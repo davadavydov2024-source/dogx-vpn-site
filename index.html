@@ -3,125 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOG X | Premium Network</title>
+    <title>DOG X VPN | Простой и Быстрый</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Unbounded:wght@400;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
         
-        :root { --accent: #ffffff; --bg: #0a0a0b; --card: #161618; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
-        .unbounded { font-family: 'Unbounded', sans-serif; }
+        :root { --main: #007bff; --bg: #f4f6f8; --card: #ffffff; }
+        body { background-color: var(--bg); color: #1a1a1a; font-family: 'Manrope', sans-serif; -webkit-font-smoothing: antialiased; }
 
-        /* Эстетика карточек */
-        .premium-card {
-            background: var(--card); border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 32px; transition: all 0.4s cubic-bezier(0.2, 0, 0, 1);
+        /* Стиль карточек (как в приложениях банков) */
+        .ui-card {
+            background: var(--card); border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.03);
+            transition: 0.3s ease;
         }
-        .premium-card:hover { border-color: rgba(255, 255, 255, 0.2); transform: translateY(-4px); }
+        .ui-card:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.06); }
 
         /* Кнопки */
-        .btn-black {
-            background: #fff; color: #000; font-weight: 700; border-radius: 18px;
-            transition: 0.3s; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;
+        .btn-primary {
+            background-color: var(--main); color: #fff; font-weight: 700; border-radius: 16px;
+            transition: 0.2s; font-size: 14px;
         }
-        .btn-black:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn-primary:hover { background-color: #0069d9; transform: scale(1.02); }
 
-        .btn-outline {
-            border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 18px;
-            font-weight: 600; font-size: 11px; transition: 0.3s;
+        .btn-secondary {
+            background-color: #f0f2f5; color: #1a1a1a; border-radius: 16px;
+            font-weight: 600; font-size: 14px; transition: 0.2s;
         }
-        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+        .btn-secondary:hover { background-color: #e4e6e9; }
 
         /* Анимация вкладок */
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
-
-        /* Кастомный скролл */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body class="p-6 md:p-16">
+<body class="p-4 md:p-10">
 
     <script>
         const REQUISITES = {
-            card: "2202 0000 0000 0000", // Сюда свой номер
-            support: "https://t.me/sswckk",
-            starsPrice: { "10": 5, "250": 120, "1000": 500 } // Пример курса Звёзд
+            card: "2202 0000 0000 0000", // Сюда свой номер карты
+            supportTg: "https://t.me/sswckk", // Твой ТГ для поддержки
+            starsRate: 1.5 // Курс: 1.5 звезды за 1 рубль (15 звезд за 10р)
         };
     </script>
 
-    <div id="auth" class="fixed inset-0 z-[100] bg-black flex items-center justify-center hidden">
-        <div class="max-w-xs w-full text-center">
-            <h2 class="unbounded text-2xl mb-10 tracking-tighter">DOG X</h2>
-            <input type="text" id="nameInp" placeholder="USER_ID" class="w-full bg-[#111] border border-white/5 p-5 rounded-2xl mb-4 text-center outline-none focus:border-white/20 uppercase text-xs font-bold tracking-widest">
-            <button onclick="login()" class="w-full py-5 btn-black">Инициализировать</button>
+    <div id="authOverlay" class="fixed inset-0 z-[100] bg-white/95 flex items-center justify-center hidden backdrop-blur-sm">
+        <div class="max-w-xs w-full text-center p-6 bg-white rounded-3xl shadow-2xl border border-black/5">
+            <i class="fas fa-dog text-5xl mb-6 text-[#007bff]"></i>
+            <h2 class="text-2xl font-extrabold mb-8 tracking-tighter">Добро пожаловать</h2>
+            <input type="text" id="nameInput" placeholder="Введите ваш ник" class="w-full bg-[#f0f2f5] p-5 rounded-xl mb-4 text-center outline-none border border-black/5 focus:border-[#007bff] text-sm font-bold">
+            <button onclick="login()" class="w-full py-5 btn-primary">Продолжить</button>
         </div>
     </div>
 
-    <nav class="max-w-5xl mx-auto flex justify-between items-center mb-24">
-        <div class="unbounded font-black text-xl tracking-tighter">DOG X</div>
-        <div class="flex gap-8 text-[10px] font-bold uppercase tracking-widest opacity-60">
-            <button onclick="showTab('home')" class="hover:opacity-100 transition">Shop</button>
-            <button onclick="showTab('me')" class="hover:opacity-100 transition">Account</button>
-            <div id="adm" class="hidden text-white border border-white px-2 rounded tracking-tighter cursor-pointer" onclick="showTab('admin')">ROOT</div>
+    <a href="https://t.me/sswckk" target="_blank" class="fixed bottom-6 right-6 z-[100] bg-white p-5 rounded-full shadow-2xl border border-black/5 hover:scale-110 transition text-[#007bff]">
+        <i class="fab fa-telegram text-2xl"></i>
+    </a>
+
+    <nav class="max-w-5xl mx-auto flex justify-between items-center mb-16 p-5 ui-card">
+        <div class="font-extrabold text-xl flex items-center gap-2">
+            <span class="text-[#007bff]">DOG</span><span>X</span>
+        </div>
+        <div class="flex gap-6 text-sm font-semibold text-gray-600">
+            <button onclick="switchTab('home')" class="hover:text-[#007bff]">Тарифы</button>
+            <button onclick="switchTab('profile')" class="hover:text-[#007bff]">Профиль</button>
+            <div id="rootTag" class="hidden text-red-500 border border-red-500 px-2 rounded cursor-pointer text-xs" onclick="switchTab('admin')">ROOT</div>
         </div>
     </nav>
 
     <main id="home" class="tab-content active max-w-5xl mx-auto">
-        <div class="mb-20">
-            <h1 class="unbounded text-4xl md:text-7xl font-black mb-6 tracking-tighter leading-none italic uppercase">Fast.<br>Secure.<br>Invisible.</h1>
-            <div class="flex items-center gap-4 opacity-40">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span class="text-[10px] font-bold uppercase tracking-widest" id="ticker">Status: All nodes operational</span>
+        <div class="mb-16 text-center lg:text-left">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase mb-4">
+                <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                <span id="ticker">Серверы работают стабильно</span>
             </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-5 tracking-tighter leading-tight">Твой личный <br> <span class="text-[#007bff]">безлимитный</span> VPN</h1>
+            <p class="text-gray-500 text-sm max-w-lg mx-auto lg:mx-0">Быстро, анонимно и без ограничений скорости.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
-            <div class="premium-card p-10 flex flex-col justify-between">
+            <div class="ui-card p-10 flex flex-col justify-between">
                 <div>
-                    <h3 class="text-[10px] font-bold uppercase opacity-30 mb-8 tracking-widest">Lite Access</h3>
-                    <div class="unbounded text-4xl mb-10">10₽</div>
+                    <h3 class="text-xs font-bold text-gray-400 mb-6 uppercase tracking-widest">Пробный</h3>
+                    <div class="text-5xl font-extrabold mb-1 tracking-tighter">10₽</div>
+                    <p class="text-[11px] text-gray-500 mb-10">на 3 дня</p>
                 </div>
-                <button onclick="openPay(10)" class="w-full py-4 btn-outline">Select</button>
+                <button onclick="openPayment(10)" class="w-full py-4 btn-secondary">Подключить</button>
             </div>
             
-            <div class="premium-card p-10 border-white/20 bg-white/[0.02] flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute top-4 right-4 text-[8px] bg-white text-black px-2 py-0.5 rounded-full font-black uppercase">Most Popular</div>
+            <div class="ui-card p-10 border-[#007bff]/20 bg-[#007bff]/[0.02] shadow-[0_10px_40px_rgba(0,123,255,0.1)] flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#007bff] text-white px-4 py-1 rounded-full text-[9px] font-bold uppercase">Хит</div>
                 <div>
-                    <h3 class="text-[10px] font-bold uppercase opacity-30 mb-8 tracking-widest">Premium Core</h3>
-                    <div class="unbounded text-4xl mb-10">250₽</div>
+                    <h3 class="text-xs font-bold text-[#007bff] mb-6 uppercase tracking-widest">Месяц Pro</h3>
+                    <div class="text-5xl font-extrabold mb-1 tracking-tighter">250₽</div>
+                    <p class="text-[11px] text-gray-500 mb-10">на 30 дней</p>
                 </div>
-                <button onclick="openPay(250)" class="w-full py-4 btn-black">Select Pro</button>
+                <button onclick="openPayment(250)" class="w-full py-5 btn-primary">Подключить Pro</button>
             </div>
 
-            <div class="premium-card p-10 flex flex-col justify-between">
+            <div class="ui-card p-10 flex flex-col justify-between">
                 <div>
-                    <h3 class="text-[10px] font-bold uppercase opacity-30 mb-8 tracking-widest">Infinite</h3>
-                    <div class="unbounded text-4xl mb-10">1000₽</div>
+                    <h3 class="text-xs font-bold text-gray-400 mb-6 uppercase tracking-widest">Ультра</h3>
+                    <div class="text-5xl font-extrabold mb-1 tracking-tighter">1000₽</div>
+                    <p class="text-[11px] text-gray-500 mb-10">на 150 дней</p>
                 </div>
-                <button onclick="openPay(1000)" class="w-full py-4 btn-outline">Select</button>
+                <button onclick="openPayment(1000)" class="w-full py-4 btn-secondary">Подключить</button>
             </div>
         </div>
     </main>
 
-    <section id="me" class="tab-content max-w-4xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div class="premium-card p-10 text-center">
-                <div class="w-20 h-20 bg-white text-black rounded-3xl mx-auto mb-6 flex items-center justify-center text-3xl font-black unbounded" id="uAv">?</div>
-                <h2 class="unbounded text-sm font-bold mb-1 tracking-tighter uppercase" id="uN">User</h2>
-                <p class="text-[10px] opacity-40 mb-10 uppercase tracking-widest">Member since 2026</p>
-                <input type="password" id="rootKey" placeholder="ROOT KEY" class="w-full bg-white/5 p-4 rounded-xl text-[9px] text-center mb-4 outline-none border border-white/5 focus:border-white/20">
-                <button onclick="checkRoot()" class="w-full py-3 text-[9px] font-bold uppercase opacity-40 hover:opacity-100 transition underline tracking-widest">System Login</button>
+    <section id="profile" class="tab-content max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="ui-card p-10 text-center">
+                <div class="w-20 h-20 bg-[#f0f2f5] text-[#007bff] rounded-full mx-auto mb-6 flex items-center justify-center text-3xl font-extrabold" id="uAva">?</div>
+                <h2 class="text-xl font-bold mb-1 tracking-tighter uppercase" id="uName">Никнейм</h2>
+                <p class="text-xs text-gray-400 mb-10">Зарегистрирован</p>
+                <input type="password" id="rootPass" placeholder="Код администратора" class="w-full bg-[#f0f2f5] p-4 rounded-xl text-[11px] text-center mb-4 outline-none border border-black/5 focus:border-[#007bff]">
+                <button onclick="checkRootAccess()" class="w-full py-3 text-[10px] font-bold uppercase text-gray-400 hover:text-red-500 transition">Вход в Root</button>
             </div>
             <div class="md:col-span-2 space-y-6">
-                <div class="premium-card p-10">
-                    <h3 class="text-[10px] font-bold uppercase opacity-30 mb-8 tracking-widest">Active Tunnels</h3>
-                    <div id="kList" class="space-y-4">
-                        <p class="text-[11px] opacity-20 italic">No active connections found...</p>
+                <div class="ui-card p-10 relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 text-[150px] font-black text-black/5 rotate-12">🔑</div>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-8 tracking-widest">Ваши ключи доступа</h3>
+                    <div id="userKeys" class="space-y-3 relative z-10">
+                        <p class="text-xs italic text-gray-400">Ключей пока нет... Купите тариф, чтобы создать подключение.</p>
                     </div>
                 </div>
             </div>
@@ -129,72 +137,74 @@
     </section>
 
     <section id="admin" class="tab-content max-w-4xl mx-auto">
-        <div class="premium-card p-12">
-            <h2 class="unbounded text-xl mb-12 italic">ADMIN_CONTROL</h2>
-            <div class="space-y-12">
+        <div class="ui-card p-12 border-red-500/10">
+            <h2 class="text-xl text-red-500 font-bold mb-10 italic">Панель управления</h2>
+            <div class="space-y-10">
                 <div>
-                    <label class="text-[10px] font-black uppercase opacity-30 mb-4 block">System Broadcast</label>
-                    <input type="text" id="admT" class="w-full bg-white/5 border border-white/5 p-5 rounded-2xl outline-none focus:border-white/20 text-xs">
-                    <button onclick="setT()" class="mt-4 px-8 py-3 btn-black">Broadcast</button>
+                    <label class="text-xs font-bold text-gray-400 mb-3 block">Текст бегущей строки на главной</label>
+                    <input type="text" id="admTicker" class="w-full bg-[#f0f2f5] border border-black/5 p-4 rounded-xl text-sm outline-none focus:border-red-500">
+                    <button onclick="updateGlobalTicker()" class="mt-3 px-6 py-2 btn-primary text-xs">Обновить текст</button>
                 </div>
                 <div class="grid grid-cols-3 gap-4">
-                    <input type="number" id="p1" class="bg-white/5 p-4 rounded-xl text-center text-xs border border-white/5">
-                    <input type="number" id="p2" class="bg-white/5 p-4 rounded-xl text-center text-xs border border-white/5">
-                    <input type="number" id="p3" class="bg-white/5 p-4 rounded-xl text-center text-xs border border-white/5">
+                    <input type="number" id="p1" class="bg-[#f0f2f5] p-4 rounded-xl text-center text-sm border border-black/5">
+                    <input type="number" id="p2" class="bg-[#f0f2f5] p-4 rounded-xl text-center text-sm border border-black/5">
+                    <input type="number" id="p3" class="bg-[#f0f2f5] p-4 rounded-xl text-center text-sm border border-black/5">
                 </div>
-                <button onclick="saveA()" class="w-full py-4 btn-outline">Update System Data</button>
+                <button onclick="saveAdminPrices()" class="w-full py-4 btn-secondary">Обновить цены на тарифы</button>
             </div>
         </div>
     </section>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('dog_db')) || { prices: [10, 250, 1000], ticker: "SYSTEM STATUS: SECURE" };
-        let u = JSON.parse(localStorage.getItem('dog_u')) || null;
+        // БАЗА ДАННЫХ (ДЕМО)
+        let db = JSON.parse(localStorage.getItem('dog_db_v6')) || { prices: [10, 250, 1000], ticker: "Серверы работают стабильно" };
+        let me = JSON.parse(localStorage.getItem('dog_me_v6')) || null;
 
-        window.onload = () => { if(!u) document.getElementById('auth').classList.remove('hidden'); else render(); };
+        window.onload = () => { if(!me) document.getElementById('authOverlay').classList.remove('hidden'); else syncData(); };
 
         function login() {
-            const n = document.getElementById('nameInp').value;
-            if(n.length < 2) return;
-            u = { name: n, keys: [] };
-            localStorage.setItem('dog_u', JSON.stringify(u));
+            const name = document.getElementById('nameInput').value.trim();
+            if(name.length < 2) return;
+            me = { name, keys: [] };
+            localStorage.setItem('dog_me_v6', JSON.stringify(me));
             location.reload();
         }
 
-        function render() {
-            document.getElementById('uN').innerText = u.name;
-            document.getElementById('uAv').innerText = u.name[0].toUpperCase();
+        function syncData() {
+            document.getElementById('uName').innerText = me.name;
+            document.getElementById('uAva').innerText = me.name[0].toUpperCase();
             document.getElementById('ticker').innerText = db.ticker;
             // Admin inputs
             document.getElementById('p1').value = db.prices[0];
             document.getElementById('p2').value = db.prices[1];
             document.getElementById('p3').value = db.prices[2];
-            document.getElementById('admT').value = db.ticker;
+            document.getElementById('admTicker').value = db.ticker;
             
-            const list = document.getElementById('kList');
-            if(u.keys.length > 0) {
-                list.innerHTML = u.keys.map(k => `
-                    <div class="flex justify-between items-center p-5 bg-white/[0.03] rounded-2xl border border-white/5">
-                        <p class="text-[10px] font-mono opacity-50 truncate mr-4">${k}</p>
-                        <button onclick="navigator.clipboard.writeText('${k}'); Swal.fire('Copied','','success')" class="text-xs hover:text-white opacity-40 hover:opacity-100"><i class="fas fa-copy"></i></button>
+            const list = document.getElementById('userKeys');
+            if(me.keys.length > 0) {
+                list.innerHTML = me.keys.map(k => `
+                    <div class="flex justify-between items-center p-4 bg-[#f0f2f5] rounded-xl border border-black/5">
+                        <p class="text-xs font-mono text-gray-600 truncate mr-4">${k}</p>
+                        <button onclick="navigator.clipboard.writeText('${k}'); Swal.fire('Скопировано','','success')" class="text-xs text-[#007bff] hover:text-black"><i class="fas fa-copy"></i></button>
                     </div>
                 `).join('');
             }
         }
 
-        function openPay(amt) {
+        function openPayment(amount) {
+            const stars = Math.ceil(amount * REQUISITES.starsRate);
             Swal.fire({
-                title: 'PAYMENT METHOD',
-                background: '#0a0a0b', color: '#fff',
+                title: 'ВЫБЕРИТЕ СПОСОБ ОПЛАТЫ',
+                background: '#fff', color: '#1a1a1a',
                 showConfirmButton: false,
                 html: `
                     <div class="space-y-3 p-4">
-                        <button onclick="payCard(${amt})" class="w-full p-6 premium-card flex justify-between items-center hover:bg-white/5">
-                            <span class="text-[10px] font-black uppercase tracking-widest">Bank Card / СБП</span>
-                            <i class="fas fa-credit-card opacity-20"></i>
+                        <button onclick="payCard(${amount})" class="w-full p-6 ui-card flex justify-between items-center hover:bg-[#f0f2f5]">
+                            <span class="text-xs font-bold">Банковская карта / СБП</span>
+                            <i class="fas fa-credit-card text-gray-400"></i>
                         </button>
-                        <button onclick="payStars(${amt})" class="w-full p-6 premium-card flex justify-between items-center hover:bg-white/5">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-[#ffad00]">Telegram Stars</span>
+                        <button onclick="payStars(${amount}, ${stars})" class="w-full p-6 ui-card flex justify-between items-center hover:bg-[#f0f2f5]">
+                            <span class="text-xs font-bold text-[#ffad00]">Telegram Stars (${stars} ★)</span>
                             <i class="fas fa-star text-[#ffad00]"></i>
                         </button>
                     </div>
@@ -204,63 +214,64 @@
 
         function payCard(amt) {
             Swal.fire({
-                title: amt + ' RUB',
-                background: '#0a0a0b', color: '#fff',
+                title: amt + ' РУБЛЕЙ',
+                background: '#fff', color: '#1a1a1a',
                 html: `
-                    <div class="p-8 premium-card">
-                        <p class="text-[9px] opacity-30 mb-4 uppercase font-bold tracking-[3px]">Send to Card Number:</p>
-                        <p class="text-lg font-black mb-6 tracking-tighter unbounded">${REQUISITES.card}</p>
-                        <p class="text-[9px] opacity-20 italic">After payment, send receipt to support</p>
+                    <div class="p-6 bg-[#f0f2f5] rounded-2xl border border-black/5 text-center">
+                        <p class="text-[10px] opacity-40 mb-3 uppercase font-bold tracking-[3px]">Переведите на карту:</p>
+                        <p class="text-lg font-extrabold mb-1 tracking-tighter">${REQUISITES.card}</p>
+                        <p class="text-[10px] text-gray-500">Получатель: sswckk</p>
+                        <p class="text-[9px] opacity-20 italic mt-3">После перевода отправьте чек в поддержку</p>
                     </div>
                 `,
-                footer: `<a href="${REQUISITES.support}" target="_blank" class="w-full py-4 btn-black text-center">Contact Support</a>`,
+                footer: `<a href="${REQUISITES.supportTg}" target="_blank" class="w-full py-4 btn-primary text-center">Отправить чек в поддержку (sswckk)</a>`,
                 showConfirmButton: false
             });
-            // Симуляция получения ключа
-            giveKey(amt);
+            // Симуляция выдачи ключа (для демо)
+            generateDemoKey(amt);
         }
 
-        function payStars(amt) {
-            const stars = REQUISITES.starsPrice[amt] || 50;
+        function payStars(amt, stars) {
             Swal.fire({
-                title: 'PAY WITH STARS',
-                background: '#0a0a0b', color: '#fff',
-                text: `Invoice for ${stars} Stars will be sent to your Telegram chat.`,
-                confirmButtonText: 'PAY NOW',
-                confirmButtonColor: '#fff',
-                showCancelButton: true
-            }).then((res) => { if(res.isConfirmed) giveKey(amt); });
+                title: 'ОПЛАТА ЗВЁЗДАМИ',
+                background: '#fff', color: '#1a1a1a',
+                text: `Счёт на ${stars} звёзд будет выставлен в личном сообщении для sswckk.`,
+                confirmButtonText: 'ОПЛАТИТЬ СЕЙЧАС',
+                confirmButtonColor: '#ffad00',
+                showCancelButton: true,
+                cancelButtonText: 'ОТМЕНА'
+            }).then((res) => { if(res.isConfirmed) generateDemoKey(amt); });
         }
 
-        function giveKey(amt) {
+        function generateDemoKey(amt) {
             setTimeout(() => {
-                const k = `vless://${btoa(Math.random()).substring(0,24)}@dog-x.node:443?security=reality&sni=google.com#DOGX_${amt}RUB`;
-                u.keys.unshift(k);
-                localStorage.setItem('dog_u', JSON.stringify(u));
-                render();
+                const k = `vless://${btoa(Math.random()).substring(0,24)}@dog-x.pro:443?security=reality&sni=google.com#DOGX_${amt}RUB`;
+                me.keys.unshift(k);
+                localStorage.setItem('dog_me_v6', JSON.stringify(me));
+                syncData();
             }, 3000);
         }
 
-        function checkRoot() {
-            if(document.getElementById('rootKey').value === '67АРТЁМ67') {
-                document.getElementById('adm').classList.remove('hidden');
-                showTab('admin');
+        function checkRootAccess() {
+            if(document.getElementById('rootPass').value === '67АРТЁМ67') {
+                document.getElementById('rootTag').classList.remove('hidden');
+                switchTab('admin');
             }
         }
 
-        function setT() {
-            db.ticker = document.getElementById('admT').value;
-            localStorage.setItem('dog_db', JSON.stringify(db));
-            render();
+        function updateGlobalTicker() {
+            db.ticker = document.getElementById('admTicker').value;
+            localStorage.setItem('dog_db_v6', JSON.stringify(db));
+            syncData();
         }
 
-        function saveA() {
+        function saveAdminPrices() {
             db.prices = [document.getElementById('p1').value, document.getElementById('p2').value, document.getElementById('p3').value];
-            localStorage.setItem('dog_db', JSON.stringify(db));
+            localStorage.setItem('dog_db_v6', JSON.stringify(db));
             location.reload();
         }
 
-        function showTab(id) {
+        function switchTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             window.scrollTo(0,0);
