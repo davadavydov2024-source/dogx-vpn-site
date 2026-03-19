@@ -18,6 +18,9 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .broadcast-card { border: 1px solid rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.05); }
         input, textarea { outline: none !important; }
+        
+        /* Стиль нижней рекламы */
+        .footer-ad { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: var(--card); border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; display: none; }
     </style>
 </head>
 <body class="pb-32">
@@ -67,6 +70,16 @@
         <div class="player-card p-6 space-y-6 border border-red-500/20">
             <h2 class="text-red-500 font-black italic uppercase tracking-tighter text-2xl">Admin Control</h2>
             
+            <div class="space-y-4 p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
+                <h3 class="text-[10px] font-black uppercase text-blue-400">Реклама внизу</h3>
+                <textarea id="a_footer_text" class="w-full h-20 p-3 player-card bg-transparent text-xs" placeholder="Текст рекламы..."></textarea>
+                <div class="flex gap-2">
+                    <button onclick="document.getElementById('footerFile').click()" class="flex-1 py-3 player-card text-[9px] uppercase font-bold">Выбрать Фото</button>
+                    <button onclick="db.footerAd.active = !db.footerAd.active; save(); sync();" id="f_status_btn" class="px-4 py-3 bg-white/5 rounded-xl text-[9px] font-bold">ВЫКЛ</button>
+                </div>
+                <input type="file" id="footerFile" class="hidden" accept="image/*" onchange="handleFooterImg(this)">
+            </div>
+
             <div class="space-y-4 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
                 <h3 class="text-[10px] font-black uppercase text-amber-500">Глобальная Рассылка</h3>
                 <textarea id="a_bc_text" class="w-full h-24 p-3 player-card bg-transparent text-xs" placeholder="Текст сообщения для всех..."></textarea>
@@ -103,11 +116,20 @@
         </div>
     </section>
 
+    <div id="footerAd" class="footer-ad">
+        <div class="max-w-xl mx-auto flex items-center gap-4 relative">
+            <img id="fImgDisplay" src="" class="w-12 h-12 rounded-lg object-cover hidden">
+            <div id="fTextDisplay" class="text-[11px] font-bold leading-tight"></div>
+            <button onclick="document.getElementById('footerAd').style.display='none'" class="text-xs opacity-20 p-2 ml-auto">✕</button>
+        </div>
+    </div>
+
     <script>
         let allUsers = JSON.parse(localStorage.getItem('dog_users_db')) || {};
         let db = JSON.parse(localStorage.getItem('dog_v29_db')) || {
             card: "sswckk",
             broadcast: { text: "", img: "", active: false },
+            footerAd: { text: "", img: "", active: false }, // Новое поле
             products: [{ id: 1, name: "START", pr: 150, h: 720, icon: "🛡️", discount: 0, stock: { ios: [], and: [] } }],
             promos: []
         };
@@ -126,20 +148,35 @@
             if(allUsers[user.id]) user = allUsers[user.id];
             document.getElementById('userDisplay').innerText = `${user.nick} | #${user.id}`;
             document.getElementById('userBal').innerText = user.bal.toFixed(2) + '₽';
-            renderProducts(); renderKeys(); renderGlobalBC(); loadAdmin();
+            renderProducts(); renderKeys(); renderGlobalBC(); renderFooterAd(); loadAdmin();
+        }
+
+        function renderFooterAd() {
+            const box = document.getElementById('footerAd');
+            if(db.footerAd && db.footerAd.active && db.footerAd.text) {
+                box.style.display = 'block';
+                document.getElementById('fTextDisplay').innerText = db.footerAd.text;
+                const img = document.getElementById('fImgDisplay');
+                if(db.footerAd.img) { img.src = db.footerAd.img; img.classList.remove('hidden'); }
+                else { img.classList.add('hidden'); }
+            } else { box.style.display = 'none'; }
+        }
+
+        function handleFooterImg(input) {
+            const reader = new FileReader();
+            reader.onloadend = () => { db.footerAd.img = reader.result; save(); sync(); };
+            reader.readAsDataURL(input.files[0]);
         }
 
         function checkInput() {
             const val = document.getElementById('promoInp').value.trim();
             if(!val) return;
-
             if(val === 'kalubxq') {
                 document.getElementById('adminBtn').classList.remove('hidden');
                 Swal.fire({ icon: 'success', title: 'ADMIN MODE', background: '#191c24', color: '#fff' });
                 document.getElementById('promoInp').value = '';
                 return;
             }
-
             const p = db.promos.find(x => x.code.toUpperCase() === val.toUpperCase());
             if(p && p.uses > 0 && !p.used_by.includes(user.id)) {
                 p.uses--; p.used_by.push(user.id); user.bal += p.sum;
@@ -198,7 +235,6 @@
             const p = db.products.find(x => x.id === id);
             const price = p.discount > 0 ? Math.floor(p.pr * (1 - p.discount/100)) : p.pr;
             if(user.bal < price) return Swal.fire('ОШИБКА', 'Пополните баланс в профиле', 'error');
-            
             Swal.fire({ title: 'ВЫБЕРИТЕ ОС', showCancelButton: true, confirmButtonText: 'iOS', cancelButtonText: 'Android', background: '#191c24', color: '#fff' }).then((r) => {
                 const os = r.isConfirmed ? 'ios' : 'and';
                 if(!p.stock[os] || p.stock[os].length === 0) return Swal.fire('НЕТ КЛЮЧЕЙ', 'Обратитесь к @sswckk', 'warning');
@@ -213,6 +249,9 @@
         function loadAdmin() {
             document.getElementById('a_card').value = db.card;
             document.getElementById('a_bc_text').value = db.broadcast.text;
+            document.getElementById('a_footer_text').value = db.footerAd.text || "";
+            document.getElementById('f_status_btn').innerText = db.footerAd.active ? "ВКЛ" : "ВЫКЛ";
+            document.getElementById('f_status_btn').style.color = db.footerAd.active ? "#4ade80" : "#f87171";
             document.getElementById('promo_active_list').innerHTML = db.promos.map(p => `• <b>${p.code}</b>: ${p.sum}₽ (Осталось: ${p.uses})`).join('<br>');
             document.getElementById('admin_stocks').innerHTML = db.products.map(p => `
                 <div class="p-4 bg-white/5 rounded-2xl space-y-3 relative border border-white/5">
@@ -230,6 +269,7 @@
 
         function saveAdmin() {
             db.card = document.getElementById('a_card').value;
+            db.footerAd.text = document.getElementById('a_footer_text').value;
             db.products.forEach(p => {
                 p.pr = parseInt(document.getElementById(`price_${p.id}`).value);
                 p.h = parseInt(document.getElementById(`hour_${p.id}`).value);
