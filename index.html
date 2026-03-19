@@ -3,279 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOG X VPN | Простой и Быстрый</title>
+    <title>DOG X | Твой Баланс</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
-        
-        :root { --main: #007bff; --bg: #f4f6f8; --card: #ffffff; }
-        body { background-color: var(--bg); color: #1a1a1a; font-family: 'Manrope', sans-serif; -webkit-font-smoothing: antialiased; }
-
-        /* Стиль карточек (как в приложениях банков) */
-        .ui-card {
-            background: var(--card); border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.03);
-            transition: 0.3s ease;
-        }
-        .ui-card:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.06); }
-
-        /* Кнопки */
-        .btn-primary {
-            background-color: var(--main); color: #fff; font-weight: 700; border-radius: 16px;
-            transition: 0.2s; font-size: 14px;
-        }
-        .btn-primary:hover { background-color: #0069d9; transform: scale(1.02); }
-
-        .btn-secondary {
-            background-color: #f0f2f5; color: #1a1a1a; border-radius: 16px;
-            font-weight: 600; font-size: 14px; transition: 0.2s;
-        }
-        .btn-secondary:hover { background-color: #e4e6e9; }
-
-        /* Анимация вкладок */
+        body { background-color: #f8fafc; color: #1e293b; font-family: 'Manrope', sans-serif; }
+        .ui-card { background: #fff; border-radius: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #edf2f7; }
+        .btn-pay { background: #007bff; color: #fff; font-weight: 800; border-radius: 18px; transition: 0.2s; }
+        .btn-pay:hover { background: #0056b3; transform: translateY(-2px); }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content.active { display: block; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <script>
-        const REQUISITES = {
-            card: "2202 0000 0000 0000", // Сюда свой номер карты
-            supportTg: "https://t.me/sswckk", // Твой ТГ для поддержки
-            starsRate: 1.5 // Курс: 1.5 звезды за 1 рубль (15 звезд за 10р)
-        };
-    </script>
-
-    <div id="authOverlay" class="fixed inset-0 z-[100] bg-white/95 flex items-center justify-center hidden backdrop-blur-sm">
-        <div class="max-w-xs w-full text-center p-6 bg-white rounded-3xl shadow-2xl border border-black/5">
-            <i class="fas fa-dog text-5xl mb-6 text-[#007bff]"></i>
-            <h2 class="text-2xl font-extrabold mb-8 tracking-tighter">Добро пожаловать</h2>
-            <input type="text" id="nameInput" placeholder="Введите ваш ник" class="w-full bg-[#f0f2f5] p-5 rounded-xl mb-4 text-center outline-none border border-black/5 focus:border-[#007bff] text-sm font-bold">
-            <button onclick="login()" class="w-full py-5 btn-primary">Продолжить</button>
+    <div id="auth" class="fixed inset-0 z-[100] bg-white flex items-center justify-center hidden">
+        <div class="max-w-xs w-full text-center">
+            <h2 class="text-3xl font-black mb-8">DOG X</h2>
+            <input type="text" id="uNameInp" placeholder="Твой ник" class="w-full bg-slate-100 p-5 rounded-2xl mb-4 text-center outline-none font-bold uppercase">
+            <button onclick="login()" class="w-full py-5 btn-pay">Начать</button>
         </div>
     </div>
 
-    <a href="https://t.me/sswckk" target="_blank" class="fixed bottom-6 right-6 z-[100] bg-white p-5 rounded-full shadow-2xl border border-black/5 hover:scale-110 transition text-[#007bff]">
-        <i class="fab fa-telegram text-2xl"></i>
-    </a>
-
-    <nav class="max-w-5xl mx-auto flex justify-between items-center mb-16 p-5 ui-card">
-        <div class="font-extrabold text-xl flex items-center gap-2">
-            <span class="text-[#007bff]">DOG</span><span>X</span>
-        </div>
-        <div class="flex gap-6 text-sm font-semibold text-gray-600">
-            <button onclick="switchTab('home')" class="hover:text-[#007bff]">Тарифы</button>
-            <button onclick="switchTab('profile')" class="hover:text-[#007bff]">Профиль</button>
-            <div id="rootTag" class="hidden text-red-500 border border-red-500 px-2 rounded cursor-pointer text-xs" onclick="switchTab('admin')">ROOT</div>
+    <nav class="max-w-5xl mx-auto flex justify-between items-center mb-8 p-4 ui-card">
+        <div class="font-black text-xl tracking-tighter italic">DOG <span class="text-blue-600">X</span></div>
+        <div class="flex gap-6 text-sm font-bold uppercase tracking-tight">
+            <button onclick="tab('home')" class="hover:text-blue-600">Магазин</button>
+            <button onclick="tab('me')" class="hover:text-blue-600">Кабинет</button>
+            <button id="admBtn" onclick="tab('admin')" class="hidden text-red-500">Админ</button>
         </div>
     </nav>
 
     <main id="home" class="tab-content active max-w-5xl mx-auto">
-        <div class="mb-16 text-center lg:text-left">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase mb-4">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                <span id="ticker">Серверы работают стабильно</span>
-            </div>
-            <h1 class="text-4xl md:text-6xl font-extrabold mb-5 tracking-tighter leading-tight">Твой личный <br> <span class="text-[#007bff]">безлимитный</span> VPN</h1>
-            <p class="text-gray-500 text-sm max-w-lg mx-auto lg:mx-0">Быстро, анонимно и без ограничений скорости.</p>
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold mb-2">Выбери свой VPN</h1>
+            <p id="topMsg" class="text-slate-400 text-sm italic tracking-wide">Загрузка...</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="ui-card p-10 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-xs font-bold text-gray-400 mb-6 uppercase tracking-widest">Пробный</h3>
-                    <div class="text-5xl font-extrabold mb-1 tracking-tighter">10₽</div>
-                    <p class="text-[11px] text-gray-500 mb-10">на 3 дня</p>
-                </div>
-                <button onclick="openPayment(10)" class="w-full py-4 btn-secondary">Подключить</button>
+                <h3 class="text-xs font-black text-slate-300 uppercase mb-4">Старт</h3>
+                <div id="pr1" class="text-5xl font-black mb-8">10₽</div>
+                <button onclick="buy(0)" class="w-full py-4 btn-pay">Купить</button>
             </div>
-            
-            <div class="ui-card p-10 border-[#007bff]/20 bg-[#007bff]/[0.02] shadow-[0_10px_40px_rgba(0,123,255,0.1)] flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#007bff] text-white px-4 py-1 rounded-full text-[9px] font-bold uppercase">Хит</div>
-                <div>
-                    <h3 class="text-xs font-bold text-[#007bff] mb-6 uppercase tracking-widest">Месяц Pro</h3>
-                    <div class="text-5xl font-extrabold mb-1 tracking-tighter">250₽</div>
-                    <p class="text-[11px] text-gray-500 mb-10">на 30 дней</p>
-                </div>
-                <button onclick="openPayment(250)" class="w-full py-5 btn-primary">Подключить Pro</button>
+            <div class="ui-card p-10 border-blue-100 bg-blue-50/30 flex flex-col justify-between">
+                <h3 class="text-xs font-black text-blue-400 uppercase mb-4">Максимум</h3>
+                <div id="pr2" class="text-5xl font-black mb-8">250₽</div>
+                <button onclick="buy(1)" class="w-full py-4 btn-pay">Купить</button>
             </div>
-
             <div class="ui-card p-10 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-xs font-bold text-gray-400 mb-6 uppercase tracking-widest">Ультра</h3>
-                    <div class="text-5xl font-extrabold mb-1 tracking-tighter">1000₽</div>
-                    <p class="text-[11px] text-gray-500 mb-10">на 150 дней</p>
-                </div>
-                <button onclick="openPayment(1000)" class="w-full py-4 btn-secondary">Подключить</button>
+                <h3 class="text-xs font-black text-slate-300 uppercase mb-4">Год</h3>
+                <div id="pr3" class="text-5xl font-black mb-8">1000₽</div>
+                <button onclick="buy(2)" class="w-full py-4 btn-pay">Купить</button>
             </div>
         </div>
     </main>
 
-    <section id="profile" class="tab-content max-w-4xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="ui-card p-10 text-center">
-                <div class="w-20 h-20 bg-[#f0f2f5] text-[#007bff] rounded-full mx-auto mb-6 flex items-center justify-center text-3xl font-extrabold" id="uAva">?</div>
-                <h2 class="text-xl font-bold mb-1 tracking-tighter uppercase" id="uName">Никнейм</h2>
-                <p class="text-xs text-gray-400 mb-10">Зарегистрирован</p>
-                <input type="password" id="rootPass" placeholder="Код администратора" class="w-full bg-[#f0f2f5] p-4 rounded-xl text-[11px] text-center mb-4 outline-none border border-black/5 focus:border-[#007bff]">
-                <button onclick="checkRootAccess()" class="w-full py-3 text-[10px] font-bold uppercase text-gray-400 hover:text-red-500 transition">Вход в Root</button>
+    <section id="me" class="tab-content max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="ui-card p-8 text-center">
+                <div class="w-24 h-24 bg-blue-600 text-white rounded-3xl mx-auto mb-6 flex items-center justify-center text-4xl font-black shadow-lg" id="ava">?</div>
+                <h2 class="text-xl font-black mb-1" id="name">USER</h2>
+                <div class="text-2xl font-black text-blue-600 mb-8" id="bal">0.00₽</div>
+                
+                <input type="text" id="promoInput" placeholder="Есть промокод?" class="w-full bg-slate-50 p-4 rounded-xl text-center text-sm border mb-3">
+                <button onclick="usePromo()" class="w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase mb-10">Активировать</button>
+
+                <input type="password" id="admKey" placeholder="ROOT KEY" class="w-full bg-transparent p-2 text-center text-[10px] outline-none opacity-20 focus:opacity-100">
+                <button onclick="checkAdmin()" class="text-[9px] font-bold text-slate-400 uppercase mt-2">Админ-панель</button>
             </div>
-            <div class="md:col-span-2 space-y-6">
-                <div class="ui-card p-10 relative overflow-hidden">
-                    <div class="absolute -top-10 -right-10 text-[150px] font-black text-black/5 rotate-12">🔑</div>
-                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-8 tracking-widest">Ваши ключи доступа</h3>
-                    <div id="userKeys" class="space-y-3 relative z-10">
-                        <p class="text-xs italic text-gray-400">Ключей пока нет... Купите тариф, чтобы создать подключение.</p>
-                    </div>
+            <div class="md:col-span-2 ui-card p-8">
+                <h3 class="text-xs font-black text-slate-300 uppercase mb-6">Твои туннели</h3>
+                <div id="keys" class="space-y-3">
+                    <p class="text-xs text-slate-300 italic">Тут пока пусто...</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="admin" class="tab-content max-w-4xl mx-auto">
-        <div class="ui-card p-12 border-red-500/10">
-            <h2 class="text-xl text-red-500 font-bold mb-10 italic">Панель управления</h2>
-            <div class="space-y-10">
-                <div>
-                    <label class="text-xs font-bold text-gray-400 mb-3 block">Текст бегущей строки на главной</label>
-                    <input type="text" id="admTicker" class="w-full bg-[#f0f2f5] border border-black/5 p-4 rounded-xl text-sm outline-none focus:border-red-500">
-                    <button onclick="updateGlobalTicker()" class="mt-3 px-6 py-2 btn-primary text-xs">Обновить текст</button>
+    <section id="admin" class="tab-content max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="ui-card p-8 space-y-4">
+                <h2 class="font-black text-red-500 uppercase">Настройки цен и реквизитов</h2>
+                <div class="grid grid-cols-3 gap-2">
+                    <input type="number" id="aP1" class="p-3 border rounded-xl text-center text-sm">
+                    <input type="number" id="aP2" class="p-3 border rounded-xl text-center text-sm">
+                    <input type="number" id="aP3" class="p-3 border rounded-xl text-center text-sm">
                 </div>
-                <div class="grid grid-cols-3 gap-4">
-                    <input type="number" id="p1" class="bg-[#f0f2f5] p-4 rounded-xl text-center text-sm border border-black/5">
-                    <input type="number" id="p2" class="bg-[#f0f2f5] p-4 rounded-xl text-center text-sm border border-black/5">
-                    <input type="number" id="p3" class="bg-[#f0f2f5] p-4 rounded-xl text-center text-sm border border-black/5">
+                <input type="text" id="aCard" class="w-full p-4 border rounded-xl text-sm" placeholder="Номер карты">
+                <input type="text" id="aTick" class="w-full p-4 border rounded-xl text-sm" placeholder="Текст на главной">
+                <input type="number" step="0.1" id="aRate" class="w-full p-4 border rounded-xl text-sm" placeholder="Курс звёзд (1.5)">
+                <button onclick="saveAdmin()" class="w-full py-4 btn-pay">Применить всё</button>
+            </div>
+
+            <div class="ui-card p-8">
+                <h2 class="font-black uppercase mb-6">Денежные промокоды</h2>
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="pName" placeholder="КОД" class="flex-1 p-3 border rounded-xl text-sm uppercase font-bold">
+                    <input type="number" id="pVal" placeholder="₽" class="w-20 p-3 border rounded-xl text-sm text-center">
+                    <button onclick="addPromo()" class="px-4 btn-pay"><i class="fas fa-plus"></i></button>
                 </div>
-                <button onclick="saveAdminPrices()" class="w-full py-4 btn-secondary">Обновить цены на тарифы</button>
+                <div id="promoList" class="space-y-2 max-h-60 overflow-y-auto"></div>
             </div>
         </div>
     </section>
 
     <script>
-        // БАЗА ДАННЫХ (ДЕМО)
-        let db = JSON.parse(localStorage.getItem('dog_db_v6')) || { prices: [10, 250, 1000], ticker: "Серверы работают стабильно" };
-        let me = JSON.parse(localStorage.getItem('dog_me_v6')) || null;
+        let db = JSON.parse(localStorage.getItem('dog_db_final_v7')) || {
+            prices: [10, 250, 1000],
+            card: "sswckk (Карта)",
+            msg: "Система работает стабильно",
+            rate: 1.5,
+            promos: [] // Теперь это [{code: 'WIN', val: 50}]
+        };
+        let user = JSON.parse(localStorage.getItem('dog_user_v7')) || null;
 
-        window.onload = () => { if(!me) document.getElementById('authOverlay').classList.remove('hidden'); else syncData(); };
+        window.onload = () => { if(!user) document.getElementById('auth').classList.remove('hidden'); else sync(); };
 
         function login() {
-            const name = document.getElementById('nameInput').value.trim();
-            if(name.length < 2) return;
-            me = { name, keys: [] };
-            localStorage.setItem('dog_me_v6', JSON.stringify(me));
-            location.reload();
+            const n = document.getElementById('uNameInp').value.trim();
+            if(n) { user = { name: n, bal: 0, keys: [] }; saveUser(); location.reload(); }
         }
 
-        function syncData() {
-            document.getElementById('uName').innerText = me.name;
-            document.getElementById('uAva').innerText = me.name[0].toUpperCase();
-            document.getElementById('ticker').innerText = db.ticker;
-            // Admin inputs
-            document.getElementById('p1').value = db.prices[0];
-            document.getElementById('p2').value = db.prices[1];
-            document.getElementById('p3').value = db.prices[2];
-            document.getElementById('admTicker').value = db.ticker;
+        function sync() {
+            document.getElementById('name').innerText = user.name;
+            document.getElementById('ava').innerText = user.name[0].toUpperCase();
+            document.getElementById('bal').innerText = user.bal.toFixed(2) + '₽';
+            document.getElementById('topMsg').innerText = db.msg;
+
+            // Магазин
+            document.getElementById('pr1').innerText = db.prices[0] + '₽';
+            document.getElementById('pr2').innerText = db.prices[1] + '₽';
+            document.getElementById('pr3').innerText = db.prices[2] + '₽';
+
+            // Админ данные
+            document.getElementById('aP1').value = db.prices[0];
+            document.getElementById('aP2').value = db.prices[1];
+            document.getElementById('aP3').value = db.prices[2];
+            document.getElementById('aCard').value = db.card;
+            document.getElementById('aTick').value = db.msg;
+            document.getElementById('aRate').value = db.rate;
+
+            renderPromos();
+            renderKeys();
+        }
+
+        function usePromo() {
+            const code = document.getElementById('promoInput').value.toUpperCase();
+            const idx = db.promos.findIndex(p => p.code === code);
             
-            const list = document.getElementById('userKeys');
-            if(me.keys.length > 0) {
-                list.innerHTML = me.keys.map(k => `
-                    <div class="flex justify-between items-center p-4 bg-[#f0f2f5] rounded-xl border border-black/5">
-                        <p class="text-xs font-mono text-gray-600 truncate mr-4">${k}</p>
-                        <button onclick="navigator.clipboard.writeText('${k}'); Swal.fire('Скопировано','','success')" class="text-xs text-[#007bff] hover:text-black"><i class="fas fa-copy"></i></button>
+            if(idx !== -1) {
+                const amount = db.promos[idx].val;
+                user.bal += amount;
+                db.promos.splice(idx, 1); // Одноразовый промокод
+                saveAll();
+                Swal.fire('Ура!', `Вам зачислено ${amount}₽ на баланс!`, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Ошибка', 'Такого кода нет или он уже использован', 'error');
+            }
+        }
+
+        function buy(idx) {
+            const price = parseInt(db.prices[idx]);
+            const stars = Math.ceil(price * db.rate);
+
+            Swal.fire({
+                title: 'ОПЛАТА ТАРИФА',
+                background: '#fff',
+                html: `
+                    <div class="space-y-3 p-2">
+                        <button onclick="pay('BAL', ${price})" class="w-full p-6 ui-card flex justify-between items-center hover:bg-blue-50">
+                            <span>С баланса (У тебя: ${user.bal}₽)</span>
+                            <i class="fas fa-wallet text-blue-500"></i>
+                        </button>
+                        <button onclick="pay('CARD', ${price})" class="w-full p-6 ui-card flex justify-between items-center hover:bg-slate-50">
+                            <span>Карта / СБП (sswckk)</span>
+                            <i class="fas fa-credit-card opacity-20"></i>
+                        </button>
+                        <button onclick="pay('STARS', ${price})" class="w-full p-6 ui-card flex justify-between items-center hover:bg-slate-50">
+                            <span>Звёзды (★ ${stars})</span>
+                            <i class="fas fa-star text-amber-400"></i>
+                        </button>
+                    </div>
+                `,
+                showConfirmButton: false
+            });
+        }
+
+        function pay(type, amt) {
+            if(type === 'BAL') {
+                if(user.bal >= amt) {
+                    user.bal -= amt;
+                    addKey(amt);
+                    saveUser();
+                    Swal.fire('Успех!', 'Оплата прошла с баланса. Ключ в профиле!', 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('Ошибка', 'Недостаточно денег на балансе!', 'error');
+                }
+            } else if(type === 'CARD') {
+                Swal.fire({
+                    title: 'Перевод на карту',
+                    html: `<div class="p-6 bg-slate-50 rounded-2xl border font-bold text-lg">${db.card}</div>`,
+                    footer: `<a href="https://t.me/sswckk" target="_blank" class="w-full py-4 btn-pay text-center">Скинуть чек sswckk</a>`,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire('Счёт звёзд', `Переведи ${Math.ceil(amt * db.rate)} ★ в лс sswckk`, 'info');
+            }
+        }
+
+        function addKey(amt) {
+            const k = `vless://${Math.random().toString(36).substring(7)}@dog-x.pro:443#DOGX_${amt}RUB`;
+            user.keys.unshift(k);
+        }
+
+        // АДМИН
+        function checkAdmin() {
+            if(document.getElementById('admKey').value === '67АРТЁМ67') {
+                document.getElementById('admBtn').classList.remove('hidden');
+                tab('admin');
+            }
+        }
+
+        function addPromo() {
+            const code = document.getElementById('pName').value.toUpperCase();
+            const val = parseInt(document.getElementById('pVal').value);
+            if(code && val) {
+                db.promos.push({code, val});
+                saveDb();
+                renderPromos();
+                document.getElementById('pName').value = '';
+                document.getElementById('pVal').value = '';
+            }
+        }
+
+        function delPromo(i) {
+            db.promos.splice(i, 1);
+            saveDb();
+            renderPromos();
+        }
+
+        function renderPromos() {
+            const l = document.getElementById('promoList');
+            l.innerHTML = db.promos.map((p, i) => `
+                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl text-sm font-bold border border-black/5">
+                    <span>${p.code} <span class="text-blue-600">+${p.val}₽</span></span>
+                    <button onclick="delPromo(${i})" class="text-red-400">Удалить</button>
+                </div>
+            `).join('');
+        }
+
+        function renderKeys() {
+            const l = document.getElementById('keys');
+            if(user.keys.length > 0) {
+                l.innerHTML = user.keys.map(k => `
+                    <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border">
+                        <p class="text-[10px] font-mono truncate mr-2">${k}</p>
+                        <button onclick="navigator.clipboard.writeText('${k}'); Swal.fire('Копия!','','success')" class="text-blue-500 font-bold">COPY</button>
                     </div>
                 `).join('');
             }
         }
 
-        function openPayment(amount) {
-            const stars = Math.ceil(amount * REQUISITES.starsRate);
-            Swal.fire({
-                title: 'ВЫБЕРИТЕ СПОСОБ ОПЛАТЫ',
-                background: '#fff', color: '#1a1a1a',
-                showConfirmButton: false,
-                html: `
-                    <div class="space-y-3 p-4">
-                        <button onclick="payCard(${amount})" class="w-full p-6 ui-card flex justify-between items-center hover:bg-[#f0f2f5]">
-                            <span class="text-xs font-bold">Банковская карта / СБП</span>
-                            <i class="fas fa-credit-card text-gray-400"></i>
-                        </button>
-                        <button onclick="payStars(${amount}, ${stars})" class="w-full p-6 ui-card flex justify-between items-center hover:bg-[#f0f2f5]">
-                            <span class="text-xs font-bold text-[#ffad00]">Telegram Stars (${stars} ★)</span>
-                            <i class="fas fa-star text-[#ffad00]"></i>
-                        </button>
-                    </div>
-                `
-            });
-        }
-
-        function payCard(amt) {
-            Swal.fire({
-                title: amt + ' РУБЛЕЙ',
-                background: '#fff', color: '#1a1a1a',
-                html: `
-                    <div class="p-6 bg-[#f0f2f5] rounded-2xl border border-black/5 text-center">
-                        <p class="text-[10px] opacity-40 mb-3 uppercase font-bold tracking-[3px]">Переведите на карту:</p>
-                        <p class="text-lg font-extrabold mb-1 tracking-tighter">${REQUISITES.card}</p>
-                        <p class="text-[10px] text-gray-500">Получатель: sswckk</p>
-                        <p class="text-[9px] opacity-20 italic mt-3">После перевода отправьте чек в поддержку</p>
-                    </div>
-                `,
-                footer: `<a href="${REQUISITES.supportTg}" target="_blank" class="w-full py-4 btn-primary text-center">Отправить чек в поддержку (sswckk)</a>`,
-                showConfirmButton: false
-            });
-            // Симуляция выдачи ключа (для демо)
-            generateDemoKey(amt);
-        }
-
-        function payStars(amt, stars) {
-            Swal.fire({
-                title: 'ОПЛАТА ЗВЁЗДАМИ',
-                background: '#fff', color: '#1a1a1a',
-                text: `Счёт на ${stars} звёзд будет выставлен в личном сообщении для sswckk.`,
-                confirmButtonText: 'ОПЛАТИТЬ СЕЙЧАС',
-                confirmButtonColor: '#ffad00',
-                showCancelButton: true,
-                cancelButtonText: 'ОТМЕНА'
-            }).then((res) => { if(res.isConfirmed) generateDemoKey(amt); });
-        }
-
-        function generateDemoKey(amt) {
-            setTimeout(() => {
-                const k = `vless://${btoa(Math.random()).substring(0,24)}@dog-x.pro:443?security=reality&sni=google.com#DOGX_${amt}RUB`;
-                me.keys.unshift(k);
-                localStorage.setItem('dog_me_v6', JSON.stringify(me));
-                syncData();
-            }, 3000);
-        }
-
-        function checkRootAccess() {
-            if(document.getElementById('rootPass').value === '67АРТЁМ67') {
-                document.getElementById('rootTag').classList.remove('hidden');
-                switchTab('admin');
-            }
-        }
-
-        function updateGlobalTicker() {
-            db.ticker = document.getElementById('admTicker').value;
-            localStorage.setItem('dog_db_v6', JSON.stringify(db));
-            syncData();
-        }
-
-        function saveAdminPrices() {
-            db.prices = [document.getElementById('p1').value, document.getElementById('p2').value, document.getElementById('p3').value];
-            localStorage.setItem('dog_db_v6', JSON.stringify(db));
+        function saveAdmin() {
+            db.prices = [document.getElementById('aP1').value, document.getElementById('aP2').value, document.getElementById('aP3').value];
+            db.card = document.getElementById('aCard').value;
+            db.msg = document.getElementById('aTick').value;
+            db.rate = document.getElementById('aRate').value;
+            saveDb();
             location.reload();
         }
 
-        function switchTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            window.scrollTo(0,0);
-        }
+        function saveDb() { localStorage.setItem('dog_db_final_v7', JSON.stringify(db)); }
+        function saveUser() { localStorage.setItem('dog_user_v7', JSON.stringify(user)); }
+        function saveAll() { saveDb(); saveUser(); }
+        function tab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById(id).classList.add('active'); }
     </script>
 </body>
 </html>
