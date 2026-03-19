@@ -79,6 +79,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .footer-ad { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: var(--card); border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; display: none; }
+        .swal2-popup { border-radius: 25px !important; background: #191c24 !important; color: #fff !important; }
     </style>
 </head>
 <body class="pb-40">
@@ -127,29 +128,23 @@
             <h2 class="text-red-500 font-black uppercase text-center text-sm">Панель Управления</h2>
             
             <div class="p-4 bg-green-500/5 rounded-2xl space-y-3">
-                <p class="text-[10px] font-bold text-green-500 uppercase">📊 Аналитика пользователей</p>
-                <div id="adm_users_list" class="space-y-2 max-h-60 overflow-y-auto pr-2">
-                    </div>
+                <p class="text-[10px] font-bold text-green-500 uppercase">📊 Аналитика (Все Юзеры)</p>
+                <div id="adm_users_list" class="space-y-2 max-h-60 overflow-y-auto pr-2"></div>
             </div>
 
-            <div class="p-4 bg-amber-500/5 rounded-2xl space-y-2">
-                <p class="text-[10px] font-bold text-amber-500 uppercase">Верхняя Рассылка</p>
-                <textarea id="adm_bc_text" class="w-full p-2 bg-black/20 rounded text-xs" placeholder="Текст сообщения"></textarea>
-                <input id="adm_bc_url" class="w-full p-2 bg-black/20 rounded text-[10px]" placeholder="Ссылка (URL)">
-                <input id="adm_bc_btn" class="w-full p-2 bg-black/20 rounded text-[10px]" placeholder="Текст кнопки">
-                <button onclick="document.getElementById('bc_file').click()" class="w-full py-2 bg-white/5 text-[9px] rounded uppercase">Загрузить ФОТО</button>
-                <input type="file" id="bc_file" class="hidden" onchange="handleImgUpload(this, 'bc')">
-                <button onclick="toggleStatus('bc')" id="bc_status_btn" class="w-full py-2 bg-amber-600/20 text-amber-500 text-[9px] font-bold rounded uppercase italic">ВКЛЮЧИТЬ / ВЫКЛЮЧИТЬ</button>
-            </div>
-
-            <div class="p-4 bg-blue-500/5 rounded-2xl space-y-2">
-                <p class="text-[10px] font-bold text-blue-400 uppercase">Нижняя Реклама</p>
-                <textarea id="adm_ad_text" class="w-full p-2 bg-black/20 rounded text-xs" placeholder="Текст рекламы"></textarea>
-                <input id="adm_ad_url" class="w-full p-2 bg-black/20 rounded text-[10px]" placeholder="Ссылка (URL)">
-                <input id="adm_ad_btn" class="w-full p-2 bg-black/20 rounded text-[10px]" placeholder="Текст кнопки">
-                <button onclick="document.getElementById('ad_file').click()" class="w-full py-2 bg-white/5 text-[9px] rounded uppercase">Загрузить ФОТО</button>
-                <input type="file" id="ad_file" class="hidden" onchange="handleImgUpload(this, 'ad')">
-                <button onclick="toggleStatus('ad')" id="ad_status_btn" class="w-full py-2 bg-blue-600/20 text-blue-400 text-[9px] font-bold rounded uppercase italic">ВКЛЮЧИТЬ / ВЫКЛЮЧИТЬ</button>
+            <div class="grid grid-cols-1 gap-4">
+                <div class="p-4 bg-amber-500/5 rounded-2xl space-y-2">
+                    <p class="text-[10px] font-bold text-amber-500 uppercase">Верхняя Рассылка</p>
+                    <textarea id="adm_bc_text" class="w-full p-2 bg-black/20 rounded text-xs" placeholder="Текст"></textarea>
+                    <input id="adm_bc_url" class="w-full p-2 bg-black/20 rounded text-[10px]" placeholder="URL">
+                    <button onclick="toggleStatus('bc')" id="bc_status_btn" class="w-full py-2 bg-amber-600/20 text-amber-500 text-[9px] font-bold rounded uppercase">ВКЛ / ВЫКЛ</button>
+                </div>
+                <div class="p-4 bg-blue-500/5 rounded-2xl space-y-2">
+                    <p class="text-[10px] font-bold text-blue-400 uppercase">Нижняя Реклама</p>
+                    <textarea id="adm_ad_text" class="w-full p-2 bg-black/20 rounded text-xs" placeholder="Текст"></textarea>
+                    <input id="adm_ad_url" class="w-full p-2 bg-black/20 rounded text-[10px]" placeholder="URL">
+                    <button onclick="toggleStatus('ad')" id="ad_status_btn" class="w-full py-2 bg-blue-600/20 text-blue-400 text-[9px] font-bold rounded uppercase">ВКЛ / ВЫКЛ</button>
+                </div>
             </div>
 
             <div class="p-4 bg-purple-500/5 rounded-2xl space-y-2">
@@ -166,10 +161,14 @@
                 <p class="text-[10px] font-bold text-blue-400 uppercase">Действия с юзером</p>
                 <input id="adm_uid" class="w-full p-3 bg-black/20 rounded-xl text-xs" placeholder="ID (напр. 1)">
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="adm_sum" type="number" class="p-3 bg-black/20 rounded-xl text-xs" placeholder="Сумма">
+                    <input id="adm_sum" type="number" class="p-3 bg-black/20 rounded-xl text-xs" placeholder="Сумма ₽">
                     <button onclick="adminChangeBalance()" class="bg-blue-600 rounded-xl text-[9px] font-bold uppercase">Обновить ₽</button>
                 </div>
-                <button onclick="adminDeleteAccount()" class="w-full py-3 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase italic">УДАЛИТЬ АККАУНТ (БАН)</button>
+                <div class="pt-2 border-t border-white/5 space-y-2">
+                    <input id="adm_new_id_val" class="w-full p-3 bg-black/20 rounded-xl text-xs" placeholder="Новый ID (напр. 10000000)">
+                    <button onclick="adminForceChangeID()" class="w-full py-3 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase">Сменить ID (Глобально)</button>
+                </div>
+                <button onclick="adminDeleteAccount()" class="w-full py-3 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase italic">УДАЛИТЬ (БАН)</button>
             </div>
 
             <div id="admin_stocks" class="space-y-4"></div>
@@ -191,17 +190,11 @@
         function renderAnalytics() {
             const list = document.getElementById('adm_users_list');
             const users = Object.values(window.allUsers);
-            if(users.length === 0) {
-                list.innerHTML = `<p class="text-[10px] opacity-30 text-center">Юзеров пока нет</p>`;
-                return;
-            }
+            if(users.length === 0) { list.innerHTML = `<p class="text-[10px] opacity-30 text-center">Пусто</p>`; return; }
             list.innerHTML = users.map(u => `
-                <div onclick="inspectUser('${u.id}')" class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 active:scale-95 transition">
-                    <div class="flex flex-col">
-                        <span class="text-[10px] font-bold text-blue-400">#${u.id} ${u.nick}</span>
-                        <span class="text-[8px] opacity-40 uppercase">Нажми для деталей</span>
-                    </div>
-                    <span class="text-[11px] font-black">${u.bal.toFixed(2)}₽</span>
+                <div onclick="inspectUser('${u.id}')" class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 mb-1 active:scale-95 transition">
+                    <div class="flex flex-col"><span class="text-[10px] font-bold text-blue-400">#${u.id} ${u.nick}</span></div>
+                    <span class="text-[11px] font-black">${u.bal.toFixed(0)}₽</span>
                 </div>
             `).join('');
         }
@@ -209,39 +202,51 @@
         function inspectUser(uid) {
             const u = window.allUsers[uid];
             if(!u) return;
-            const keysCount = u.keys ? u.keys.length : 0;
+            const keysStr = u.keys ? u.keys.map(k => k.name).join(', ') : 'Нет';
             Swal.fire({
-                title: `ПРОФИЛЬ #${u.id}`,
+                title: `ИНФО О ЮЗЕРЕ #${u.id}`,
                 html: `
-                <div class="text-left space-y-2 text-xs">
+                <div class="text-left space-y-3 text-[11px] opacity-90">
                     <p><b>НИК:</b> ${u.nick}</p>
                     <p><b>БАЛАНС:</b> ${u.bal.toFixed(2)}₽</p>
-                    <p><b>КУПЛЕНО КЛЮЧЕЙ:</b> ${keysCount}</p>
+                    <p><b>ID В БАЗЕ:</b> <span class="text-blue-400">${u.id}</span></p>
+                    <p><b>TG/USERNAME:</b> ${u.username || '@неизвестно'}</p>
+                    <p><b>КЛЮЧИ:</b> ${keysStr}</p>
                 </div>`,
                 showCancelButton: true,
-                confirmButtonText: 'Выбрать ID',
-                cancelButtonText: 'Закрыть',
+                confirmButtonText: 'Выбрать для правки',
                 confirmButtonColor: '#5865f2'
-            }).then((res) => {
-                if(res.isConfirmed) {
-                    document.getElementById('adm_uid').value = u.id;
-                    Swal.fire('ID Выбран', 'ID вставлен в блок управления', 'success');
+            }).then((res) => { if(res.isConfirmed) document.getElementById('adm_uid').value = u.id; });
+        }
+
+        function adminForceChangeID() {
+            const oldId = document.getElementById('adm_uid').value;
+            const newId = document.getElementById('adm_new_id_val').value.trim();
+            if(!window.allUsers[oldId] || !newId) return Swal.fire('Ошибка', 'ID не найден или пуст', 'error');
+            
+            const userData = window.allUsers[oldId];
+            userData.id = newId;
+            
+            window.firebase_db_mod.set(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users/' + newId), userData).then(() => {
+                window.firebase_db_mod.remove(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users/' + oldId));
+                Swal.fire('УСПЕХ', `ID изменен на ${newId}`, 'success');
+                if(window.user.id == oldId) {
+                    window.user.id = newId;
+                    localStorage.setItem('dog_v29_me', JSON.stringify(window.user));
+                    location.reload();
                 }
             });
         }
 
-        // --- ЛОГИКА ОТОБРАЖЕНИЯ ---
+        // --- ОСТАЛЬНАЯ ЛОГИКА ---
         function renderGlobalBC() {
             const bc = window.db.broadcast;
             const el = document.getElementById('globalBC');
             if(!bc || !bc.active) return el.classList.add('hidden');
             el.classList.remove('hidden');
             document.getElementById('bcTextDisplay').innerText = bc.text;
-            if(bc.img) {
-                document.getElementById('bcImgDisplay').src = bc.img;
-                document.getElementById('bcImgDisplay').classList.remove('hidden');
-            }
-            document.getElementById('bcBtnBox').innerHTML = bc.url ? `<a href="${bc.url}" class="px-4 py-1 bg-amber-500 text-black text-[10px] font-bold rounded-lg uppercase">${bc.btnText || 'ОТКРЫТЬ'}</a>` : '';
+            if(bc.img) { document.getElementById('bcImgDisplay').src = bc.img; document.getElementById('bcImgDisplay').classList.remove('hidden'); }
+            document.getElementById('bcBtnBox').innerHTML = bc.url ? `<a href="${bc.url}" class="px-4 py-1 bg-amber-500 text-black text-[10px] font-bold rounded-lg uppercase">ОТКРЫТЬ</a>` : '';
         }
 
         function renderFooterAd() {
@@ -250,22 +255,8 @@
             if(!ad || !ad.active) return el.style.display = 'none';
             el.style.display = 'block';
             document.getElementById('adTextDisplay').innerText = ad.text;
-            if(ad.img) {
-                document.getElementById('adImgDisplay').src = ad.img;
-                document.getElementById('adImgDisplay').classList.remove('hidden');
-            }
-            document.getElementById('adBtnBox').innerHTML = ad.url ? `<a href="${ad.url}" class="px-4 py-2 bg-blue-500 text-white text-[10px] font-bold rounded-lg uppercase">${ad.btnText || 'ПЕРЕЙТИ'}</a>` : '';
-        }
-
-        function handleImgUpload(input, type) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                if(type === 'bc') window.db.broadcast.img = e.target.result;
-                if(type === 'ad') window.db.footerAd.img = e.target.result;
-                Swal.fire('Фото готово', '', 'success');
-            };
-            reader.readAsDataURL(file);
+            if(ad.img) { document.getElementById('adImgDisplay').src = ad.img; document.getElementById('adImgDisplay').classList.remove('hidden'); }
+            document.getElementById('adBtnBox').innerHTML = ad.url ? `<a href="${ad.url}" class="px-4 py-2 bg-blue-500 text-white text-[10px] font-bold rounded-lg uppercase">ПЕРЕЙТИ</a>` : '';
         }
 
         function toggleStatus(type) {
@@ -280,57 +271,28 @@
             if(!code || !sum) return;
             if(!window.db.promos) window.db.promos = [];
             window.db.promos.push({ code, sum });
-            document.getElementById('new_promo_code').value = '';
-            document.getElementById('new_promo_sum').value = '';
             loadAdmin();
         }
 
-        function deletePromo(index) {
-            window.db.promos.splice(index, 1);
-            loadAdmin();
-        }
+        function deletePromo(index) { window.db.promos.splice(index, 1); loadAdmin(); }
 
         function loadAdmin() {
             renderAnalytics();
             document.getElementById('adm_bc_text').value = window.db.broadcast.text || '';
             document.getElementById('adm_bc_url').value = window.db.broadcast.url || '';
-            document.getElementById('adm_bc_btn').value = window.db.broadcast.btnText || '';
-            document.getElementById('bc_status_btn').className = window.db.broadcast.active ? "w-full py-2 bg-green-600 text-white text-[9px] font-bold rounded uppercase italic" : "w-full py-2 bg-amber-600/20 text-amber-500 text-[9px] font-bold rounded uppercase italic";
-            
+            document.getElementById('bc_status_btn').className = window.db.broadcast.active ? "w-full py-2 bg-green-600 text-white text-[9px] font-bold rounded uppercase" : "w-full py-2 bg-amber-600/20 text-amber-500 text-[9px] font-bold rounded uppercase";
             document.getElementById('adm_ad_text').value = window.db.footerAd.text || '';
             document.getElementById('adm_ad_url').value = window.db.footerAd.url || '';
-            document.getElementById('adm_ad_btn').value = window.db.footerAd.btnText || '';
-            document.getElementById('ad_status_btn').className = window.db.footerAd.active ? "w-full py-2 bg-green-600 text-white text-[9px] font-bold rounded uppercase italic" : "w-full py-2 bg-blue-600/20 text-blue-400 text-[9px] font-bold rounded uppercase italic";
-
-            document.getElementById('adm_promos_list').innerHTML = (window.db.promos || []).map((p, i) => `
-                <div class="flex justify-between items-center bg-black/40 p-2 rounded text-[10px]">
-                    <span class="font-bold">${p.code} (+${p.sum}₽)</span>
-                    <button onclick="deletePromo(${i})" class="text-red-500">❌</button>
-                </div>`).join('');
-
-            document.getElementById('admin_stocks').innerHTML = window.db.products.map(p => `
-                <div class="p-4 bg-white/5 rounded-2xl space-y-2 border-l-2 border-blue-500">
-                    <div class="flex gap-2">
-                        <input id="p_i_${p.id}" value="${p.icon || '🛡️'}" class="bg-black/40 rounded p-1 w-10 text-center">
-                        <input id="p_n_${p.id}" value="${p.name}" class="bg-black/40 rounded p-1 text-[10px] font-bold flex-1 uppercase w-full">
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <input id="p_p_${p.id}" value="${p.pr}" class="bg-black/40 rounded p-1 text-[10px]">
-                        <input id="p_h_${p.id}" value="${p.h}" class="bg-black/40 rounded p-1 text-[10px]">
-                        <input id="p_d_${p.id}" value="${p.discount || 0}" class="bg-black/40 rounded p-1 text-[10px] text-red-400">
-                    </div>
-                    <button onclick="deleteProduct(${p.id})" class="w-full text-[8px] text-red-500 opacity-50 uppercase">Удалить тариф</button>
-                </div>`).join('');
+            document.getElementById('ad_status_btn').className = window.db.footerAd.active ? "w-full py-2 bg-green-600 text-white text-[9px] font-bold rounded uppercase" : "w-full py-2 bg-blue-600/20 text-blue-400 text-[9px] font-bold rounded uppercase";
+            document.getElementById('adm_promos_list').innerHTML = (window.db.promos || []).map((p, i) => `<div class="flex justify-between items-center bg-black/40 p-2 rounded text-[10px] mb-1"><span>${p.code} (+${p.sum}₽)</span><button onclick="deletePromo(${i})" class="text-red-500">❌</button></div>`).join('');
+            document.getElementById('admin_stocks').innerHTML = window.db.products.map(p => `<div class="p-4 bg-white/5 rounded-2xl space-y-2 border-l-2 border-blue-500 mb-2"><div class="flex gap-2"><input id="p_i_${p.id}" value="${p.icon || '🛡️'}" class="bg-black/40 rounded p-1 w-10 text-center"><input id="p_n_${p.id}" value="${p.name}" class="bg-black/40 rounded p-1 text-[10px] font-bold flex-1 uppercase"></div><div class="grid grid-cols-3 gap-2"><input id="p_p_${p.id}" value="${p.pr}" class="bg-black/40 rounded p-1 text-[10px]"><input id="p_h_${p.id}" value="${p.h}" class="bg-black/40 rounded p-1 text-[10px]"><input id="p_d_${p.id}" value="${p.discount || 0}" class="bg-black/40 rounded p-1 text-[10px] text-red-400"></div><button onclick="deleteProduct(${p.id})" class="w-full text-[8px] text-red-500 opacity-50 uppercase">Удалить</button></div>`).join('');
         }
 
         function saveAdmin() {
             window.db.broadcast.text = document.getElementById('adm_bc_text').value;
             window.db.broadcast.url = document.getElementById('adm_bc_url').value;
-            window.db.broadcast.btnText = document.getElementById('adm_bc_btn').value;
             window.db.footerAd.text = document.getElementById('adm_ad_text').value;
             window.db.footerAd.url = document.getElementById('adm_ad_url').value;
-            window.db.footerAd.btnText = document.getElementById('adm_ad_btn').value;
-
             window.db.products.forEach(p => {
                 p.icon = document.getElementById(`p_i_${p.id}`).value;
                 p.name = document.getElementById(`p_n_${p.id}`).value;
@@ -339,23 +301,22 @@
                 p.discount = parseInt(document.getElementById(`p_d_${p.id}`).value) || 0;
             });
             window.saveSystem();
-            Swal.fire('Успех', 'Все настройки обновлены', 'success');
+            Swal.fire('Сохранено', '', 'success');
         }
 
-        // --- БАЗОВЫЕ ФУНКЦИИ ---
         function updateUI() {
             if(!window.user) return;
             document.getElementById('userDisplay').innerText = `${window.user.nick} | #${window.user.id}`;
-            document.getElementById('userBal').innerText = window.user.bal.toFixed(2) + '₽';
+            document.getElementById('userBal').innerText = window.user.bal.toFixed(0) + '₽';
             renderKeys();
         }
 
         async function initUser() {
             if(window.user) return;
-            const { value: nick } = await Swal.fire({ title: 'РЕГИСТРАЦИЯ', input: 'text', background: '#191c24', color: '#fff' });
+            const { value: nick } = await Swal.fire({ title: 'НИК', input: 'text', background: '#191c24', color: '#fff' });
             if(!nick) return initUser();
             const id = (Object.keys(window.allUsers).length + 1).toString();
-            window.user = { id, nick, bal: 0, keys: [] };
+            window.user = { id, nick, bal: 0, keys: [], username: "" };
             localStorage.setItem('dog_v29_me', JSON.stringify(window.user));
             window.saveUser(window.user);
         }
@@ -376,9 +337,7 @@
         function adminDeleteAccount() {
             const uid = document.getElementById('adm_uid').value;
             if(!window.allUsers[uid]) return;
-            window.firebase_db_mod.remove(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users/' + uid)).then(() => {
-                Swal.fire('Удалено', 'Аккаунт стерт', 'success');
-            });
+            window.firebase_db_mod.remove(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users/' + uid)).then(() => Swal.fire('Удалено', '', 'success'));
         }
 
         function adminChangeBalance() {
@@ -387,12 +346,12 @@
             if(!window.allUsers[uid]) return;
             window.allUsers[uid].bal += sum;
             window.saveUser(window.allUsers[uid]);
-            Swal.fire('Обновлено', 'Баланс изменен', 'success');
+            Swal.fire('Обновлено', '', 'success');
         }
 
         function checkInput() {
             const val = document.getElementById('promoInp').value.trim().toUpperCase();
-            if(val === 'KALUBXQ') { document.getElementById('adminBtn').classList.remove('hidden'); return Swal.fire('ADMIN', 'Доступ разрешен', 'success'); }
+            if(val === 'KALUBXQ') { document.getElementById('adminBtn').classList.remove('hidden'); return Swal.fire('ADMIN', 'OK', 'success'); }
             if(window.db.promos) {
                 const promo = window.db.promos.find(p => p.code === val);
                 if(promo) {
@@ -403,7 +362,7 @@
                     return Swal.fire('Ура!', `+${promo.sum}₽`, 'success');
                 }
             }
-            Swal.fire('Ошибка', 'Неверный код', 'error');
+            Swal.fire('Ошибка', 'Нет такого кода', 'error');
         }
 
         function renderProducts() {
@@ -412,12 +371,7 @@
             grid.innerHTML = window.db.products.map(p => {
                 const disc = parseInt(p.discount) || 0;
                 const finalPrice = disc > 0 ? p.pr - (p.pr * (disc / 100)) : p.pr;
-                return `
-                <div class="player-card p-5 flex justify-between items-center relative overflow-hidden">
-                    ${disc > 0 ? `<div class="absolute top-0 right-0 bg-red-600 px-2 py-1 text-[8px] font-bold">-${disc}%</div>` : ''}
-                    <div class="flex items-center gap-4"><div class="text-3xl">${p.icon || '🛡️'}</div><div><h4 class="font-bold text-xs uppercase">${p.name}</h4><p class="text-[9px] opacity-40">${p.h} ч.</p></div></div>
-                    <button onclick="buyKey(${p.id})" class="px-6 py-2 btn-primary text-[10px] uppercase font-bold">${finalPrice.toFixed(0)}₽</button>
-                </div>`;
+                return `<div class="player-card p-5 flex justify-between items-center relative overflow-hidden">${disc > 0 ? `<div class="absolute top-0 right-0 bg-red-600 px-2 py-1 text-[8px] font-bold">-${disc}%</div>` : ''}<div class="flex items-center gap-4"><div class="text-3xl">${p.icon || '🛡️'}</div><div><h4 class="font-bold text-xs uppercase">${p.name}</h4><p class="text-[9px] opacity-40">${p.h} ч.</p></div></div><button onclick="buyKey(${p.id})" class="px-6 py-2 btn-primary text-[10px] uppercase font-bold">${finalPrice.toFixed(0)}₽</button></div>`;
             }).join('');
         }
 
@@ -437,6 +391,7 @@
         function deleteProduct(id) { window.db.products = window.db.products.filter(p => p.id !== id); loadAdmin(); }
         function addTariff() { window.db.products.push({ id: Date.now(), name: "NEW", pr: 100, h: 24, icon: "⚡", discount: 0 }); loadAdmin(); }
         function showHappyGuide() { Swal.fire({ title: 'ИНСТРУКЦИЯ', html: `<div class="text-left text-[11px] opacity-70">Скопируй ключ -> Happy Plus -> Лицензия -> Активировать.</div>`, icon: 'info' }); }
+        function handleImgUpload() {}
     </script>
 </body>
 </html>
