@@ -105,10 +105,11 @@
                 <h3 class="text-[10px] font-black opacity-40 uppercase text-blue-400">Реквизиты оплаты</h3>
                 <input id="a_card" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Карта или @юзернейм">
                 <hr class="opacity-5">
-                <h3 class="text-[10px] font-black opacity-40 uppercase text-blue-400">Управление балансом</h3>
-                <input id="target_id" class="w-full p-3 player-card bg-transparent text-xs" placeholder="ID пользователя">
-                <input id="target_sum" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Сумма (например: 100 или -50)">
-                <button onclick="adminGift()" class="w-full py-3 bg-green-600/20 text-green-400 text-[9px] font-bold rounded-xl uppercase">Выдать баланс</button>
+                <h3 class="text-[10px] font-black opacity-40 uppercase text-blue-400">Управление пользователем</h3>
+                <input id="target_id" class="w-full p-3 player-card bg-transparent text-xs" placeholder="ID пользователя (напр: 1)">
+                <input id="target_sum" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Изменить баланс (напр: 100 или -50)">
+                <input id="target_nick" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Новый никнейм">
+                <button onclick="adminGift()" class="w-full py-3 bg-green-600/20 text-green-400 text-[9px] font-bold rounded-xl uppercase italic">Применить изменения</button>
             </div>
 
             <button onclick="saveAdmin()" class="w-full py-6 btn-primary bg-red-600 uppercase italic font-black text-sm tracking-widest shadow-2xl shadow-red-900/40">Сохранить все изменения</button>
@@ -136,7 +137,6 @@
 
         window.onload = () => { if(!user) initUser(); else sync(); };
 
-        // ИЗМЕНЕННАЯ РЕГИСТРАЦИЯ: Порядковый ID
         async function initUser() {
             const { value: nick } = await Swal.fire({ 
                 title: 'РЕГИСТРАЦИЯ', 
@@ -147,18 +147,13 @@
                 confirmButtonColor: '#5865f2',
                 confirmButtonText: 'Создать аккаунт',
                 allowOutsideClick: false,
-                inputValidator: (value) => {
-                    if (!value) return 'Нужно ввести ник!'
-                }
+                inputValidator: (value) => { if (!value) return 'Нужно ввести ник!' }
             });
 
-            // Считаем количество существующих ключей в объекте и прибавляем 1
             const nextId = Object.keys(allUsers).length + 1;
-            
             user = { id: nextId, nick: nick, bal: 0, keys: [] };
             allUsers[nextId] = user; 
-            save(); 
-            sync();
+            save(); sync();
         }
 
         function sync() {
@@ -316,11 +311,22 @@
             if(code && sum) { db.promos.push({ code, sum, uses, used_by: [] }); save(); sync(); }
         }
 
+        // ОБНОВЛЕННАЯ ФУНКЦИЯ: Теперь меняет и баланс, и ник
         function adminGift() {
             const id = document.getElementById('target_id').value;
-            const sum = parseFloat(document.getElementById('target_sum').value);
-            if(allUsers[id]) { allUsers[id].bal += sum; save(); sync(); Swal.fire('УСПЕХ', `Баланс юзера #${id} изменен`, 'success'); }
-            else { Swal.fire('ОШИБКА', 'Юзер не найден', 'error'); }
+            const sum = parseFloat(document.getElementById('target_sum').value || 0);
+            const newNick = document.getElementById('target_nick').value.trim();
+            
+            if(allUsers[id]) { 
+                if(sum !== 0) allUsers[id].bal += sum; 
+                if(newNick !== "") allUsers[id].nick = newNick;
+                
+                save(); sync(); 
+                Swal.fire('УСПЕХ', `Данные пользователя #${id} обновлены`, 'success'); 
+                document.getElementById('target_sum').value = "";
+                document.getElementById('target_nick').value = "";
+            }
+            else { Swal.fire('ОШИБКА', 'Пользователь не найден', 'error'); }
         }
 
         function deleteTariff(id) { db.products = db.products.filter(p => p.id !== id); save(); sync(); }
