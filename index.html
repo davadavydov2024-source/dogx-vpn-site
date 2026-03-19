@@ -19,7 +19,6 @@
         .broadcast-card { border: 1px solid rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.05); }
         input, textarea { outline: none !important; }
         
-        /* Стиль нижней рекламы */
         .footer-ad { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: var(--card); border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; display: none; }
     </style>
 </head>
@@ -129,7 +128,7 @@
         let db = JSON.parse(localStorage.getItem('dog_v29_db')) || {
             card: "sswckk",
             broadcast: { text: "", img: "", active: false },
-            footerAd: { text: "", img: "", active: false }, // Новое поле
+            footerAd: { text: "", img: "", active: false },
             products: [{ id: 1, name: "START", pr: 150, h: 720, icon: "🛡️", discount: 0, stock: { ios: [], and: [] } }],
             promos: []
         };
@@ -137,11 +136,29 @@
 
         window.onload = () => { if(!user) initUser(); else sync(); };
 
+        // ИЗМЕНЕННАЯ РЕГИСТРАЦИЯ: Порядковый ID
         async function initUser() {
-            const { value: nick } = await Swal.fire({ title: 'ДОБРО ПОЖАЛОВАТЬ', input: 'text', inputPlaceholder: 'Ваш ник...', background: '#191c24', color: '#fff', confirmButtonColor: '#5865f2' });
-            const id = Math.floor(1000 + Math.random() * 9000);
-            user = { id, nick: nick || 'Пользователь', bal: 0, keys: [] };
-            allUsers[id] = user; save(); sync();
+            const { value: nick } = await Swal.fire({ 
+                title: 'РЕГИСТРАЦИЯ', 
+                input: 'text', 
+                inputPlaceholder: 'Придумайте ник...', 
+                background: '#191c24', 
+                color: '#fff', 
+                confirmButtonColor: '#5865f2',
+                confirmButtonText: 'Создать аккаунт',
+                allowOutsideClick: false,
+                inputValidator: (value) => {
+                    if (!value) return 'Нужно ввести ник!'
+                }
+            });
+
+            // Считаем количество существующих ключей в объекте и прибавляем 1
+            const nextId = Object.keys(allUsers).length + 1;
+            
+            user = { id: nextId, nick: nick, bal: 0, keys: [] };
+            allUsers[nextId] = user; 
+            save(); 
+            sync();
         }
 
         function sync() {
