@@ -3,336 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOG X VPN | Cybernet Core 2026</title>
+    <title>DOG X VPN | ULTIMATE TERMINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap');
         
-        :root { --neon: #00ffaa; --accent: #00ccff; --bg: #010204; --panel: rgba(255, 255, 255, 0.02); }
-        body { background-color: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        :root { --neon: #00ffaa; --bg: #020408; --glass: rgba(255, 255, 255, 0.03); }
+        body { background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .orbitron { font-family: 'Orbitron', sans-serif; }
-        
-        /* Киберпанк фон */
-        .grid-bg { 
-            background-image: linear-gradient(rgba(0, 255, 170, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 170, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            position: fixed; inset: 0; z-index: -2;
-        }
-        .glow-sphere {
-            position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 255, 170, 0.08) 0%, transparent 70%);
-            top: -200px; right: -200px; z-index: -1; filter: blur(100px); animation: pulse Glow 15s infinite alternate;
-        }
-        @keyframes pulseGlow { from { opacity: 0.4; transform: scale(1); } to { opacity: 0.8; transform: scale(1.2); } }
 
-        /* Стекломорфизм */
-        .glass { background: var(--panel); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; transition: 0.3s; }
-        .glass:hover { border-color: rgba(0, 255, 170, 0.2); background: rgba(0, 255, 170, 0.01); }
-        
-        /* Неон эффекты */
-        .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
-        .neon-border { border: 1px solid var(--neon); box-shadow: 0 0 15px rgba(0, 255, 170, 0.3); }
-        .btn-neon { background: var(--neon); color: #000; font-weight: 900; text-transform: uppercase; box-shadow: 0 0 20px rgba(0, 255, 170, 0.3); transition: 0.4s; }
-        .btn-neon:hover { box-shadow: 0 0 40px rgba(0, 255, 170, 0.6); transform: translateY(-2px); }
+        /* Живой фон */
+        .bg-animate {
+            position: fixed; inset: 0; z-index: -1;
+            background: radial-gradient(circle at 20% 30%, rgba(0, 255, 170, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(0, 204, 255, 0.05) 0%, transparent 40%);
+        }
+        .particles { position: fixed; inset: 0; z-index: -1; opacity: 0.3; pointer-events: none; }
 
-        /* Анимация переключения вкладок */
-        .tab-content { display: none; animation: slideUp 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
+        /* Стекломорфизм 2.0 */
+        .ultra-glass {
+            background: var(--glass); backdrop-filter: blur(50px);
+            border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 35px;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .ultra-glass:hover { border-color: var(--neon); box-shadow: 0 0 50px rgba(0, 255, 170, 0.1); transform: translateY(-5px); }
+
+        /* Кнопки */
+        .btn-main {
+            background: linear-gradient(135deg, #00ffaa 0%, #00ccff 100%);
+            color: #000; font-weight: 800; border-radius: 20px;
+            transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-main:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 255, 170, 0.4); }
+
+        .tab-content { display: none; animation: slideUp 0.5s ease-out; }
         .tab-content.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Кастомный скролл */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: rgba(0, 255, 170, 0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--neon); }
+        .price-text { background: linear-gradient(to bottom, #fff 30%, #666); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="grid-bg"></div>
-    <div class="glow-sphere"></div>
+<body class="p-4 md:p-10">
+    <div class="bg-animate"></div>
 
     <script>
-        const MY_CONFIG = {
+        const CONFIG = {
             card: "2200 0000 0000 0000",
-            tgSupport: "https://t.me/sswckk"     // Твой ТГ для чеков
+            usdt: "TYX... (TRC20)",
+            tg: "https://t.me/sswckk"
         };
     </script>
 
-    <a href="https://t.me/sswckk" target="_blank" class="fixed bottom-6 right-6 z-[100] glass p-5 text-[#00ffaa] hover:scale-110 transition shadow-2xl border-emerald-500/20">
-        <i class="fab fa-telegram text-2xl"></i>
-    </a>
-
-    <div id="authOverlay" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center hidden backdrop-blur-xl">
-        <div class="glass p-12 max-w-sm w-full text-center border-emerald-500/20">
-            <h2 class="orbitron text-2xl font-black mb-8 neon-text italic">LOGIN_ROOT</h2>
-            <input type="text" id="regName" placeholder="НИКНЕЙМ" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 mb-6 text-center tracking-widest outline-none focus:border-emerald-500 transition uppercase font-bold text-xs">
-            <button onclick="register()" class="w-full btn-neon py-4 rounded-xl text-xs tracking-widest">INITIALIZE SESSION</button>
+    <div id="authBox" class="fixed inset-0 z-[1000] bg-black/95 flex items-center justify-center hidden backdrop-blur-2xl">
+        <div class="ultra-glass p-12 max-w-sm w-full text-center">
+            <h2 class="orbitron text-2xl font-black mb-8 italic tracking-tighter">DOG X <span class="text-[#00ffaa]">CORE</span></h2>
+            <input type="text" id="uNameInp" placeholder="ВВЕДИТЕ НИК" class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 mb-6 text-center outline-none focus:border-emerald-500 uppercase font-bold text-xs tracking-widest">
+            <button onclick="login()" class="w-full py-4 btn-main text-[10px]">Инициализировать</button>
         </div>
     </div>
 
-    <nav class="max-w-7xl mx-auto flex justify-between items-center mb-16 p-6 glass relative z-50 shadow-2xl">
-        <div class="orbitron font-black text-3xl italic tracking-tighter flex items-center gap-3">
-            <span class="bg-[#00ffaa] text-black px-2 rounded-lg">DOG</span> <span class="neon-text">X</span>
+    <nav class="max-w-6xl mx-auto flex justify-between items-center mb-16 ultra-glass p-6 px-10 relative z-50">
+        <div class="orbitron font-black text-2xl italic tracking-tighter">
+            DOG<span class="text-[#00ffaa]">X</span>
         </div>
-        <div class="flex gap-10 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
-            <button onclick="showTab('home')" class="hover:neon-text transition">Магазин</button>
-            <button onclick="showTab('profile')" class="hover:neon-text transition">Кабинет</button>
-            <div id="adminBadge" class="hidden text-red-500 font-black border border-red-500 px-3 py-1 rounded-full text-[9px] animate-pulse">[ROOT]</div>
+        <div class="flex gap-8 text-[10px] font-bold uppercase tracking-widest">
+            <button onclick="tab('home')" class="hover:text-[#00ffaa] transition">Сервис</button>
+            <button onclick="tab('cabinet')" class="hover:text-[#00ffaa] transition">Профиль</button>
+            <div id="rootTag" class="hidden text-red-500 border border-red-500 px-2 rounded">ADMIN</div>
         </div>
     </nav>
 
-    <main id="home" class="tab-content active max-w-7xl mx-auto">
-        <div class="flex flex-col lg:flex-row gap-12 items-center mb-24">
-            <div class="flex-1 text-center lg:text-left">
-                <div class="inline-flex items-center gap-3 px-4 py-1 glass border-emerald-500/20 rounded-full mb-4">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                    <span class="text-[10px] font-bold uppercase text-emerald-500 tracking-widest">Quantum Encryption Active</span>
-                </div>
-                <h1 class="orbitron text-6xl md:text-9xl font-black mb-6 italic leading-[0.85] tracking-tighter uppercase">NO <span class="neon-text">LIMITS.</span></h1>
-                <p id="topTicker" class="text-gray-500 font-medium max-w-lg italic text-sm">Система шифрования DOG X VPN активна. Все узлы серверов в норме. Скорость: Оптимальная.</p>
+    <main id="home" class="tab-content active max-w-6xl mx-auto">
+        <div class="text-center mb-20">
+            <div class="inline-block px-4 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-[9px] uppercase font-bold text-emerald-400 tracking-[4px] mb-6">System Online v6.0</div>
+            <h1 class="orbitron text-5xl md:text-8xl font-black italic mb-6 leading-none uppercase">Private<br><span class="text-[#00ffaa]">Connection.</span></h1>
+            <p id="broadcast" class="text-gray-500 text-xs italic tracking-widest uppercase opacity-50">Загрузка системных сообщений...</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+            <div class="ultra-glass p-10 text-center group">
+                <p class="text-[10px] text-gray-500 uppercase mb-4 tracking-widest">Light Protocol</p>
+                <div class="orbitron text-5xl font-black mb-8 price-text">10₽</div>
+                <button onclick="buy(0)" class="w-full py-4 btn-main text-[10px]">Выбрать</button>
             </div>
-            
-            <div class="glass p-8 w-full lg:w-96 border-emerald-500/10">
-                <h3 class="orbitron text-sm font-bold mb-6 uppercase italic text-gray-400">Live Server Status</h3>
-                <div class="space-y-4 text-[10px] font-bold uppercase tracking-widest">
-                    <div class="flex justify-between items-center p-3 bg-black/30 rounded-lg"><span>DE_Frankfurt</span><span class="text-green-400">12% / 24ms</span></div>
-                    <div class="flex justify-between items-center p-3 bg-black/30 rounded-lg"><span>FI_Helsinki</span><span class="text-green-400">18% / 19ms</span></div>
-                    <div class="flex justify-between items-center p-3 bg-black/30 rounded-lg"><span>US_NewYork</span><span class="text-yellow-400">65% / 88ms</span></div>
-                    <div class="flex justify-between items-center p-3 bg-black/30 rounded-lg"><span>NL_Amsterdam</span><span class="text-green-400">ACTIVE</span></div>
-                </div>
+            <div class="ultra-glass p-10 text-center scale-110 border-emerald-500/30 shadow-[0_0_50px_rgba(0,255,170,0.1)]">
+                <p class="text-[10px] text-emerald-400 uppercase mb-4 tracking-widest font-black">Ultra Protocol</p>
+                <div class="orbitron text-6xl font-black mb-8 text-[#00ffaa]">250₽</div>
+                <button onclick="buy(1)" class="w-full py-5 btn-main text-[10px]">Активировать Pro</button>
+            </div>
+            <div class="ultra-glass p-10 text-center">
+                <p class="text-[10px] text-gray-500 uppercase mb-4 tracking-widest">Infinity Protocol</p>
+                <div class="orbitron text-5xl font-black mb-8 price-text">1000₽</div>
+                <button onclick="buy(2)" class="w-full py-4 btn-main text-[10px]">Выбрать</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
-            <div class="glass p-12 group border-white/5 hover:border-emerald-500/20 transition-all duration-500 hover:-translate-y-2">
-                <div class="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Trial Access</div>
-                <div id="p1_price" class="orbitron text-5xl font-black mb-10 italic">10₽</div>
-                <ul class="text-xs space-y-3 mb-12 text-gray-400 font-medium">
-                    <li><i class="fas fa-check text-emerald-500 mr-2"></i> Скорость до 100 Мбит</li>
-                    <li><i class="fas fa-check text-emerald-500 mr-2"></i> 3 Локации</li>
-                </ul>
-                <button onclick="pay(10)" class="w-full py-5 glass border-white/10 font-bold text-[10px] uppercase hover:btn-neon hover:text-black transition">Активировать</button>
-            </div>
-
-            <div class="glass p-12 neon-border scale-105 bg-emerald-500/[0.02] shadow-[0_0_60px_rgba(0,255,170,0.1)] relative">
-                <div class="absolute -top-4 left-8 bg-[#00ffaa] text-black px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter">Bestseller 2026</div>
-                <div class="text-[10px] text-emerald-500 mb-2 uppercase font-bold tracking-widest">Premium Access</div>
-                <div id="p2_price" class="orbitron text-7xl font-black mb-10 italic neon-text">250₽</div>
-                <ul class="text-xs space-y-3 mb-12 font-medium">
-                    <li><i class="fas fa-bolt text-emerald-500 mr-2"></i> Безлимитная скорость</li>
-                    <li><i class="fas fa-globe text-emerald-500 mr-2"></i> 50+ Локаций</li>
-                    <li><i class="fas fa-shield-halved text-emerald-500 mr-2"></i> Double VPN</li>
-                </ul>
-                <button onclick="pay(250)" class="w-full py-5 btn-neon rounded-2xl text-[10px] uppercase shadow-2xl">Активировать Pro</button>
-            </div>
-
-            <div class="glass p-12 group border-white/5 hover:border-emerald-500/20 transition-all duration-500 hover:-translate-y-2">
-                <div class="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Elite Access</div>
-                <div id="p3_price" class="orbitron text-5xl font-black mb-10 italic">1000₽</div>
-                <ul class="text-xs space-y-3 mb-12 text-gray-400 font-medium">
-                    <li><i class="fas fa-check text-emerald-500 mr-2"></i> Приоритетный канал</li>
-                    <li><i class="fas fa-clock text-emerald-500 mr-2"></i> 150 дней доступа</li>
-                </ul>
-                <button onclick="pay(1000)" class="w-full py-5 glass border-white/10 font-bold text-[10px] uppercase hover:btn-neon hover:text-black transition">Активировать</button>
-            </div>
+        <div class="ultra-glass p-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div><p class="text-[9px] opacity-40 uppercase mb-1">Германия</p><p class="text-xs font-bold text-emerald-400">14ms</p></div>
+            <div><p class="text-[9px] opacity-40 uppercase mb-1">Нидерланды</p><p class="text-xs font-bold text-emerald-400">21ms</p></div>
+            <div><p class="text-[9px] opacity-40 uppercase mb-1">Финляндия</p><p class="text-xs font-bold text-emerald-400">18ms</p></div>
+            <div><p class="text-[9px] opacity-40 uppercase mb-1">Турция</p><p class="text-xs font-bold text-yellow-400">45ms</p></div>
         </div>
     </main>
 
-    <section id="profile" class="tab-content max-w-5xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="glass p-12 text-center relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-10 opacity-5 italic orbitron text-9xl">DOG</div>
-                <div class="w-28 h-28 bg-gradient-to-tr from-[#00ffaa] to-[#00ccff] text-black rounded-full mx-auto mb-8 flex items-center justify-center text-5xl font-black orbitron shadow-2xl border-4 border-white/5">
+    <section id="cabinet" class="tab-content max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="ultra-glass p-10 text-center h-fit">
+                <div class="w-24 h-24 bg-gradient-to-tr from-emerald-400 to-cyan-500 rounded-[30px] mx-auto mb-6 flex items-center justify-center text-4xl text-black font-black orbitron rotate-3">
                     <span id="uAva">?</span>
                 </div>
-                <h2 id="uName" class="orbitron text-2xl font-black mb-2 italic">USER</h2>
-                <div id="uBal" class="text-3xl font-black text-emerald-400 mb-10 tracking-tighter">0.00₽</div>
-                <button onclick="logout()" class="text-[9px] text-red-500 uppercase font-black opacity-30 hover:opacity-100 transition tracking-widest">Disconnect System</button>
+                <h2 id="uName" class="orbitron text-xl font-black mb-1">USER</h2>
+                <p id="uBal" class="text-emerald-400 text-lg font-black mb-8">0.00₽</p>
+                <input type="text" id="admKey" placeholder="ROOT CODE" class="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-[10px] text-center mb-4 outline-none focus:border-emerald-500 transition">
+                <button onclick="checkAdm()" class="w-full py-3 bg-white/5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-white/10">Вход в терминал</button>
             </div>
-
-            <div class="lg:col-span-2 space-y-8">
-                <div class="glass p-10 border-emerald-500/10 hover:border-emerald-500/30 transition">
-                    <h3 class="text-[10px] text-gray-500 uppercase mb-5 tracking-widest italic italic">System Authentication Key</h3>
-                    <div class="flex gap-4">
-                        <input type="text" id="promoInp" placeholder="PROMO_CODE / ACCESS_KEY" class="flex-grow bg-black/40 border border-white/10 p-5 rounded-2xl outline-none focus:border-emerald-500 transition text-xs font-mono uppercase tracking-widest">
-                        <button onclick="applyAdmin()" class="px-10 bg-white/5 border border-white/10 rounded-2xl font-black text-[10px] uppercase hover:bg-emerald-500 hover:text-black transition">Run</button>
-                    </div>
-                </div>
-                <div class="glass p-10 overflow-hidden">
-                    <h3 class="text-[10px] text-gray-500 uppercase mb-6 tracking-widest italic italic">Active Secure Tunnels</h3>
-                    <div id="userKeys" class="space-y-4">
-                        <p class="text-[11px] opacity-20 italic font-medium">Ключи появятся здесь после подтверждения оплаты...</p>
-                    </div>
+            <div class="md:col-span-2 ultra-glass p-10">
+                <h3 class="orbitron text-xs font-black uppercase tracking-widest mb-8 opacity-40">Ваши активные ключи</h3>
+                <div id="keyList" class="space-y-4">
+                    <p class="text-[11px] opacity-20 italic">Здесь пусто... Купите подписку, чтобы создать туннель.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="admin" class="tab-content max-w-7xl mx-auto">
-        <div class="flex justify-between items-end mb-12 border-b border-red-500/10 pb-8">
-            <div>
-                <h1 class="orbitron text-4xl text-red-500 font-black italic uppercase tracking-tighter">Root_Terminal</h1>
-                <p class="text-[10px] text-gray-600 mt-2 uppercase tracking-widest">Управление параметрами DOG X VPN</p>
-            </div>
-            <button onclick="showTab('home')" class="text-[10px] bg-red-500 text-white px-6 py-3 rounded-xl font-black uppercase">Выход</button>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            <div class="glass p-10 border-red-500/20 bg-red-500/[0.01]">
-                <h3 class="text-[10px] text-red-500 font-black mb-8 uppercase italic tracking-widest">Configuration: Prices</h3>
-                <div class="grid grid-cols-3 gap-5 mb-8 text-center">
-                    <div><label class="text-[9px] opacity-40 uppercase">Lite</label><input type="number" id="admP1" class="w-full bg-black border border-red-500/30 p-4 rounded-xl text-xs mt-1 text-center font-mono text-red-400"></div>
-                    <div><label class="text-[9px] opacity-40 uppercase">Pro</label><input type="number" id="admP2" class="w-full bg-black border border-red-500/30 p-4 rounded-xl text-xs mt-1 text-center font-mono text-red-400"></div>
-                    <div><label class="text-[9px] opacity-40 uppercase">Elite</label><input type="number" id="admP3" class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs mt-1 text-center font-mono text-white"></div>
+    <section id="admin" class="tab-content max-w-5xl mx-auto">
+        <div class="ultra-glass p-12 border-red-500/20">
+            <h2 class="orbitron text-2xl text-red-500 font-black mb-10 italic">OVERLORD TERMINAL</h2>
+            <div class="space-y-10">
+                <div>
+                    <label class="text-[10px] uppercase font-black opacity-40 mb-4 block">Глобальная рассылка сообщений</label>
+                    <textarea id="admBroad" class="w-full bg-black/50 border border-white/10 p-6 rounded-3xl outline-none focus:border-red-500 text-xs" placeholder="Текст для всех юзеров..."></textarea>
+                    <button onclick="setBroad()" class="mt-4 w-full py-4 bg-red-500/10 border border-red-500 text-red-500 rounded-2xl font-black text-[10px] uppercase">Запустить вещание</button>
                 </div>
-                <button onclick="updatePrices()" class="w-full py-4 bg-red-600/20 border border-red-600 text-red-500 rounded-xl font-black text-[10px] uppercase hover:bg-red-600 hover:text-white transition">Update System Config</button>
+                <div class="grid grid-cols-3 gap-6">
+                    <div><label class="text-[9px] opacity-30 block mb-2">ЦЕНА 1</label><input type="number" id="aP1" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-center"></div>
+                    <div><label class="text-[9px] opacity-30 block mb-2">ЦЕНА 2</label><input type="number" id="aP2" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-center"></div>
+                    <div><label class="text-[9px] opacity-30 block mb-2">ЦЕНА 3</label><input type="number" id="aP3" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-center"></div>
+                </div>
+                <button onclick="saveAdm()" class="w-full py-4 btn-main text-[10px]">Обновить параметры системы</button>
             </div>
-
-            <div class="glass p-10 border-blue-500/20 bg-blue-500/[0.01]">
-                <h3 class="text-[10px] text-blue-500 font-black mb-8 uppercase italic tracking-widest">Global Broadcast</h3>
-                <input type="text" id="admTicker" class="w-full bg-black border border-blue-500/30 p-5 rounded-xl text-xs mb-5 outline-none focus:border-blue-500" placeholder="Бегущая строка на главной...">
-                <button onclick="updateTicker()" class="w-full py-4 bg-blue-600/20 border border-blue-600 text-blue-500 rounded-2xl font-black text-[10px] uppercase hover:bg-blue-600 hover:text-white transition">Broadcast Message</button>
-            </div>
-        </div>
-        
-        <div class="glass p-10 border-white/5">
-            <h3 class="text-[10px] text-gray-500 font-black mb-8 uppercase italic tracking-widest">Voucher Generation</h3>
-            <div class="flex gap-4 mb-8">
-                <input type="text" id="pName" placeholder="CODE" class="bg-black border border-white/10 p-4 rounded-xl flex-grow font-mono uppercase text-xs tracking-widest">
-                <input type="number" id="pPct" placeholder="%" class="w-24 bg-black border border-white/10 p-4 rounded-xl text-center text-xs">
-                <button onclick="makePromo()" class="px-12 bg-white/5 rounded-xl font-black text-[10px] uppercase hover:bg-white/10">Generate</button>
-            </div>
-            <div id="pList" class="flex flex-wrap gap-3"></div>
         </div>
     </section>
 
     <script>
-        // ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ (ДЕМО)
-        let db = JSON.parse(localStorage.getItem('dog_v5')) || {
+        let db = JSON.parse(localStorage.getItem('dog_v6')) || {
             prices: [10, 250, 1000],
-            promos: [{n: 'DOGX2026', p: 15}],
-            ticker: "СИСТЕМА ШИФРОВАНИЯ DOG X VPN ВКЛЮЧЕНА И СТАБИЛЬНА. quantum secure v4.2"
+            msg: "СИСТЕМА ШИФРОВАНИЯ DOG X VPN СТАТУС: ACTIVE",
+            msgId: 1
         };
-        let me = JSON.parse(localStorage.getItem('dog_me_v5')) || null;
+        let user = JSON.parse(localStorage.getItem('dog_u6')) || null;
 
         window.onload = () => {
-            if(!me) document.getElementById('authOverlay').classList.remove('hidden');
-            else sync();
+            if(!user) document.getElementById('authBox').classList.remove('hidden');
+            else { render(); checkMsg(); }
         };
 
-        function register() {
-            const n = document.getElementById('regName').value.trim();
-            if(n.length < 2) return Swal.fire('Короткое имя', '', 'error');
-            me = { name: n, balance: 0, keys: [], disc: 0 };
-            saveMe();
+        function login() {
+            const n = document.getElementById('uNameInp').value;
+            if(n.length < 2) return;
+            user = { name: n, bal: 0, keys: [] };
+            localStorage.setItem('dog_u6', JSON.stringify(user));
             location.reload();
         }
 
-        function sync() {
-            // Главная
-            document.getElementById('ticker').innerText = db.ticker;
-            document.getElementById('p1_price').innerText = db.prices[0] + '₽';
-            document.getElementById('p2_price').innerText = db.prices[1] + '₽';
-            document.getElementById('p3_price').innerText = db.prices[2] + '₽';
+        function render() {
+            document.getElementById('uName').innerText = user.name.toUpperCase();
+            document.getElementById('uAva').innerText = user.name[0].toUpperCase();
+            document.getElementById('uBal').innerText = user.bal.toFixed(2) + '₽';
+            document.getElementById('broadcast').innerText = db.msg;
             
-            // Профиль
-            document.getElementById('uName').innerText = me.name.toUpperCase();
-            document.getElementById('uAva').innerText = me.name[0].toUpperCase();
-            document.getElementById('uBal').innerText = me.balance.toFixed(2) + '₽';
-            
-            // Админка
-            document.getElementById('admP1').value = db.prices[0];
-            document.getElementById('admP2').value = db.prices[1];
-            document.getElementById('admP3').value = db.prices[2];
-            document.getElementById('admTicker').value = db.ticker;
-            renderAdminPromos();
-        }
-
-        // АДМИН ПАНЕЛЬ
-        function applyAdmin() {
-            const code = document.getElementById('promoInp').value;
-            if(code === '67АРТЁМ67') {
-                document.getElementById('adminBadge').classList.remove('hidden');
-                showTab('admin');
-                Swal.fire({ title: 'ROOT ACCESS GRANTED', text: 'Welcome back, Creator', icon: 'success', background: '#010204', color: '#fff' });
-            } else {
-                Swal.fire('ERROR', 'INVALID ACCESS KEY', 'error');
-            }
-        }
-
-        function updatePrices() {
-            db.prices = [parseInt(document.getElementById('admP1').value), parseInt(document.getElementById('admP2').value), parseInt(document.getElementById('admP3').value)];
-            saveDB();
-            sync();
-            Swal.fire('UPDATED', 'Prices changed globally', 'success');
-        }
-
-        function updateTicker() {
-            db.ticker = document.getElementById('admTicker').value.toUpperCase();
-            saveDB();
-            sync();
-        }
-
-        function makePromo() {
-            const n = document.getElementById('pName').value.toUpperCase();
-            const p = parseInt(document.getElementById('pPct').value);
-            if(n && p) { db.promos.push({n, p}); saveDB(); renderAdminPromos(); }
-        }
-
-        function renderAdminPromos() {
-            document.getElementById('pList').innerHTML = db.promos.map((x, i) => `
-                <div class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-[10px] flex gap-3 items-center">
-                    ${x.n} (-${x.p}%) <button onclick="delPromo(${i})" class="text-red-500 hover:text-white">×</button>
-                </div>
-            `).join('');
-        }
-
-        function delPromo(i) { db.promos.splice(i, 1); saveDB(); renderAdminPromos(); }
-
-        // ОПЛАТА И ДЕМО КЛЮЧИ
-        function pay(amount) {
-            Swal.fire({
-                title: 'ОПЛАТА',
-                background: '#010204',
-                color: '#fff',
-                html: `
-                    <div class="text-left text-xs p-5 bg-white/5 border border-white/10 rounded-2xl">
-                        <p class="mb-4 text-[10px] opacity-40 uppercase tracking-widest font-black italic">Переведите ${amount}₽ на реквизиты:</p>
-                        <p class="text-lg text-emerald-400 font-black mb-1">${MY_CONFIG.card}</p>
-                        <p class="mb-6 opacity-60">СБП / Карта ( Demo Mode )</p>
-                        <a href="${MY_CONFIG.tgSupport}" target="_blank" class="block w-full py-4 btn-neon rounded-xl text-center text-[10px] font-black shadow-none tracking-widest">Отправить чек в Telegram</a>
+            const list = document.getElementById('keyList');
+            if(user.keys.length > 0) {
+                list.innerHTML = user.keys.map(k => `
+                    <div class="ultra-glass p-6 flex justify-between items-center border-white/5 bg-white/[0.02]">
+                        <div class="overflow-hidden mr-4">
+                            <p class="text-[9px] text-emerald-400 font-mono truncate tracking-tighter">${k}</p>
+                        </div>
+                        <button onclick="navigator.clipboard.writeText('${k}'); Swal.fire('OK','Копировано','success')" class="text-white/40 hover:text-emerald-400"><i class="fas fa-copy"></i></button>
                     </div>
-                `,
-                footer: '<button onclick="addDemoKey('+amount+')" class="text-[9px] uppercase opacity-20 hover:opacity-100 font-black underline">Я ОПЛАТИЛ (ДЕМО АКТИВАЦИЯ)</button>',
-                showConfirmButton: false
+                `).join('');
+            }
+            // Цены в админке
+            document.getElementById('aP1').value = db.prices[0];
+            document.getElementById('aP2').value = db.prices[1];
+            document.getElementById('aP3').value = db.prices[2];
+        }
+
+        function buy(id) {
+            Swal.fire({
+                title: 'МЕТОД ОПЛАТЫ',
+                background: '#020408', color: '#fff',
+                showConfirmButton: false,
+                html: `
+                    <div class="space-y-4 p-4">
+                        <button onclick="pay('CARD', ${db.prices[id]})" class="w-full p-6 ultra-glass flex justify-between items-center hover:bg-white/5"><span>КАРТА / СБП</span><i class="fas fa-credit-card text-emerald-400"></i></button>
+                        <button onclick="pay('USDT', ${db.prices[id]})" class="w-full p-6 ultra-glass flex justify-between items-center hover:bg-white/5"><span>USDT (TRC20)</span><i class="fas fa-bolt text-cyan-400"></i></button>
+                    </div>
+                `
             });
         }
 
-        function addDemoKey(amount) {
-            Swal.close();
-            const key = 'vless://' + btoa(Math.random()).substring(0,32) + '@DOG_X_CORE:443?security=reality&sni=google.com#DOGX_VIP';
-            me.keys.unshift({key, plan: amount + '₽ PLAN'});
-            saveMe();
-            
+        function pay(type, amt) {
+            const req = type === 'CARD' ? CONFIG.card : CONFIG.usdt;
             Swal.fire({
-                title: 'КЛЮЧ АКТИВИРОВАН',
-                html: `<div class="p-3 bg-black rounded-lg border border-emerald-500/20 text-emerald-400 font-mono text-[9px] break-all">${key}</div>`,
-                confirmButtonText: 'Скопировать',
-                confirmButtonColor: '#00ffaa',
-                background: '#010204', color: '#fff'
-            }).then(() => { navigator.clipboard.writeText(key); sync(); });
+                title: 'ОПЛАТА ' + amt + '₽',
+                background: '#020408', color: '#fff',
+                html: `<div class="p-6 ultra-glass"><p class="text-[10px] opacity-40 mb-4 tracking-widest">РЕКВИЗИТЫ:</p><p class="text-sm font-black mb-4 text-emerald-400 font-mono">${req}</p><p class="text-[9px] opacity-30 italic uppercase">После перевода отправьте чек в поддержку</p></div>`,
+                footer: `<a href="${CONFIG.tg}" target="_blank" class="w-full py-4 btn-main text-center text-[10px]">Подтвердить оплату (TG)</a>`,
+                showConfirmButton: false
+            });
+            // Демо-выдача через 5 сек (имитация проверки)
+            setTimeout(() => {
+                const k = `vless://${btoa(Math.random()).substring(0,32)}@node-de.dogx.pro:443?security=reality&sni=google.com&fp=chrome&type=grpc&serviceName=grpc#DOGX_${user.name}`;
+                user.keys.unshift(k);
+                localStorage.setItem('dog_u6', JSON.stringify(user));
+                render();
+            }, 5000);
         }
 
-        function showTab(id) {
+        function checkAdm() {
+            if(document.getElementById('admKey').value === '67АРТЁМ67') {
+                document.getElementById('rootTag').classList.remove('hidden');
+                tab('admin');
+            }
+        }
+
+        function setBroad() {
+            db.msg = document.getElementById('admBroad').value.toUpperCase();
+            db.msgId = Date.now();
+            localStorage.setItem('dog_v6', JSON.stringify(db));
+            Swal.fire('СИСТЕМА', 'Рассылка запущена!', 'success');
+            render();
+        }
+
+        function checkMsg() {
+            const last = localStorage.getItem('dog_last_msg');
+            if(last != db.msgId && db.msgId != 1) {
+                Swal.fire({ title: 'УВЕДОМЛЕНИЕ', text: db.msg, background: '#020408', color: '#00ffaa' });
+                localStorage.setItem('dog_last_msg', db.msgId);
+            }
+        }
+
+        function saveAdm() {
+            db.prices = [document.getElementById('aP1').value, document.getElementById('aP2').value, document.getElementById('aP3').value];
+            localStorage.setItem('dog_v6', JSON.stringify(db));
+            location.reload();
+        }
+
+        function tab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             window.scrollTo(0,0);
         }
-
-        function saveMe() { localStorage.setItem('dog_me_v5', JSON.stringify(me)); }
-        function saveDB() { localStorage.setItem('dog_v5', JSON.stringify(db)); }
-        function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
 </html>
