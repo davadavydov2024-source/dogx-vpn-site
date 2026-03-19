@@ -126,6 +126,12 @@
         <div class="player-card p-6 space-y-6 border border-red-500/20">
             <h2 class="text-red-500 font-black uppercase text-center text-sm">Панель Управления</h2>
             
+            <div class="p-4 bg-green-500/5 rounded-2xl space-y-3">
+                <p class="text-[10px] font-bold text-green-500 uppercase">📊 Аналитика пользователей</p>
+                <div id="adm_users_list" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                    </div>
+            </div>
+
             <div class="p-4 bg-amber-500/5 rounded-2xl space-y-2">
                 <p class="text-[10px] font-bold text-amber-500 uppercase">Верхняя Рассылка</p>
                 <textarea id="adm_bc_text" class="w-full p-2 bg-black/20 rounded text-xs" placeholder="Текст сообщения"></textarea>
@@ -157,7 +163,7 @@
             </div>
 
             <div class="p-4 bg-white/5 rounded-2xl space-y-3">
-                <p class="text-[10px] font-bold text-blue-400 uppercase">Юзеры</p>
+                <p class="text-[10px] font-bold text-blue-400 uppercase">Действия с юзером</p>
                 <input id="adm_uid" class="w-full p-3 bg-black/20 rounded-xl text-xs" placeholder="ID (напр. 1)">
                 <div class="grid grid-cols-2 gap-2">
                     <input id="adm_sum" type="number" class="p-3 bg-black/20 rounded-xl text-xs" placeholder="Сумма">
@@ -181,6 +187,49 @@
     </div>
 
     <script>
+        // --- АНАЛИТИКА ---
+        function renderAnalytics() {
+            const list = document.getElementById('adm_users_list');
+            const users = Object.values(window.allUsers);
+            if(users.length === 0) {
+                list.innerHTML = `<p class="text-[10px] opacity-30 text-center">Юзеров пока нет</p>`;
+                return;
+            }
+            list.innerHTML = users.map(u => `
+                <div onclick="inspectUser('${u.id}')" class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 active:scale-95 transition">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-blue-400">#${u.id} ${u.nick}</span>
+                        <span class="text-[8px] opacity-40 uppercase">Нажми для деталей</span>
+                    </div>
+                    <span class="text-[11px] font-black">${u.bal.toFixed(2)}₽</span>
+                </div>
+            `).join('');
+        }
+
+        function inspectUser(uid) {
+            const u = window.allUsers[uid];
+            if(!u) return;
+            const keysCount = u.keys ? u.keys.length : 0;
+            Swal.fire({
+                title: `ПРОФИЛЬ #${u.id}`,
+                html: `
+                <div class="text-left space-y-2 text-xs">
+                    <p><b>НИК:</b> ${u.nick}</p>
+                    <p><b>БАЛАНС:</b> ${u.bal.toFixed(2)}₽</p>
+                    <p><b>КУПЛЕНО КЛЮЧЕЙ:</b> ${keysCount}</p>
+                </div>`,
+                showCancelButton: true,
+                confirmButtonText: 'Выбрать ID',
+                cancelButtonText: 'Закрыть',
+                confirmButtonColor: '#5865f2'
+            }).then((res) => {
+                if(res.isConfirmed) {
+                    document.getElementById('adm_uid').value = u.id;
+                    Swal.fire('ID Выбран', 'ID вставлен в блок управления', 'success');
+                }
+            });
+        }
+
         // --- ЛОГИКА ОТОБРАЖЕНИЯ ---
         function renderGlobalBC() {
             const bc = window.db.broadcast;
@@ -242,26 +291,23 @@
         }
 
         function loadAdmin() {
-            // Загрузка полей рассылки
+            renderAnalytics();
             document.getElementById('adm_bc_text').value = window.db.broadcast.text || '';
             document.getElementById('adm_bc_url').value = window.db.broadcast.url || '';
             document.getElementById('adm_bc_btn').value = window.db.broadcast.btnText || '';
             document.getElementById('bc_status_btn').className = window.db.broadcast.active ? "w-full py-2 bg-green-600 text-white text-[9px] font-bold rounded uppercase italic" : "w-full py-2 bg-amber-600/20 text-amber-500 text-[9px] font-bold rounded uppercase italic";
             
-            // Загрузка полей рекламы
             document.getElementById('adm_ad_text').value = window.db.footerAd.text || '';
             document.getElementById('adm_ad_url').value = window.db.footerAd.url || '';
             document.getElementById('adm_ad_btn').value = window.db.footerAd.btnText || '';
             document.getElementById('ad_status_btn').className = window.db.footerAd.active ? "w-full py-2 bg-green-600 text-white text-[9px] font-bold rounded uppercase italic" : "w-full py-2 bg-blue-600/20 text-blue-400 text-[9px] font-bold rounded uppercase italic";
 
-            // Список промокодов
             document.getElementById('adm_promos_list').innerHTML = (window.db.promos || []).map((p, i) => `
                 <div class="flex justify-between items-center bg-black/40 p-2 rounded text-[10px]">
                     <span class="font-bold">${p.code} (+${p.sum}₽)</span>
                     <button onclick="deletePromo(${i})" class="text-red-500">❌</button>
                 </div>`).join('');
 
-            // Тарифы
             document.getElementById('admin_stocks').innerHTML = window.db.products.map(p => `
                 <div class="p-4 bg-white/5 rounded-2xl space-y-2 border-l-2 border-blue-500">
                     <div class="flex gap-2">
@@ -269,26 +315,22 @@
                         <input id="p_n_${p.id}" value="${p.name}" class="bg-black/40 rounded p-1 text-[10px] font-bold flex-1 uppercase w-full">
                     </div>
                     <div class="grid grid-cols-3 gap-2">
-                        <input id="p_p_${p.id}" value="${p.pr}" class="bg-black/40 rounded p-1 text-[10px]" placeholder="Цена">
-                        <input id="p_h_${p.id}" value="${p.h}" class="bg-black/40 rounded p-1 text-[10px]" placeholder="Часы">
-                        <input id="p_d_${p.id}" value="${p.discount || 0}" class="bg-black/40 rounded p-1 text-[10px] text-red-400" placeholder="Скидка%">
+                        <input id="p_p_${p.id}" value="${p.pr}" class="bg-black/40 rounded p-1 text-[10px]">
+                        <input id="p_h_${p.id}" value="${p.h}" class="bg-black/40 rounded p-1 text-[10px]">
+                        <input id="p_d_${p.id}" value="${p.discount || 0}" class="bg-black/40 rounded p-1 text-[10px] text-red-400">
                     </div>
                     <button onclick="deleteProduct(${p.id})" class="w-full text-[8px] text-red-500 opacity-50 uppercase">Удалить тариф</button>
                 </div>`).join('');
         }
 
         function saveAdmin() {
-            // Сохраняем рассылку
             window.db.broadcast.text = document.getElementById('adm_bc_text').value;
             window.db.broadcast.url = document.getElementById('adm_bc_url').value;
             window.db.broadcast.btnText = document.getElementById('adm_bc_btn').value;
-
-            // Сохраняем рекламу
             window.db.footerAd.text = document.getElementById('adm_ad_text').value;
             window.db.footerAd.url = document.getElementById('adm_ad_url').value;
             window.db.footerAd.btnText = document.getElementById('adm_ad_btn').value;
 
-            // Сохраняем тарифы
             window.db.products.forEach(p => {
                 p.icon = document.getElementById(`p_i_${p.id}`).value;
                 p.name = document.getElementById(`p_n_${p.id}`).value;
@@ -297,10 +339,10 @@
                 p.discount = parseInt(document.getElementById(`p_d_${p.id}`).value) || 0;
             });
             window.saveSystem();
-            Swal.fire('Успех', 'Все настройки обновлены в облаке', 'success');
+            Swal.fire('Успех', 'Все настройки обновлены', 'success');
         }
 
-        // --- БАЗОВЫЕ ФУНКЦИИ (БЕЗ ИЗМЕНЕНИЙ) ---
+        // --- БАЗОВЫЕ ФУНКЦИИ ---
         function updateUI() {
             if(!window.user) return;
             document.getElementById('userDisplay').innerText = `${window.user.nick} | #${window.user.id}`;
@@ -394,7 +436,7 @@
         function topUp() { Swal.fire('Оплата', 'Свяжитесь с @sswckk', 'info'); }
         function deleteProduct(id) { window.db.products = window.db.products.filter(p => p.id !== id); loadAdmin(); }
         function addTariff() { window.db.products.push({ id: Date.now(), name: "NEW", pr: 100, h: 24, icon: "⚡", discount: 0 }); loadAdmin(); }
-        function showHappyGuide() { Swal.fire({ title: 'ИНСТРУКЦИЯ', html: `<div class="text-left text-[11px] opacity-70">Скопируй ключ -> Happ Plus(IOS/ADNROID) -> Лицензия -> Активировать.</div>`, icon: 'info' }); }
+        function showHappyGuide() { Swal.fire({ title: 'ИНСТРУКЦИЯ', html: `<div class="text-left text-[11px] opacity-70">Скопируй ключ -> Happy Plus -> Лицензия -> Активировать.</div>`, icon: 'info' }); }
     </script>
 </body>
 </html>
