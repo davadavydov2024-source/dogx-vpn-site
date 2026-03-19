@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | Игровой VPN</title>
+    <title>DOG X | User System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -16,123 +16,149 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .promo-banner { 
-            position: fixed; bottom: 20px; left: 20px; right: 20px; 
-            background: #232733; border: 1px solid var(--accent);
-            border-radius: 18px; z-index: 50; display: none; align-items: center; gap: 12px; padding: 12px;
-        }
+        .promo-banner { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #232733; border: 1px solid var(--accent); border-radius: 18px; z-index: 50; display: none; align-items: center; gap: 12px; padding: 12px; }
     </style>
 </head>
 <body class="pb-32">
 
     <div id="bcBanner" class="max-w-xl mx-auto m-4 hidden">
-        <div class="player-card p-4 border-amber-500/30 flex items-center gap-4">
+        <div class="player-card p-4 border-amber-500/30 flex items-center gap-4 relative">
             <img id="bcImg" src="" class="w-12 h-12 rounded-lg object-cover hidden">
-            <div class="flex-1">
-                <p id="bcText" class="text-[11px] font-bold text-amber-400 italic"></p>
-            </div>
-            <button onclick="document.getElementById('bcBanner').remove()" class="text-xs opacity-40 px-2">✕</button>
+            <div class="flex-1 text-[11px] font-bold text-amber-400 italic" id="bcText"></div>
         </div>
     </div>
 
     <div id="promoBanner" class="promo-banner">
         <img id="promoImg" src="" class="w-12 h-12 rounded-lg object-cover hidden">
-        <div class="flex-1">
-            <p id="promoText" class="text-[11px] leading-tight font-bold"></p>
-            <a id="promoLink" href="#" target="_blank" class="text-[10px] text-blue-400 font-bold underline">Подробнее</a>
-        </div>
-        <button onclick="this.parentElement.style.display='none'" class="text-gray-500 p-2"><i class="fas fa-times"></i></button>
+        <div class="flex-1"><p id="promoText" class="text-[11px] font-bold"></p><a id="promoLink" href="#" target="_blank" class="text-[10px] text-blue-400 font-bold underline">Открыть</a></div>
     </div>
 
     <header class="p-6 flex justify-between items-center">
-        <div class="text-2xl font-extrabold tracking-tighter">DOG<span class="text-blue-500 italic">X</span></div>
+        <div>
+            <div class="text-2xl font-extrabold tracking-tighter">DOG<span class="text-blue-500 italic">X</span></div>
+            <div id="userDisplay" class="text-[9px] font-bold opacity-40 uppercase tracking-widest mt-1">Загрузка...</div>
+        </div>
         <div class="flex gap-4">
-            <button onclick="showTab('home')" class="text-sm font-bold opacity-60 hover:opacity-100">Маркет</button>
-            <button onclick="showTab('me')" class="text-sm font-bold opacity-60 hover:opacity-100">Кабинет</button>
-            <button id="adminBtn" onclick="showTab('admin')" class="hidden text-red-500 text-sm font-bold">Админ</button>
+            <button onclick="showTab('home')" class="text-sm font-bold opacity-60">Маркет</button>
+            <button onclick="showTab('me')" class="text-sm font-bold opacity-60">Кабинет</button>
+            <button id="adminBtn" onclick="showTab('admin')" class="hidden text-red-500 text-sm font-bold">Admin</button>
         </div>
     </header>
 
-    <main id="home" class="tab-content active px-6 space-y-6">
-        <h2 class="text-xl font-extrabold">Все тарифы</h2>
+    <main id="home" class="tab-content active px-6 space-y-4">
+        <h2 class="text-xl font-extrabold">Тарифы VPN</h2>
         <div id="productsGrid" class="grid grid-cols-1 gap-4"></div>
     </main>
 
     <section id="me" class="tab-content px-6 space-y-6">
-        <div class="player-card p-6 flex flex-col items-center text-center">
-            <div class="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mb-4"><i class="fas fa-wallet text-3xl text-blue-500"></i></div>
-            <p class="text-xs opacity-50 font-bold uppercase mb-1">Твой баланс</p>
-            <h3 class="text-4xl font-extrabold mb-6" id="userBal">0.00₽</h3>
-            <div class="flex gap-2 w-full">
+        <div class="player-card p-8 text-center relative">
+            <div class="absolute top-4 left-4 text-[8px] font-black opacity-20" id="idTag">ID: #----</div>
+            <p class="text-[10px] opacity-40 font-bold uppercase mb-2">Твой баланс</p>
+            <h3 class="text-5xl font-extrabold mb-8 text-blue-500" id="userBal">0.00₽</h3>
+            <div class="flex gap-2">
                 <button onclick="topUp()" class="flex-1 py-4 btn-primary text-xs">ПОПОЛНИТЬ</button>
-                <button onclick="installApp()" class="flex-1 py-4 player-card text-xs font-bold">СКАЧАТЬ APP</button>
+                <button onclick="installApp()" class="flex-1 py-4 player-card text-xs font-bold uppercase">App</button>
             </div>
         </div>
         <div id="keysList" class="space-y-3"></div>
-        <input type="text" id="promoInp" oninput="checkAdmin()" placeholder="Промокод или Пароль" class="w-full p-4 player-card bg-transparent text-center text-sm outline-none">
+        <input type="text" id="promoInp" oninput="checkPass()" placeholder="Промокод или Пароль" class="w-full p-4 player-card bg-transparent text-center text-sm outline-none">
+        <button onclick="usePromo()" class="w-full text-[10px] font-bold opacity-30 uppercase">Активировать</button>
     </section>
 
-    <section id="admin" class="tab-content px-6 space-y-6">
+    <section id="admin" class="tab-content px-6 pb-20 space-y-6">
         <div class="player-card p-6 space-y-6">
-            <h2 class="text-red-500 font-extrabold uppercase italic">Админ-Панель</h2>
+            <h2 class="text-red-500 font-black italic uppercase">Управление Юзерами</h2>
             
-            <div class="space-y-3 p-4 bg-white/5 rounded-2xl">
-                <h3 class="text-[10px] font-black uppercase opacity-50">Настройка Рекламы (Низ)</h3>
+            <div class="space-y-4 p-4 bg-white/5 rounded-2xl">
+                <h3 class="text-[10px] font-black opacity-50 uppercase tracking-widest text-blue-400">Управление балансом</h3>
+                <div class="flex gap-2">
+                    <input id="target_id" class="flex-1 p-3 player-card bg-transparent text-xs" placeholder="ID (например: 1234)">
+                    <input id="target_sum" class="w-20 p-3 player-card bg-transparent text-xs" placeholder="+/-">
+                </div>
+                <button onclick="adminGift()" class="w-full py-3 btn-primary bg-green-600 text-[10px]">ИЗМЕНИТЬ БАЛАНС ЮЗЕРУ</button>
+            </div>
+
+            <div class="space-y-4 p-4 bg-white/5 rounded-2xl">
+                <h3 class="text-[10px] font-black opacity-50 uppercase tracking-widest text-blue-400">Реквизиты и Реклама</h3>
+                <input id="a_card" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Реквизиты">
                 <input id="a_promo_text" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Текст рекламы">
-                <input id="a_promo_url" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Ссылка (https://...)">
-                <div class="flex items-center gap-2">
-                    <button onclick="document.getElementById('promoFile').click()" class="flex-1 py-2 player-card text-[10px]">ВЫБРАТЬ ФОТО</button>
-                    <input type="file" id="promoFile" class="hidden" accept="image/*" onchange="handleImg(this, 'promo')">
-                </div>
+                <button onclick="document.getElementById('promoFile').click()" class="w-full py-2 player-card text-[10px]">ФОТО РЕКЛАМЫ</button>
+                <input type="file" id="promoFile" class="hidden" accept="image/*" onchange="handleImg(this, 'promo')">
             </div>
 
-            <div class="space-y-3 p-4 bg-white/5 rounded-2xl">
-                <h3 class="text-[10px] font-black uppercase opacity-50">Рассылка (Верх)</h3>
-                <input id="a_bc_text" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Текст рассылки">
-                <div class="flex items-center gap-2">
-                    <button onclick="document.getElementById('bcFile').click()" class="flex-1 py-2 player-card text-[10px]">ВЫБРАТЬ ФОТО</button>
-                    <input type="file" id="bcFile" class="hidden" accept="image/*" onchange="handleImg(this, 'bc')">
-                </div>
+            <div class="space-y-4 p-4 bg-white/5 rounded-2xl">
+                <h3 class="text-[10px] font-black opacity-50 uppercase tracking-widest text-blue-400">Цены</h3>
+                <div id="a_prices_list" class="space-y-3"></div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 pt-4 border-t border-white/5">
-                <textarea id="a_ios" class="w-full h-24 p-3 player-card bg-transparent text-[9px]" placeholder="iPhone ключи..."></textarea>
-                <textarea id="a_and" class="w-full h-24 p-3 player-card bg-transparent text-[9px]" placeholder="Android ключи..."></textarea>
+            <div class="grid grid-cols-2 gap-3">
+                <textarea id="a_ios" class="h-32 p-3 player-card bg-transparent text-[9px]" placeholder="iPhone ключи..."></textarea>
+                <textarea id="a_and" class="h-32 p-3 player-card bg-transparent text-[9px]" placeholder="Android ключи..."></textarea>
             </div>
 
-            <button onclick="saveAdmin()" class="w-full py-5 btn-primary bg-red-600 uppercase italic shadow-lg shadow-red-900/20">Сохранить и Обновить</button>
+            <button onclick="saveAdmin()" class="w-full py-5 btn-primary bg-red-600 uppercase italic">Сохранить</button>
         </div>
     </section>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('dog_v19_db')) || {
-            promo: { text: "", img: "", url: "https://t.me/sswckk", active: true },
+        // База данных пользователей теперь хранится отдельно
+        let allUsers = JSON.parse(localStorage.getItem('dog_users_db')) || {};
+
+        let db = JSON.parse(localStorage.getItem('dog_v21_db')) || {
+            promo: { text: "", img: "", url: "https://t.me/sswckk" },
             bc: { text: "", img: "" },
+            card: "sswckk",
             products: [
                 { id: 0, name: "ПРОБНЫЙ", pr: 10, h: 24, icon: "⚡" },
                 { id: 1, name: "МЕСЯЦ", pr: 250, h: 720, icon: "💎" },
                 { id: 2, name: "ГОДОВОЙ", pr: 1000, h: 8760, icon: "👑" }
             ],
-            stock_ios: [], stock_and: []
+            promos: [], stock_ios: [], stock_and: []
         };
-        let user = JSON.parse(localStorage.getItem('dog_v19_user')) || { bal: 0, keys: [] };
 
-        window.onload = () => { sync(); };
+        // Текущий профиль
+        let user = JSON.parse(localStorage.getItem('dog_v21_me')) || null;
+
+        window.onload = () => {
+            if(!user) initUser();
+            else sync();
+        };
+
+        async function initUser() {
+            const { value: nickname } = await Swal.fire({
+                title: 'ДОБРО ПОЖАЛОВАТЬ',
+                input: 'text',
+                inputLabel: 'Введите ваш Никнейм',
+                inputPlaceholder: 'Artyom...',
+                background: '#191c24', color: '#fff',
+                allowOutsideClick: false
+            });
+            const newId = Math.floor(1000 + Math.random() * 9000);
+            user = { id: newId, nick: nickname || 'User', bal: 0, keys: [] };
+            allUsers[newId] = user;
+            save(); sync();
+        }
 
         function sync() {
+            // Обновляем данные текущего юзера из общей базы (на случай если админ дал денег)
+            if(allUsers[user.id]) user = allUsers[user.id];
+            
+            document.getElementById('userDisplay').innerText = `${user.nick} | #${user.id}`;
+            document.getElementById('idTag').innerText = `ID: #${user.id}`;
             document.getElementById('userBal').innerText = user.bal.toFixed(2) + '₽';
             renderProducts(); renderKeys(); renderPromo(); renderBC(); loadAdmin();
         }
 
-        function handleImg(input, target) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                if(target === 'promo') db.promo.img = reader.result;
-                if(target === 'bc') db.bc.img = reader.result;
-                Swal.fire('Фото загружено','Нажмите Сохранить','success');
-            };
-            reader.readAsDataURL(file);
+        function adminGift() {
+            const id = document.getElementById('target_id').value;
+            const sum = parseFloat(document.getElementById('target_sum').value);
+            if(allUsers[id] && !isNaN(sum)) {
+                allUsers[id].bal += sum;
+                save(); sync();
+                Swal.fire('Успех!', `Юзеру #${id} изменено на ${sum}₽`, 'success');
+            } else {
+                Swal.fire('Ошибка', 'Юзер не найден или сумма неверна', 'error');
+            }
         }
 
         function renderProducts() {
@@ -140,41 +166,28 @@
                 <div class="player-card p-5 flex justify-between items-center">
                     <div class="flex items-center gap-4">
                         <div class="text-3xl">${p.icon}</div>
-                        <div><h4 class="font-extrabold text-sm">${p.name}</h4><p class="text-[10px] opacity-40">${p.h}ч.</p></div>
+                        <div><h4 class="font-extrabold text-sm uppercase">${p.name}</h4><p class="text-[10px] opacity-40">${p.h} часов</p></div>
                     </div>
-                    <div class="text-right"><div class="font-extrabold">${p.pr}₽</div><button onclick="buyKey(${p.id})" class="mt-1 px-4 py-2 btn-primary text-[10px]">КУПИТЬ</button></div>
+                    <div class="text-right">
+                        <div class="font-extrabold text-lg">${p.pr}₽</div>
+                        <button onclick="buyKey(${p.id})" class="mt-2 px-5 py-2 btn-primary text-[10px]">КУПИТЬ</button>
+                    </div>
                 </div>`).join('');
-        }
-
-        function renderPromo() {
-            const b = document.getElementById('promoBanner');
-            const hasP = user.keys.some(k => (k.expire - Date.now()) > 600000000);
-            if(db.promo.text && !hasP) {
-                b.style.display = 'flex'; document.getElementById('promoText').innerText = db.promo.text;
-                document.getElementById('promoLink').href = db.promo.url;
-                if(db.promo.img) { document.getElementById('promoImg').src = db.promo.img; document.getElementById('promoImg').classList.remove('hidden'); }
-            } else b.style.display = 'none';
-        }
-
-        function renderBC() {
-            if(db.bc.text) {
-                document.getElementById('bcBanner').classList.remove('hidden');
-                document.getElementById('bcText').innerText = db.bc.text;
-                if(db.bc.img) { document.getElementById('bcImg').src = db.bc.img; document.getElementById('bcImg').classList.remove('hidden'); }
-            }
         }
 
         function buyKey(id) {
             const p = db.products.find(x => x.id === id);
             if(user.bal < p.pr) return Swal.fire('Мало денег','','error');
             Swal.fire({
-                title: 'ОС?', background: '#191c24', color: '#fff', showCancelButton: true, confirmButtonText: 'iPhone', cancelButtonText: 'Android'
+                title: 'УСТРОЙСТВО', background: '#191c24', color: '#fff', showCancelButton: true, confirmButtonText: 'iPhone', cancelButtonText: 'Android'
             }).then((r) => {
                 const type = r.isConfirmed ? 'stock_ios' : 'stock_and';
                 if(db[type].length === 0) return Swal.fire('Нет ключей','','warning');
                 const key = db[type].shift();
-                user.bal -= p.pr; user.keys.unshift({ key, name: p.name, expire: Date.now() + (p.h * 3600000) });
-                save(); sync(); Swal.fire('Готово!','','success');
+                user.bal -= p.pr; 
+                user.keys.unshift({ key, name: p.name, expire: Date.now() + (p.h * 3600000) });
+                allUsers[user.id] = user; // Обновляем в общей базе
+                save(); sync();
             });
         }
 
@@ -184,34 +197,56 @@
             if(user.keys.length === 0) { list.innerHTML = `<p class="text-center opacity-20 py-10">Нет подписок</p>`; return; }
             list.innerHTML = user.keys.map(k => `
                 <div class="player-card p-4">
-                    <div class="flex justify-between text-[9px] font-black uppercase mb-2"><span class="text-blue-500">${k.name}</span><span>${new Date(k.expire).toLocaleDateString()}</span></div>
+                    <div class="flex justify-between items-center mb-2"><span class="text-[10px] font-black uppercase text-blue-500">${k.name}</span><span class="text-[9px] opacity-40">${new Date(k.expire).toLocaleDateString()}</span></div>
                     <div class="bg-black/20 p-3 rounded-lg text-[9px] font-mono break-all mb-2 select-all">${k.key}</div>
-                    <button onclick="navigator.clipboard.writeText('${k.key}'); Swal.fire('Ок','','success')" class="w-full py-2 bg-white/5 rounded-lg text-[9px] font-bold">КОПИРОВАТЬ</button>
+                    <button onclick="navigator.clipboard.writeText('${k.key}'); Swal.fire('Ок','','success')" class="w-full py-2 bg-white/5 rounded-lg text-[10px] font-bold">КОПИРОВАТЬ</button>
                 </div>`).join('');
         }
 
-        function checkAdmin() { if(document.getElementById('promoInp').value === 'kalubxq') document.getElementById('adminBtn').classList.remove('hidden'); }
-        function loadAdmin() {
-            document.getElementById('a_promo_text').value = db.promo.text; document.getElementById('a_promo_url').value = db.promo.url;
-            document.getElementById('a_bc_text').value = db.bc.text; document.getElementById('a_ios').value = db.stock_ios.join('\n');
-            document.getElementById('a_and').value = db.stock_and.join('\n');
-        }
+        function checkPass() { if(document.getElementById('promoInp').value === 'kalubxq') document.getElementById('adminBtn').classList.remove('hidden'); }
+        
         function saveAdmin() {
-            db.promo.text = document.getElementById('a_promo_text').value; db.promo.url = document.getElementById('a_promo_url').value;
-            db.bc.text = document.getElementById('a_bc_text').value; db.stock_ios = document.getElementById('a_ios').value.split('\n').filter(l => l.length > 5);
+            db.card = document.getElementById('a_card').value;
+            db.promo.text = document.getElementById('a_promo_text').value;
+            db.stock_ios = document.getElementById('a_ios').value.split('\n').filter(l => l.length > 5);
             db.stock_and = document.getElementById('a_and').value.split('\n').filter(l => l.length > 5);
             save(); location.reload();
         }
-        function topUp() { Swal.fire({ title: 'ОПЛАТА', background: '#191c24', color: '#fff', html: `<a href="https://t.me/sswckk" target="_blank" class="text-xl font-black text-blue-500 underline">@sswckk</a>`, showConfirmButton: false }); }
-        function installApp() {
-            const url = "https://davadavydov2024-source.github.io/dogx-vpn-site/";
-            Swal.fire({
-                title: 'УСТАНОВКА', background: '#191c24', color: '#fff',
-                html: `<div class="text-left space-y-3 p-2"><p class="text-[10px] opacity-60">Перейдите по ссылке и нажмите "Добавить на экран Домой":</p>
-                <a href="${url}" target="_blank" class="block py-3 btn-primary text-center text-[10px]">ОТКРЫТЬ САЙТ</a></div>`, showConfirmButton: false
-            });
+
+        function loadAdmin() {
+            document.getElementById('a_card').value = db.card;
+            document.getElementById('a_promo_text').value = db.promo.text;
+            document.getElementById('a_ios').value = db.stock_ios.join('\n');
+            document.getElementById('a_and').value = db.stock_and.join('\n');
+            document.getElementById('a_prices_list').innerHTML = db.products.map(p => `
+                <div class="flex gap-2 items-center">
+                    <span class="text-[9px] font-bold w-12">${p.name}</span>
+                    <input id="p_${p.id}_p" value="${p.pr}" class="flex-1 p-2 player-card bg-transparent text-[10px]">
+                </div>`).join('');
         }
-        function save() { localStorage.setItem('dog_v19_db', JSON.stringify(db)); localStorage.setItem('dog_v19_user', JSON.stringify(user)); }
+
+        function handleImg(input, target) {
+            const reader = new FileReader();
+            reader.onloadend = () => { if(target === 'promo') db.promo.img = reader.result; save(); };
+            reader.readAsDataURL(input.files[0]);
+        }
+
+        function renderPromo() {
+            if(db.promo.text) {
+                document.getElementById('promoBanner').style.display = 'flex';
+                document.getElementById('promoText').innerText = db.promo.text;
+                if(db.promo.img) { document.getElementById('promoImg').src = db.promo.img; document.getElementById('promoImg').classList.remove('hidden'); }
+            }
+        }
+
+        function renderBC() { if(db.bc.text) { document.getElementById('bcBanner').classList.remove('hidden'); document.getElementById('bcText').innerText = db.bc.text; } }
+        function topUp() { Swal.fire({ title: 'ОПЛАТА', background: '#191c24', color: '#fff', html: `Реквизиты: ${db.card}<br><br><a href="https://t.me/sswckk" class="text-blue-500 font-bold">@sswckk</a>`, showConfirmButton: false }); }
+        function installApp() { Swal.fire({ title: 'APP', background: '#191c24', color: '#fff', text: 'Добавьте сайт на экран Домой', confirmButtonColor: '#5865f2' }); }
+        function save() { 
+            localStorage.setItem('dog_v21_db', JSON.stringify(db)); 
+            localStorage.setItem('dog_v21_me', JSON.stringify(user));
+            localStorage.setItem('dog_users_db', JSON.stringify(allUsers));
+        }
         function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
     </script>
 </body>
