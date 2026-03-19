@@ -3,315 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOG X VPN | Admin Authority</title>
+    <title>DOG X VPN | Deep Web Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@300;400;700;900&display=swap');
-        :root { --neon: #4ade80; --bg: #030712; --panel: rgba(255,255,255,0.03); }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Space+Grotesk:wght@300;500;700&display=swap');
+        
+        :root { --neon: #4ade80; --accent: #22c55e; --bg: #050505; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
         .sync { font-family: 'Syncopate', sans-serif; }
-        .glass { background: var(--panel); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; }
-        .neon-shadow { box-shadow: 0 0 20px rgba(74, 222, 128, 0.2); }
-        .admin-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,0,0,0.2); color: #ff4d4d; font-family: monospace; }
+        
+        /* Сетка на фоне */
+        .grid-bg { 
+            background-image: linear-gradient(rgba(74, 222, 128, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(74, 222, 128, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: fixed; inset: 0; z-index: -1;
+        }
+
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; }
+        .neon-text { text-shadow: 0 0 15px var(--neon); }
+        .neon-btn { background: var(--neon); color: black; box-shadow: 0 0 30px rgba(74, 222, 128, 0.3); transition: 0.4s; font-weight: 900; }
+        .neon-btn:hover { box-shadow: 0 0 50px rgba(74, 222, 128, 0.6); transform: scale(1.02); }
+
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        tr:hover { background: rgba(255,255,255,0.02); }
+        .tab-content.active { display: block; animation: zoomIn 0.3s ease; }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px currentColor; }
+        .spin-anim { animation: rotate 4s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="p-4">
+<body class="p-4 md:p-8">
+    <div class="grid-bg"></div>
 
-    <div id="authOverlay" class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center hidden">
-        <div class="glass p-12 max-w-md w-full text-center border-green-500/20">
-            <h2 class="sync text-xl mb-8 tracking-widest text-green-400">INITIALIZING...</h2>
-            <input type="text" id="regName" placeholder="IDENTIFIER" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 mb-4 text-center uppercase tracking-widest">
-            <button onclick="register()" class="w-full bg-green-500 text-black font-black py-4 rounded-xl hover:scale-105 transition">ENTER SYSTEM</button>
+    <div id="authOverlay" class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center hidden backdrop-blur-md">
+        <div class="glass p-12 max-w-sm w-full text-center border-green-500/30">
+            <div class="sync text-3xl mb-10 neon-text italic">LOGIN_ROOT</div>
+            <input type="text" id="regName" placeholder="NICKNAME" class="w-full p-5 rounded-2xl bg-white/5 border border-white/10 mb-6 text-center tracking-widest outline-none focus:border-green-400">
+            <button onclick="register()" class="w-full neon-btn py-5 rounded-2xl uppercase tracking-widest text-sm">INITIALIZE</button>
         </div>
     </div>
 
-    <nav class="max-w-7xl mx-auto flex justify-between items-center py-6 mb-10 border-b border-white/5">
-        <div class="sync text-2xl font-bold italic tracking-tighter">DOG <span class="text-green-400">X</span></div>
-        <div class="flex gap-8 items-center uppercase text-[10px] font-bold tracking-[0.3em]">
-            <button onclick="showTab('market')" class="hover:text-green-400">Market</button>
-            <button onclick="showTab('profile')" class="hover:text-green-400">Profile</button>
-            <button onclick="openAdmin()" class="text-red-500 border border-red-500/30 px-3 py-1 rounded">Admin Terminal</button>
+    <nav class="max-w-6xl mx-auto flex justify-between items-center mb-12 relative">
+        <div class="sync text-3xl font-black italic">DOG <span class="text-green-400">X</span></div>
+        <div class="flex gap-6 md:gap-12 text-[11px] font-bold uppercase tracking-widest">
+            <button onclick="showTab('market')" class="hover:text-green-400 transition">Маркет</button>
+            <button onclick="showTab('profile')" class="hover:text-green-400 transition">Кабинет</button>
+            <div id="adminIndicator" class="hidden text-red-500 animate-pulse">[ADMIN_ACTIVE]</div>
         </div>
     </nav>
 
-    <main id="market" class="tab-content active max-w-7xl mx-auto">
-        <div class="text-center py-20">
-            <h1 class="text-7xl md:text-9xl font-black italic mb-6 leading-none">NO <span class="text-green-400">LIMITS.</span></h1>
-            <p id="globalAlert" class="text-red-500 animate-pulse font-bold text-xs uppercase tracking-widest"></p>
+    <main id="market" class="tab-content active max-w-6xl mx-auto">
+        <div class="flex flex-col lg:flex-row gap-12 items-center mb-20">
+            <div class="flex-1">
+                <div class="inline-block px-4 py-1 border border-green-500/30 rounded-full text-[10px] text-green-400 font-bold mb-4 uppercase tracking-tighter">Secure Tunnel v4.2</div>
+                <h1 class="text-6xl md:text-9xl font-black mb-6 italic leading-[0.85]">BREAK THE <br> <span class="text-green-400 neon-text">WALL.</span></h1>
+                <p id="globalMsg" class="text-gray-500 font-medium max-w-md italic">Система активна. Все узлы в норме.</p>
+            </div>
+            
+            <div class="glass p-8 w-full lg:w-80 text-center border-green-500/10">
+                <p class="text-[10px] uppercase opacity-40 mb-2 tracking-widest">Твой кошелек</p>
+                <div id="balDisplay" class="text-5xl font-black mb-6 italic tracking-tighter">0₽</div>
+                <button onclick="addCash()" class="w-full py-3 bg-white/5 rounded-xl text-[10px] font-bold hover:bg-white/10 transition uppercase">Пополнить баланс</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20">
+            <div class="glass p-4 flex items-center gap-3">
+                <span class="status-dot text-green-400 bg-green-400"></span>
+                <span class="text-[10px] font-bold">DE_FRANKFURT: <span class="text-green-400">12%</span></span>
+            </div>
+            <div class="glass p-4 flex items-center gap-3">
+                <span class="status-dot text-green-400 bg-green-400"></span>
+                <span class="text-[10px] font-bold">NL_AMSTERDAM: <span class="text-green-400">24%</span></span>
+            </div>
+            <div class="glass p-4 flex items-center gap-3">
+                <span class="status-dot text-yellow-400 bg-yellow-400"></span>
+                <span class="text-[10px] font-bold">US_VIRGINIA: <span class="text-yellow-400">68%</span></span>
+            </div>
+            <div class="glass p-4 flex items-center gap-3">
+                <span class="status-dot text-red-500 bg-red-500 animate-pulse"></span>
+                <span class="text-[10px] font-bold">RU_MOSCOW: <span class="text-red-500">FULL</span></span>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-            <div class="glass p-10 relative">
-                <p class="opacity-30 text-[10px] mb-4 uppercase">Basic Access</p>
-                <div id="price1_display" class="text-6xl font-black mb-8 italic">10₽</div>
-                <button onclick="buy(1)" class="w-full py-4 bg-white/5 border border-white/10 rounded-xl hover:bg-green-400 hover:text-black transition font-bold">ACTIVATE</button>
+            <div class="glass p-10 group hover:border-green-400/30 transition">
+                <div class="text-xs opacity-30 mb-8 uppercase">LITE / 3D</div>
+                <div id="p1" class="text-6xl font-black mb-10 italic">10₽</div>
+                <button onclick="buy(1)" class="w-full py-5 border border-white/5 rounded-2xl group-hover:neon-btn group-hover:text-black transition uppercase font-bold text-xs">Активировать</button>
             </div>
-            <div class="glass p-10 border-green-400/40 neon-shadow">
-                <p class="text-green-400 text-[10px] mb-4 uppercase font-bold">Most Popular</p>
-                <div id="price2_display" class="text-6xl font-black mb-8 italic">250₽</div>
-                <button onclick="buy(2)" class="w-full py-4 bg-green-400 text-black rounded-xl font-bold">ACTIVATE PRO</button>
+            <div class="glass p-10 border-green-500/40 relative transform scale-105 shadow-2xl">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-green-400 text-black px-6 py-1 rounded-full text-[10px] font-black italic uppercase">Bestseller</div>
+                <div class="text-xs text-green-400 mb-8 uppercase font-bold">PREMIUM / 30D</div>
+                <div id="p2" class="text-7xl font-black mb-10 italic neon-text">250₽</div>
+                <button onclick="buy(2)" class="w-full py-5 neon-btn rounded-2xl uppercase font-bold text-xs">Активировать</button>
             </div>
-            <div class="glass p-10">
-                <p class="opacity-30 text-[10px] mb-4 uppercase">Elite Access</p>
-                <div id="price3_display" class="text-6xl font-black mb-8 italic">1000₽</div>
-                <button onclick="buy(3)" class="w-full py-4 bg-white/5 border border-white/10 rounded-xl hover:bg-green-400 hover:text-black transition font-bold">ACTIVATE ELITE</button>
+            <div class="glass p-10 group hover:border-green-400/30 transition">
+                <div class="text-xs opacity-30 mb-8 uppercase">ULTRA / 150D</div>
+                <div id="p3" class="text-6xl font-black mb-10 italic">1000₽</div>
+                <button onclick="buy(3)" class="w-full py-5 border border-white/5 rounded-2xl group-hover:neon-btn group-hover:text-black transition uppercase font-bold text-xs">Активировать</button>
             </div>
         </div>
     </main>
 
-    <section id="profile" class="tab-content max-w-4xl mx-auto">
-        <div class="glass p-12 flex flex-col md:flex-row gap-12 items-center">
-            <div class="text-center">
-                <div class="w-32 h-32 bg-green-400 rounded-full flex items-center justify-center text-5xl text-black font-black mb-4 shadow-2xl">A</div>
-                <h2 id="uName" class="text-3xl font-black italic">ARTYOM</h2>
-                <div id="uBalance" class="text-green-400 font-mono mt-2">Баланс: 0₽</div>
-                <button onclick="addBalance()" class="mt-4 text-[10px] opacity-40 hover:opacity-100 underline">ПОПОЛНИТЬ</button>
+    <section id="profile" class="tab-content max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="glass p-10 text-center relative overflow-hidden">
+                <div id="uLvl" class="absolute top-4 right-4 text-[10px] border border-green-400/40 text-green-400 px-2 py-1 rounded">LEVEL 1</div>
+                <div class="w-24 h-24 bg-gradient-to-br from-green-400 to-blue-600 rounded-full mx-auto mb-6 flex items-center justify-center text-4xl font-black text-black">A</div>
+                <h2 id="uName" class="text-3xl font-black mb-1 italic">USER</h2>
+                <p id="uStatus" class="text-[10px] uppercase text-gray-500 tracking-widest mb-6 italic">Подписка не найдена</p>
+                <button onclick="logout()" class="text-[10px] text-red-500 uppercase font-bold hover:underline">Log Out System</button>
             </div>
-            <div class="flex-grow space-y-4">
-                <div class="bg-white/5 p-6 rounded-2xl">
-                    <p class="text-[10px] uppercase opacity-40 mb-1">Status</p>
-                    <p id="uStatus" class="font-bold text-xl italic tracking-widest text-green-400">ACTIVE</p>
+
+            <div class="lg:col-span-2 space-y-8">
+                <div class="glass p-8 flex flex-col md:flex-row items-center gap-8 border-yellow-500/20">
+                    <div class="relative w-32 h-32">
+                        <div id="wheel" class="w-full h-full rounded-full border-4 border-dashed border-yellow-500 flex items-center justify-center spin-anim">
+                            <i class="fas fa-dharmachakra text-4xl text-yellow-500"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 italic uppercase">Daily Spin</h3>
+                        <p class="text-xs text-gray-400 mb-4">Раз в 24 часа испытай удачу и получи бонус на баланс!</p>
+                        <button onclick="spinWheel()" id="spinBtn" class="px-8 py-3 bg-yellow-500 text-black rounded-xl font-bold uppercase text-xs hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition">Spin Now</button>
+                    </div>
                 </div>
-                <div class="bg-white/5 p-6 rounded-2xl">
-                    <p class="text-[10px] uppercase opacity-40 mb-1">Promo Active</p>
-                    <input type="text" id="promoInput" placeholder="ENTER CODE" class="bg-transparent border-b border-white/10 w-full py-2 outline-none focus:border-green-400 transition">
-                    <button onclick="applyPromo()" class="text-[10px] mt-2 text-green-400 font-bold uppercase">Apply</button>
+
+                <div class="glass p-8">
+                    <h3 class="text-sm font-bold mb-6 uppercase tracking-widest opacity-50 italic">System Authentication</h3>
+                    <div class="flex gap-4">
+                        <input type="text" id="promoInput" placeholder="ENTER CODE OR ACCESS KEY" class="bg-black/40 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-green-400 transition font-mono uppercase">
+                        <button onclick="applyCode()" class="px-8 py-4 bg-white/5 rounded-xl font-bold uppercase text-[10px] hover:bg-white/10 transition">Run</button>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <section id="admin" class="tab-content max-w-7xl mx-auto">
-        <div class="flex justify-between items-end mb-12">
-            <h1 class="sync text-4xl text-red-500 italic">SYSTEM_CONTROL</h1>
-            <button onclick="logout()" class="text-xs opacity-30 hover:opacity-100">LOGOUT_ROOT</button>
+        <div class="flex justify-between items-center mb-12">
+            <h1 class="sync text-3xl text-red-500 italic">ROOT_TERMINAL</h1>
+            <button onclick="showTab('market')" class="text-xs bg-red-500/10 text-red-500 px-4 py-2 rounded">EXIT_ROOT</button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <div class="glass p-8 border-red-500/20">
-                <h3 class="text-red-500 font-bold mb-6 text-sm uppercase italic">Prices_Config</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-[10px] opacity-50">Price 1 (Lite)</label>
-                        <input type="number" id="cfgPrice1" class="w-full admin-input p-3 rounded mt-1">
-                    </div>
-                    <div>
-                        <label class="text-[10px] opacity-50">Price 2 (Pro)</label>
-                        <input type="number" id="cfgPrice2" class="w-full admin-input p-3 rounded mt-1">
-                    </div>
-                    <div>
-                        <label class="text-[10px] opacity-50">Price 3 (Elite)</label>
-                        <input type="number" id="cfgPrice3" class="w-full admin-input p-3 rounded mt-1">
-                    </div>
-                    <button onclick="savePrices()" class="w-full bg-red-600/20 border border-red-600 text-red-500 py-3 rounded font-bold hover:bg-red-600 hover:text-white transition">UPDATE_PRICES</button>
+                <h3 class="text-xs uppercase font-bold text-red-500 mb-6 italic">Configuration_Prices</h3>
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <input type="number" id="c1" class="bg-black border border-red-500/30 p-3 rounded text-sm text-center">
+                    <input type="number" id="c2" class="bg-black border border-red-500/30 p-3 rounded text-sm text-center">
+                    <input type="number" id="c3" class="bg-black border border-red-500/30 p-3 rounded text-sm text-center">
                 </div>
+                <button onclick="updateSettings()" class="w-full py-4 bg-red-600/20 border border-red-600 text-red-500 rounded-xl font-bold uppercase text-xs">Update System Config</button>
             </div>
 
-            <div class="lg:col-span-2 space-y-8">
-                <div class="glass p-8">
-                    <h3 class="text-blue-400 font-bold mb-6 text-sm uppercase italic">Global_Broadcast</h3>
-                    <textarea id="broadcastMsg" placeholder="Введите текст для всех пользователей..." class="w-full bg-black/40 border border-blue-500/30 p-4 rounded-xl text-sm min-h-[100px] outline-none"></textarea>
-                    <button onclick="sendBroadcast()" class="mt-4 px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transition uppercase text-xs">Push Notification</button>
-                </div>
-
-                <div class="glass p-8">
-                    <h3 class="text-yellow-400 font-bold mb-6 text-sm uppercase italic">Promo_Generator</h3>
-                    <div class="flex gap-4">
-                        <input type="text" id="newPromoName" placeholder="CODE" class="bg-black/40 border border-yellow-500/30 p-3 rounded-lg flex-grow uppercase font-mono">
-                        <input type="number" id="newPromoPct" placeholder="%" class="bg-black/40 border border-yellow-500/30 p-3 rounded-lg w-24 text-center">
-                        <button onclick="addPromo()" class="bg-yellow-500 text-black px-6 py-3 rounded-lg font-bold uppercase text-xs">Create</button>
-                    </div>
-                    <div id="promoList" class="mt-4 flex flex-wrap gap-2">
-                        </div>
-                </div>
+            <div class="glass p-8 border-blue-500/20">
+                <h3 class="text-xs uppercase font-bold text-blue-500 mb-6 italic">Global_Notification</h3>
+                <textarea id="msgBox" class="w-full h-24 bg-black border border-blue-500/30 p-4 rounded-xl text-xs outline-none mb-4" placeholder="Message for all users..."></textarea>
+                <button onclick="setMsg()" class="w-full py-4 bg-blue-600/20 border border-blue-600 text-blue-500 rounded-xl font-bold uppercase text-xs">Broadcast Message</button>
             </div>
         </div>
 
-        <div class="glass mt-8 overflow-hidden">
-            <table class="w-full text-left text-xs italic">
-                <thead class="bg-white/5 uppercase opacity-50">
-                    <tr>
-                        <th class="p-5">User</th>
-                        <th class="p-5">Balance</th>
-                        <th class="p-5">Status</th>
-                        <th class="p-5">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="userTable">
-                    </tbody>
-            </table>
+        <div class="glass p-8 border-yellow-500/20">
+             <h3 class="text-xs uppercase font-bold text-yellow-500 mb-6 italic">Promo_Vault</h3>
+             <div class="flex gap-4 mb-6">
+                <input type="text" id="pName" placeholder="CODE" class="bg-black border border-yellow-500/30 p-3 rounded-xl flex-grow font-mono uppercase text-xs">
+                <input type="number" id="pPct" placeholder="%" class="bg-black border border-yellow-500/30 p-3 rounded-xl w-24 text-center">
+                <button onclick="makePromo()" class="px-10 bg-yellow-500 text-black rounded-xl font-black text-xs uppercase">Generate</button>
+             </div>
+             <div id="pList" class="flex flex-wrap gap-2"></div>
         </div>
     </section>
 
     <script>
-        // Изначальный конфиг (если в памяти пусто)
-        let config = JSON.parse(localStorage.getItem('vpn_config')) || {
+        let db = JSON.parse(localStorage.getItem('dog_db')) || {
             prices: [10, 250, 1000],
-            promos: [{name: 'DOGX', pct: 15}],
-            announcement: "СИСТЕМА РАБОТАЕТ В ШТАТНОМ РЕЖИМЕ"
+            promos: [{n: 'DOGX', p: 20}],
+            msg: "СИСТЕМА ШИФРОВАНИЯ DOG X VPN ВКЛЮЧЕНА",
+            users: []
         };
 
-        let user = JSON.parse(localStorage.getItem('vpn_user')) || null;
+        let me = JSON.parse(localStorage.getItem('dog_me')) || null;
+        let isAdmin = false;
 
         window.onload = () => {
-            if(!user) {
-                document.getElementById('authOverlay').classList.remove('hidden');
-            } else {
-                refreshUI();
-            }
+            if(!me) document.getElementById('authOverlay').classList.remove('hidden');
+            else update();
         };
 
         function register() {
             const n = document.getElementById('regName').value;
             if(n.length < 2) return;
-            user = { name: n, balance: 0, status: 'FREE', history: [] };
-            localStorage.setItem('vpn_user', JSON.stringify(user));
+            me = { name: n, bal: 0, plan: 'FREE', disc: 0, lastSpin: 0 };
+            localStorage.setItem('dog_me', JSON.stringify(me));
             location.reload();
         }
 
-        function refreshUI() {
-            // Цены на главной
-            document.getElementById('price1_display').innerText = config.prices[0] + '₽';
-            document.getElementById('price2_display').innerText = config.prices[1] + '₽';
-            document.getElementById('price3_display').innerText = config.prices[2] + '₽';
-            
-            // Профиль
-            document.getElementById('uName').innerText = user.name.toUpperCase();
-            document.getElementById('uBalance').innerText = `БАЛАНС: ${user.balance}₽`;
-            document.getElementById('uStatus').innerText = user.status;
-            
-            // Админка значения
-            document.getElementById('cfgPrice1').value = config.prices[0];
-            document.getElementById('cfgPrice2').value = config.prices[1];
-            document.getElementById('cfgPrice3').value = config.prices[2];
-            document.getElementById('globalAlert').innerText = config.announcement;
+        function update() {
+            // Market UI
+            document.getElementById('p1').innerText = db.prices[0] + '₽';
+            document.getElementById('p2').innerText = db.prices[1] + '₽';
+            document.getElementById('p3').innerText = db.prices[2] + '₽';
+            document.getElementById('balDisplay').innerText = me.bal + '₽';
+            document.getElementById('globalMsg').innerText = db.msg;
 
-            renderUsers();
+            // Profile UI
+            document.getElementById('uName').innerText = me.name.toUpperCase();
+            document.getElementById('uBalance').innerText = `БАЛАНС: ${me.bal}₽`; // This was for a different div, fix:
+            document.getElementById('uStatus').innerText = me.plan === 'FREE' ? 'Подписка не найдена' : 'СТАТУС: ' + me.plan;
+            
+            // Admin inputs
+            document.getElementById('c1').value = db.prices[0];
+            document.getElementById('c2').value = db.prices[1];
+            document.getElementById('c3').value = db.prices[2];
+            
             renderPromos();
         }
 
-        // АДМИН ФУНКЦИИ
-        function openAdmin() {
-            Swal.fire({
-                title: 'TERMINAL_AUTH',
-                input: 'password',
-                confirmButtonColor: '#ef4444',
-                background: '#030712',
-                color: '#fff'
-            }).then(r => {
-                if(r.value === 'admin') {
-                    showTab('admin');
-                } else {
-                    Swal.fire('ERROR', 'INVALID_ROOT_PASS', 'error');
-                }
-            });
-        }
-
-        function savePrices() {
-            config.prices = [
-                parseInt(document.getElementById('cfgPrice1').value),
-                parseInt(document.getElementById('cfgPrice2').value),
-                parseInt(document.getElementById('cfgPrice3').value)
-            ];
-            saveConfig();
-            Swal.fire('SUCCESS', 'PRICES_UPDATED', 'success');
-            refreshUI();
-        }
-
-        function sendBroadcast() {
-            config.announcement = document.getElementById('broadcastMsg').value.toUpperCase();
-            saveConfig();
-            Swal.fire('PUSHED', 'ALL USERS WILL SEE THIS', 'info');
-            refreshUI();
-        }
-
-        function addPromo() {
-            const n = document.getElementById('newPromoName').value.toUpperCase();
-            const p = parseInt(document.getElementById('newPromoPct').value);
-            if(!n || !p) return;
-            config.promos.push({name: n, pct: p});
-            saveConfig();
-            renderPromos();
-        }
-
-        function applyPromo() {
-            const code = document.getElementById('promoInput').value.toUpperCase();
-            const found = config.promos.find(p => p.name === code);
-            if(found) {
-                Swal.fire('PROMO_OK', `Скидка ${found.pct}% применена на следующую покупку`, 'success');
-                user.discount = found.pct;
-                localStorage.setItem('vpn_user', JSON.stringify(user));
-            } else {
-                Swal.fire('ERROR', 'CODE_NOT_FOUND', 'error');
+        function applyCode() {
+            const code = document.getElementById('promoInput').value.trim();
+            
+            // СЕКРЕТНЫЙ КОД ТУТ
+            if(code === '67АРТЁМ67') {
+                isAdmin = true;
+                document.getElementById('adminIndicator').classList.remove('hidden');
+                showTab('admin');
+                Swal.fire({ title: 'ACCESS GRANTED', text: 'Welcome back, Creator', icon: 'success', background: '#050505', color: '#fff' });
+                return;
             }
+
+            const found = db.promos.find(x => x.n === code.toUpperCase());
+            if(found) {
+                me.disc = found.p;
+                Swal.fire('OK!', `Промокод на скидку ${found.p}% активирован`, 'success');
+                saveMe();
+            } else {
+                Swal.fire('ERROR', 'Код недействителен', 'error');
+            }
+        }
+
+        function spinWheel() {
+            const now = Date.now();
+            if(now - me.lastSpin < 86400000) return Swal.fire('WAIT!', 'Можно крутить только раз в сутки', 'warning');
+            
+            const wheel = document.getElementById('wheel');
+            const win = Math.floor(Math.random() * 100);
+            wheel.style.transition = '5s cubic-bezier(0.1, 0, 0.1, 1)';
+            wheel.style.transform = 'rotate(1800deg)';
+            
+            setTimeout(() => {
+                me.bal += win;
+                me.lastSpin = now;
+                saveMe();
+                update();
+                Swal.fire('WIN!', `Вы выиграли ${win}₽ на баланс!`, 'success');
+                wheel.style.transition = 'none';
+                wheel.style.transform = 'rotate(0deg)';
+            }, 5000);
         }
 
         function buy(id) {
-            let price = config.prices[id-1];
-            if(user.discount) {
-                price = Math.floor(price * (1 - user.discount/100));
+            let price = db.prices[id-1];
+            if(me.disc > 0) price = Math.floor(price * (1 - me.disc/100));
+            
+            if(me.bal < price) return Swal.fire('NO MONEY', 'Пополни баланс', 'error');
+            
+            me.bal -= price;
+            me.plan = id === 1 ? 'LITE' : (id === 2 ? 'PREMIUM' : 'ELITE');
+            me.disc = 0;
+            saveMe();
+            update();
+            Swal.fire('ACTIVE', 'VPN успешно подключен', 'success');
+        }
+
+        function updateSettings() {
+            db.prices = [parseInt(document.getElementById('c1').value), parseInt(document.getElementById('c2').value), parseInt(document.getElementById('c3').value)];
+            saveDB();
+            update();
+            Swal.fire('UPDATED', 'Prices changed globally', 'success');
+        }
+
+        function setMsg() {
+            db.msg = document.getElementById('msgBox').value.toUpperCase();
+            saveDB();
+            update();
+        }
+
+        function makePromo() {
+            const n = document.getElementById('pName').value.toUpperCase();
+            const p = parseInt(document.getElementById('pPct').value);
+            if(n && p) {
+                db.promos.push({n, p});
+                saveDB();
+                renderPromos();
             }
-
-            if(user.balance < price) return Swal.fire('NO_MONEY', 'TOP UP BALANCE', 'error');
-
-            user.balance -= price;
-            user.status = id === 1 ? 'LITE' : (id === 2 ? 'PRO' : 'ELITE');
-            user.discount = 0; // Сбрасываем промо после юза
-            localStorage.setItem('vpn_user', JSON.stringify(user));
-            refreshUI();
-            Swal.fire('ULTRA_VPN_ACTIVE', 'ENJOY FREEDOM', 'success');
-        }
-
-        function addBalance() {
-            user.balance += 500;
-            localStorage.setItem('vpn_user', JSON.stringify(user));
-            refreshUI();
-        }
-
-        function renderUsers() {
-            const table = document.getElementById('userTable');
-            table.innerHTML = `
-                <tr>
-                    <td class="p-5 font-bold text-green-400 italic">${user.name} (YOU)</td>
-                    <td class="p-5">${user.balance}₽</td>
-                    <td class="p-5 uppercase">${user.status}</td>
-                    <td class="p-5 flex gap-2">
-                        <button onclick="addBalance()" class="text-blue-400">ADD_CASH</button>
-                        <button class="text-red-500 opacity-30">BAN</button>
-                    </td>
-                </tr>
-            `;
         }
 
         function renderPromos() {
-            const list = document.getElementById('promoList');
-            list.innerHTML = config.promos.map((p, i) => `
-                <div class="bg-yellow-500/10 border border-yellow-500/30 px-3 py-1 rounded-full text-[10px] flex gap-2 items-center">
-                    ${p.name} (-${p.pct}%)
-                    <button onclick="delPromo(${i})" class="text-red-500">×</button>
+            document.getElementById('pList').innerHTML = db.promos.map((x, i) => `
+                <div class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-[10px] flex gap-4">
+                    ${x.n} (-${x.p}%) <button onclick="delPromo(${i})" class="text-red-500">×</button>
                 </div>
             `).join('');
         }
 
-        function delPromo(i) {
-            config.promos.splice(i, 1);
-            saveConfig();
-            renderPromos();
-        }
-
-        function saveConfig() { localStorage.setItem('vpn_config', JSON.stringify(config)); }
+        function delPromo(i) { db.promos.splice(i, 1); saveDB(); renderPromos(); }
+        function addCash() { me.bal += 500; saveMe(); update(); }
+        function saveMe() { localStorage.setItem('dog_me', JSON.stringify(me)); }
+        function saveDB() { localStorage.setItem('dog_db', JSON.stringify(db)); }
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
         function logout() { localStorage.clear(); location.reload(); }
-
     </script>
 </body>
 </html>
