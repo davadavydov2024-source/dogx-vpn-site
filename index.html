@@ -202,7 +202,7 @@
         function inspectUser(uid) {
             const u = window.allUsers[uid];
             if(!u) return;
-            const keysStr = u.keys ? u.keys.map(k => k.name).join(', ') : 'Нет';
+            const keysStr = (u.keys && u.keys.length > 0) ? u.keys.map(k => k.name).join(', ') : 'Нет';
             Swal.fire({
                 title: `ИНФО О ЮЗЕРЕ #${u.id}`,
                 html: `
@@ -219,23 +219,50 @@
             }).then((res) => { if(res.isConfirmed) document.getElementById('adm_uid').value = u.id; });
         }
 
+        // --- ИСПРАВЛЕННАЯ ФУНКЦИЯ СМЕНЫ ID ---
         function adminForceChangeID() {
             const oldId = document.getElementById('adm_uid').value;
             const newId = document.getElementById('adm_new_id_val').value.trim();
-            if(!window.allUsers[oldId] || !newId) return Swal.fire('Ошибка', 'ID не найден или пуст', 'error');
             
-            const userData = window.allUsers[oldId];
-            userData.id = newId;
-            
-            window.firebase_db_mod.set(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users/' + newId), userData).then(() => {
-                window.firebase_db_mod.remove(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users/' + oldId));
-                Swal.fire('УСПЕХ', `ID изменен на ${newId}`, 'success');
-                if(window.user.id == oldId) {
-                    window.user.id = newId;
-                    localStorage.setItem('dog_v29_me', JSON.stringify(window.user));
-                    location.reload();
-                }
+            if(!window.allUsers[oldId]) return Swal.fire('Ошибка', 'ID не найден в системе', 'error');
+            if(!newId) return Swal.fire('Ошибка', 'Введите новый ID', 'error');
+            if(window.allUsers[newId]) return Swal.fire('Ошибка', 'Этот ID уже занят кем-то другим', 'error');
+
+            Swal.fire({
+                title: 'Перенос аккаунта...',
+                text: 'Пожалуйста, подождите',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
             });
+
+            const userData = {...window.allUsers[oldId]}; // Копируем данные
+            userData.id = newId; // Обновляем ID внутри объекта
+
+            // 1. Создаем запись по новому ID
+            window.firebase_db_mod.set(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users/' + newId), userData)
+                .then(() => {
+                    // 2. Только когда запись создана — удаляем старый ID
+                    return window.firebase_db_mod.remove(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users/' + oldId));
+                })
+                .then(() => {
+                    // 3. Обновляем локальный кэш
+                    delete window.allUsers[oldId];
+                    window.allUsers[newId] = userData;
+                    
+                    Swal.fire('УСПЕХ', `Аккаунт перенесен с ${oldId} на ${newId}`, 'success');
+                    
+                    // Если админ меняет СВОЙ айди
+                    if(window.user && window.user.id == oldId) {
+                        window.user = userData;
+                        localStorage.setItem('dog_v29_me', JSON.stringify(userData));
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        loadAdmin();
+                    }
+                })
+                .catch(err => {
+                    Swal.fire('Критическая ошибка', err.message, 'error');
+                });
         }
 
         // --- ОСТАЛЬНАЯ ЛОГИКА ---
@@ -391,7 +418,6 @@
         function deleteProduct(id) { window.db.products = window.db.products.filter(p => p.id !== id); loadAdmin(); }
         function addTariff() { window.db.products.push({ id: Date.now(), name: "NEW", pr: 100, h: 24, icon: "⚡", discount: 0 }); loadAdmin(); }
         function showHappyGuide() { Swal.fire({ title: 'ИНСТРУКЦИЯ', html: `<div class="text-left text-[11px] opacity-70">Скопируй ключ -> Happy Plus -> Лицензия -> Активировать.</div>`, icon: 'info' }); }
-        function handleImgUpload() {}
     </script>
 </body>
 </html>
