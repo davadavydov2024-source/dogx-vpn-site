@@ -20,6 +20,7 @@
         input, textarea { outline: none !important; }
         
         .footer-ad { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: var(--card); border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; display: none; }
+        .ad-btn { background: var(--accent); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
     </style>
 </head>
 <body class="pb-32">
@@ -72,6 +73,10 @@
             <div class="space-y-4 p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
                 <h3 class="text-[10px] font-black uppercase text-blue-400">Реклама внизу</h3>
                 <textarea id="a_footer_text" class="w-full h-20 p-3 player-card bg-transparent text-xs" placeholder="Текст рекламы..."></textarea>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="a_footer_btn_text" class="p-3 player-card bg-transparent text-[10px]" placeholder="Текст кнопки (не обяз.)">
+                    <input id="a_footer_url" class="p-3 player-card bg-transparent text-[10px]" placeholder="Ссылка (https://...)">
+                </div>
                 <div class="flex gap-2">
                     <button onclick="document.getElementById('footerFile').click()" class="flex-1 py-3 player-card text-[9px] uppercase font-bold">Выбрать Фото</button>
                     <button onclick="db.footerAd.active = !db.footerAd.active; save(); sync();" id="f_status_btn" class="px-4 py-3 bg-white/5 rounded-xl text-[9px] font-bold">ВЫКЛ</button>
@@ -116,11 +121,11 @@
         </div>
     </section>
 
-    <div id="footerAd" class="footer-ad">
+    <div id="footerAd" class="footer-ad" onclick="handleAdClick(event)">
         <div class="max-w-xl mx-auto flex items-center gap-4 relative">
             <img id="fImgDisplay" src="" class="w-12 h-12 rounded-lg object-cover hidden">
-            <div id="fTextDisplay" class="text-[11px] font-bold leading-tight"></div>
-            <button onclick="document.getElementById('footerAd').style.display='none'" class="text-xs opacity-20 p-2 ml-auto">✕</button>
+            <div id="fTextDisplay" class="text-[11px] font-bold leading-tight flex-1"></div>
+            <div id="fBtnContainer"></div> <button onclick="event.stopPropagation(); document.getElementById('footerAd').style.display='none'" class="text-xs opacity-20 p-2">✕</button>
         </div>
     </div>
 
@@ -129,7 +134,7 @@
         let db = JSON.parse(localStorage.getItem('dog_v29_db')) || {
             card: "sswckk",
             broadcast: { text: "", img: "", active: false },
-            footerAd: { text: "", img: "", active: false },
+            footerAd: { text: "", img: "", active: false, url: "", btnText: "" }, // Добавлены поля
             products: [{ id: 1, name: "START", pr: 150, h: 720, icon: "🛡️", discount: 0, stock: { ios: [], and: [] } }],
             promos: []
         };
@@ -168,10 +173,31 @@
             if(db.footerAd && db.footerAd.active && db.footerAd.text) {
                 box.style.display = 'block';
                 document.getElementById('fTextDisplay').innerText = db.footerAd.text;
+                
+                // Рендер картинки
                 const img = document.getElementById('fImgDisplay');
                 if(db.footerAd.img) { img.src = db.footerAd.img; img.classList.remove('hidden'); }
                 else { img.classList.add('hidden'); }
+
+                // Рендер кнопки
+                const btnBox = document.getElementById('fBtnContainer');
+                if(db.footerAd.btnText) {
+                    btnBox.innerHTML = `<button class="ad-btn">${db.footerAd.btnText}</button>`;
+                } else {
+                    btnBox.innerHTML = "";
+                }
+                
+                // Курсор если есть ссылка
+                box.style.cursor = db.footerAd.url ? 'pointer' : 'default';
+
             } else { box.style.display = 'none'; }
+        }
+
+        // Обработка клика по рекламе
+        function handleAdClick(e) {
+            if(db.footerAd.url) {
+                window.open(db.footerAd.url, '_blank');
+            }
         }
 
         function handleFooterImg(input) {
@@ -262,6 +288,8 @@
             document.getElementById('a_card').value = db.card;
             document.getElementById('a_bc_text').value = db.broadcast.text;
             document.getElementById('a_footer_text').value = db.footerAd.text || "";
+            document.getElementById('a_footer_btn_text').value = db.footerAd.btnText || "";
+            document.getElementById('a_footer_url').value = db.footerAd.url || "";
             document.getElementById('f_status_btn').innerText = db.footerAd.active ? "ВКЛ" : "ВЫКЛ";
             document.getElementById('f_status_btn').style.color = db.footerAd.active ? "#4ade80" : "#f87171";
             document.getElementById('promo_active_list').innerHTML = db.promos.map(p => `• <b>${p.code}</b>: ${p.sum}₽ (Осталось: ${p.uses})`).join('<br>');
@@ -282,6 +310,8 @@
         function saveAdmin() {
             db.card = document.getElementById('a_card').value;
             db.footerAd.text = document.getElementById('a_footer_text').value;
+            db.footerAd.btnText = document.getElementById('a_footer_btn_text').value;
+            db.footerAd.url = document.getElementById('a_footer_url').value;
             db.products.forEach(p => {
                 p.pr = parseInt(document.getElementById(`price_${p.id}`).value);
                 p.h = parseInt(document.getElementById(`hour_${p.id}`).value);
@@ -311,16 +341,13 @@
             if(code && sum) { db.promos.push({ code, sum, uses, used_by: [] }); save(); sync(); }
         }
 
-        // ОБНОВЛЕННАЯ ФУНКЦИЯ: Теперь меняет и баланс, и ник
         function adminGift() {
             const id = document.getElementById('target_id').value;
             const sum = parseFloat(document.getElementById('target_sum').value || 0);
             const newNick = document.getElementById('target_nick').value.trim();
-            
             if(allUsers[id]) { 
                 if(sum !== 0) allUsers[id].bal += sum; 
                 if(newNick !== "") allUsers[id].nick = newNick;
-                
                 save(); sync(); 
                 Swal.fire('УСПЕХ', `Данные пользователя #${id} обновлены`, 'success'); 
                 document.getElementById('target_sum').value = "";
