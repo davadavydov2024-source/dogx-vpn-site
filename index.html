@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | Global VPN</title>
+    <title>DOG X | Global Broadcast</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -16,22 +16,20 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Рекламный баннер внизу */
-        .footer-ad { position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; background: #191c24; border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; display: none; animation: slideInUp 0.5s ease; }
-        @keyframes slideInUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .broadcast-card { border: 1px solid rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.05); }
+        input, textarea { outline: none !important; }
     </style>
 </head>
-<body class="pb-40">
+<body class="pb-32">
 
     <div id="globalBC" class="max-w-xl mx-auto m-4 hidden">
-        <div class="player-card p-4 flex items-center gap-4 relative border border-amber-500/30 bg-amber-500/5">
-            <img id="bcImgDisplay" src="" class="w-14 h-14 rounded-xl object-cover hidden">
+        <div class="player-card broadcast-card p-4 flex items-center gap-4 relative">
+            <img id="bcImgDisplay" src="" class="w-14 h-14 rounded-xl object-cover hidden border border-amber-500/20">
             <div class="flex-1">
                 <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">Объявление</p>
                 <div id="bcTextDisplay" class="text-[11px] font-bold leading-tight"></div>
             </div>
-            <button onclick="this.parentElement.parentElement.remove()" class="text-xs opacity-20 p-2">✕</button>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-xs opacity-20 hover:opacity-100 p-2">✕</button>
         </div>
     </div>
 
@@ -45,68 +43,71 @@
     </header>
 
     <main id="home" class="tab-content active px-6 space-y-4">
-        <h2 class="text-xl font-extrabold italic uppercase">Тарифы VPN</h2>
+        <h2 class="text-xl font-extrabold italic">Доступные подписки</h2>
         <div id="productsGrid" class="grid grid-cols-1 gap-4"></div>
     </main>
 
     <section id="me" class="tab-content px-6 space-y-6">
-        <div class="player-card p-8 text-center relative shadow-2xl shadow-blue-500/5">
+        <div class="player-card p-8 text-center relative border-b-4 border-blue-600/20 shadow-2xl shadow-blue-500/5">
             <p class="text-[10px] opacity-40 font-bold uppercase mb-2">Мой Баланс</p>
             <h3 class="text-5xl font-extrabold mb-8 text-blue-500" id="userBal">0.00₽</h3>
             <div class="flex gap-2"><button onclick="topUp()" class="flex-1 py-4 btn-primary text-xs uppercase">Пополнить</button><button onclick="installApp()" class="flex-1 py-4 player-card text-xs font-bold uppercase">Помощь</button></div>
         </div>
+        
         <div id="keysList" class="space-y-3"></div>
+
         <div class="space-y-3 pt-4">
-            <input type="text" id="promoInp" placeholder="Промокод или Пароль" class="w-full p-4 player-card bg-transparent text-center text-sm">
-            <button onclick="checkInput()" class="w-full py-4 btn-primary bg-white/5 text-[10px] uppercase">Подтвердить</button>
+            <p class="text-[9px] text-center opacity-30 font-bold uppercase">Ввод промокода или пароля</p>
+            <input type="text" id="promoInp" placeholder="••••••••" class="w-full p-4 player-card bg-transparent text-center text-sm border border-white/5 focus:border-blue-500/50">
+            <button onclick="checkInput()" class="w-full py-4 btn-primary bg-white/5 text-[10px] tracking-[0.2em] uppercase">Подтвердить</button>
         </div>
     </section>
 
     <section id="admin" class="tab-content px-6 pb-20 space-y-6">
         <div class="player-card p-6 space-y-6 border border-red-500/20">
-            <h2 class="text-red-500 font-black italic uppercase text-2xl">Admin Control</h2>
+            <h2 class="text-red-500 font-black italic uppercase tracking-tighter text-2xl">Admin Control</h2>
             
-            <div class="space-y-4 p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
-                <h3 class="text-[10px] font-black uppercase text-blue-400">Реклама внизу сайта</h3>
-                <textarea id="a_footer_text" class="w-full h-20 p-3 player-card bg-transparent text-xs" placeholder="Текст для баннера внизу..."></textarea>
+            <div class="space-y-4 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+                <h3 class="text-[10px] font-black uppercase text-amber-500">Глобальная Рассылка</h3>
+                <textarea id="a_bc_text" class="w-full h-24 p-3 player-card bg-transparent text-xs" placeholder="Текст сообщения для всех..."></textarea>
                 <div class="flex gap-2">
-                    <button onclick="document.getElementById('footerFile').click()" class="flex-1 py-3 player-card text-[9px] uppercase font-bold">Фото для низа</button>
-                    <button onclick="toggleFooterAd()" id="footerStatusBtn" class="px-4 py-3 bg-white/5 rounded-xl text-[9px] uppercase font-bold">ВЫКЛ</button>
+                    <button onclick="document.getElementById('bcFile').click()" class="flex-1 py-3 player-card text-[9px] uppercase font-bold">Выбрать Фото</button>
+                    <button onclick="clearBC()" class="px-4 py-3 bg-red-500/20 text-red-500 rounded-xl text-[9px]">✕</button>
                 </div>
-                <input type="file" id="footerFile" class="hidden" accept="image/*" onchange="handleFooterImg(this)">
+                <input type="file" id="bcFile" class="hidden" accept="image/*" onchange="handleImg(this)">
+                <button onclick="sendGlobalBC()" class="w-full py-4 btn-primary bg-amber-600 text-[10px] uppercase shadow-lg shadow-amber-900/20">ОПУБЛИКОВАТЬ ДЛЯ ВСЕХ</button>
             </div>
 
-            <div class="space-y-4 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
-                <h3 class="text-[10px] font-black uppercase text-amber-500">Рассылка (Верх)</h3>
-                <textarea id="a_bc_text" class="w-full h-20 p-3 player-card bg-transparent text-xs" placeholder="Текст уведомления..."></textarea>
-                <button onclick="sendGlobalBC()" class="w-full py-3 btn-primary bg-amber-600 text-[10px] uppercase">Опубликовать вверх</button>
+            <div class="space-y-4 p-4 bg-purple-500/10 rounded-2xl border border-purple-500/20">
+                <h3 class="text-[10px] font-black uppercase text-purple-400">Промокоды на Баланс</h3>
+                <input id="new_p_code" class="w-full p-3 player-card bg-transparent text-xs uppercase" placeholder="КОД (НАПР: FREE50)">
+                <div class="grid grid-cols-2 gap-2"><input id="new_p_sum" class="p-3 player-card bg-transparent text-xs" placeholder="Сумма ₽"><input id="new_p_uses" class="p-3 player-card bg-transparent text-xs" placeholder="Лимит раз"></div>
+                <button onclick="addPromo()" class="w-full py-3 btn-primary bg-purple-600 text-[10px] uppercase">Создать промо</button>
+                <div id="promo_active_list" class="text-[9px] opacity-40 space-y-1 pt-2"></div>
             </div>
+
+            <div id="admin_stocks" class="space-y-6"></div>
+            <button onclick="addTariffPrompt()" class="w-full py-4 border-2 border-dashed border-blue-500/20 rounded-2xl text-[10px] font-bold opacity-60">+ ДОБАВИТЬ НОВЫЙ ТАРИФ</button>
 
             <div class="space-y-4 p-4 bg-white/5 rounded-2xl">
-                <h3 class="text-[10px] font-black opacity-40 uppercase">Реквизиты</h3>
-                <input id="a_card" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Карта или Юзернейм">
+                <h3 class="text-[10px] font-black opacity-40 uppercase text-blue-400">Реквизиты оплаты</h3>
+                <input id="a_card" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Карта или @юзернейм">
+                <hr class="opacity-5">
+                <h3 class="text-[10px] font-black opacity-40 uppercase text-blue-400">Управление балансом</h3>
+                <input id="target_id" class="w-full p-3 player-card bg-transparent text-xs" placeholder="ID пользователя">
+                <input id="target_sum" class="w-full p-3 player-card bg-transparent text-xs" placeholder="Сумма (например: 100 или -50)">
+                <button onclick="adminGift()" class="w-full py-3 bg-green-600/20 text-green-400 text-[9px] font-bold rounded-xl uppercase">Выдать баланс</button>
             </div>
 
-            <button onclick="saveAdmin()" class="w-full py-6 btn-primary bg-red-600 uppercase italic font-black text-sm shadow-2xl shadow-red-900/40">Сохранить все изменения</button>
+            <button onclick="saveAdmin()" class="w-full py-6 btn-primary bg-red-600 uppercase italic font-black text-sm tracking-widest shadow-2xl shadow-red-900/40">Сохранить все изменения</button>
         </div>
     </section>
-
-    <div id="footerAdBox" class="footer-ad">
-        <div class="max-w-xl mx-auto flex items-center gap-4">
-            <img id="footerImg" src="" class="w-12 h-12 rounded-lg object-cover hidden">
-            <div class="flex-1">
-                <p id="footerText" class="text-[11px] font-bold leading-tight opacity-90"></p>
-            </div>
-            <button onclick="document.getElementById('footerAdBox').style.display='none'" class="text-xs opacity-40 p-2">✕</button>
-        </div>
-    </div>
 
     <script>
         let allUsers = JSON.parse(localStorage.getItem('dog_users_db')) || {};
         let db = JSON.parse(localStorage.getItem('dog_v29_db')) || {
             card: "sswckk",
             broadcast: { text: "", img: "", active: false },
-            footerAd: { text: "Добро пожаловать в DOG X VPN!", img: "", active: true },
             products: [{ id: 1, name: "START", pr: 150, h: 720, icon: "🛡️", discount: 0, stock: { ios: [], and: [] } }],
             promos: []
         };
@@ -115,8 +116,9 @@
         window.onload = () => { if(!user) initUser(); else sync(); };
 
         async function initUser() {
+            const { value: nick } = await Swal.fire({ title: 'ДОБРО ПОЖАЛОВАТЬ', input: 'text', inputPlaceholder: 'Ваш ник...', background: '#191c24', color: '#fff', confirmButtonColor: '#5865f2' });
             const id = Math.floor(1000 + Math.random() * 9000);
-            user = { id, nick: 'Пользователь', bal: 0, keys: [] };
+            user = { id, nick: nick || 'Пользователь', bal: 0, keys: [] };
             allUsers[id] = user; save(); sync();
         }
 
@@ -124,60 +126,50 @@
             if(allUsers[user.id]) user = allUsers[user.id];
             document.getElementById('userDisplay').innerText = `${user.nick} | #${user.id}`;
             document.getElementById('userBal').innerText = user.bal.toFixed(2) + '₽';
-            renderGlobalBC(); 
-            renderFooterAd();
-            loadAdmin();
+            renderProducts(); renderKeys(); renderGlobalBC(); loadAdmin();
         }
 
-        // Рендер рекламы внизу
-        function renderFooterAd() {
-            const box = document.getElementById('footerAdBox');
-            if(db.footerAd && db.footerAd.active) {
-                box.style.display = 'block';
-                document.getElementById('footerText').innerText = db.footerAd.text;
-                const img = document.getElementById('footerImg');
-                if(db.footerAd.img) { img.src = db.footerAd.img; img.classList.remove('hidden'); }
-                else { img.classList.add('hidden'); }
-            } else { box.style.display = 'none'; }
-        }
+        function checkInput() {
+            const val = document.getElementById('promoInp').value.trim();
+            if(!val) return;
 
-        function toggleFooterAd() {
-            db.footerAd.active = !db.footerAd.active;
-            save(); sync();
-        }
+            if(val === 'kalubxq') {
+                document.getElementById('adminBtn').classList.remove('hidden');
+                Swal.fire({ icon: 'success', title: 'ADMIN MODE', background: '#191c24', color: '#fff' });
+                document.getElementById('promoInp').value = '';
+                return;
+            }
 
-        function handleFooterImg(input) {
-            const reader = new FileReader();
-            reader.onloadend = () => { db.footerAd.img = reader.result; save(); sync(); };
-            reader.readAsDataURL(input.files[0]);
+            const p = db.promos.find(x => x.code.toUpperCase() === val.toUpperCase());
+            if(p && p.uses > 0 && !p.used_by.includes(user.id)) {
+                p.uses--; p.used_by.push(user.id); user.bal += p.sum;
+                allUsers[user.id] = user; save(); sync();
+                Swal.fire({ icon: 'success', title: `+${p.sum}₽`, text: 'Промокод активирован!', background: '#191c24', color: '#fff' });
+            } else {
+                Swal.fire({ icon: 'error', title: 'ОШИБКА', text: 'Код не существует или уже использован', background: '#191c24', color: '#fff' });
+            }
+            document.getElementById('promoInp').value = '';
         }
 
         function sendGlobalBC() {
             db.broadcast.text = document.getElementById('a_bc_text').value;
             db.broadcast.active = true;
             save(); sync();
+            Swal.fire('ГОТОВО', 'Рассылка запущена для всех пользователей!', 'success');
         }
 
-        function loadAdmin() {
-            document.getElementById('a_card').value = db.card;
-            document.getElementById('a_footer_text').value = db.footerAd.text;
-            document.getElementById('footerStatusBtn').innerText = db.footerAd.active ? 'ВКЛЮЧЕНО' : 'ВЫКЛЮЧЕНО';
-            document.getElementById('footerStatusBtn').style.color = db.footerAd.active ? '#4ade80' : '#f87171';
+        function clearBC() {
+            db.broadcast.active = false;
+            db.broadcast.text = "";
+            db.broadcast.img = "";
+            save(); sync();
+            Swal.fire('УДАЛЕНО', 'Рассылка очищена', 'info');
         }
 
-        function saveAdmin() {
-            db.card = document.getElementById('a_card').value;
-            db.footerAd.text = document.getElementById('a_footer_text').value;
-            save(); location.reload();
-        }
-
-        function checkInput() {
-            const val = document.getElementById('promoInp').value.trim();
-            if(val === 'kalubxq') {
-                document.getElementById('adminBtn').classList.remove('hidden');
-                Swal.fire({ icon: 'success', title: 'ADMIN MODE', background: '#191c24', color: '#fff' });
-            }
-            document.getElementById('promoInp').value = '';
+        function handleImg(input) {
+            const reader = new FileReader();
+            reader.onloadend = () => { db.broadcast.img = reader.result; save(); sync(); };
+            reader.readAsDataURL(input.files[0]);
         }
 
         function renderGlobalBC() {
@@ -185,21 +177,100 @@
             if(db.broadcast.active && db.broadcast.text) {
                 box.classList.remove('hidden');
                 document.getElementById('bcTextDisplay').innerText = db.broadcast.text;
+                const img = document.getElementById('bcImgDisplay');
+                if(db.broadcast.img) { img.src = db.broadcast.img; img.classList.remove('hidden'); }
+                else { img.classList.add('hidden'); }
             } else { box.classList.add('hidden'); }
         }
 
-        function save() { 
-            localStorage.setItem('dog_v29_db', JSON.stringify(db)); 
-            localStorage.setItem('dog_v29_me', JSON.stringify(user)); 
-            localStorage.setItem('dog_users_db', JSON.stringify(allUsers)); 
+        function renderProducts() {
+            document.getElementById('productsGrid').innerHTML = db.products.map(p => {
+                const price = p.discount > 0 ? Math.floor(p.pr * (1 - p.discount/100)) : p.pr;
+                return `<div class="player-card p-5 flex justify-between items-center relative">
+                    ${p.discount > 0 ? `<div class="discount-badge">-${p.discount}%</div>` : ''}
+                    <div class="flex items-center gap-4"><div class="text-3xl">${p.icon}</div><div><h4 class="font-extrabold text-sm uppercase">${p.name}</h4><p class="text-[10px] opacity-40">${p.h} ч.</p></div></div>
+                    <div class="text-right"><div>${p.discount > 0 ? `<span class="text-[10px] opacity-30 line-through">${p.pr}₽</span>` : ''}<span class="font-extrabold text-lg text-blue-400"> ${price}₽</span></div>
+                    <button onclick="buyKey(${p.id})" class="mt-2 px-6 py-2 btn-primary text-[10px] uppercase">Купить</button></div></div>`;
+            }).join('');
         }
 
-        function showTab(id) { 
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); 
-            document.getElementById(id).classList.add('active'); 
+        function buyKey(id) {
+            const p = db.products.find(x => x.id === id);
+            const price = p.discount > 0 ? Math.floor(p.pr * (1 - p.discount/100)) : p.pr;
+            if(user.bal < price) return Swal.fire('ОШИБКА', 'Пополните баланс в профиле', 'error');
+            
+            Swal.fire({ title: 'ВЫБЕРИТЕ ОС', showCancelButton: true, confirmButtonText: 'iOS', cancelButtonText: 'Android', background: '#191c24', color: '#fff' }).then((r) => {
+                const os = r.isConfirmed ? 'ios' : 'and';
+                if(!p.stock[os] || p.stock[os].length === 0) return Swal.fire('НЕТ КЛЮЧЕЙ', 'Обратитесь к @sswckk', 'warning');
+                const key = p.stock[os].shift();
+                user.bal -= price;
+                user.keys.unshift({ key, name: `${p.name} (${os.toUpperCase()})`, expire: Date.now() + (p.h * 3600000) });
+                allUsers[user.id] = user; save(); sync();
+                Swal.fire('УСПЕХ', 'Ключ добавлен в ваш профиль!', 'success');
+            });
         }
 
-        function topUp() { Swal.fire({ title: 'ПОПОЛНЕНИЕ', html: `<div class="p-4 bg-white/5 rounded-xl text-blue-400 font-mono">${db.card}</div>`, background: '#191c24', color: '#fff' }); }
+        function loadAdmin() {
+            document.getElementById('a_card').value = db.card;
+            document.getElementById('a_bc_text').value = db.broadcast.text;
+            document.getElementById('promo_active_list').innerHTML = db.promos.map(p => `• <b>${p.code}</b>: ${p.sum}₽ (Осталось: ${p.uses})`).join('<br>');
+            document.getElementById('admin_stocks').innerHTML = db.products.map(p => `
+                <div class="p-4 bg-white/5 rounded-2xl space-y-3 relative border border-white/5">
+                    <button onclick="deleteTariff(${p.id})" class="absolute top-2 right-2 text-red-500 opacity-30 hover:opacity-100">✕</button>
+                    <h4 class="text-[10px] font-black uppercase text-blue-400">${p.name}</h4>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input id="price_${p.id}" value="${p.pr}" class="p-2 player-card bg-transparent text-[10px]" placeholder="Цена">
+                        <input id="hour_${p.id}" value="${p.h}" class="p-2 player-card bg-transparent text-[10px]" placeholder="Часы">
+                        <input id="disc_${p.id}" value="${p.discount || 0}" class="p-2 player-card bg-transparent text-[10px] border-red-500/20 border" placeholder="Скидка %">
+                    </div>
+                    <textarea id="stock_${p.id}_ios" class="w-full h-20 p-2 player-card bg-transparent text-[8px]" placeholder="Ключи для iOS (каждый с новой строки)">${p.stock.ios.join('\n')}</textarea>
+                    <textarea id="stock_${p.id}_and" class="w-full h-20 p-2 player-card bg-transparent text-[8px]" placeholder="Ключи для Android (каждый с новой строки)">${p.stock.and.join('\n')}</textarea>
+                </div>`).join('');
+        }
+
+        function saveAdmin() {
+            db.card = document.getElementById('a_card').value;
+            db.products.forEach(p => {
+                p.pr = parseInt(document.getElementById(`price_${p.id}`).value);
+                p.h = parseInt(document.getElementById(`hour_${p.id}`).value);
+                p.discount = parseInt(document.getElementById(`disc_${p.id}`).value);
+                p.stock.ios = document.getElementById(`stock_${p.id}_ios`).value.split('\n').filter(l => l.length > 5);
+                p.stock.and = document.getElementById(`stock_${p.id}_and`).value.split('\n').filter(l => l.length > 5);
+            });
+            save(); location.reload();
+        }
+
+        function renderKeys() {
+            const list = document.getElementById('keysList');
+            user.keys = user.keys.filter(k => k.expire > Date.now());
+            if(user.keys.length === 0) { list.innerHTML = `<div class="p-10 text-center opacity-20 text-[10px] uppercase font-bold tracking-widest">Активные ключи отсутствуют</div>`; return; }
+            list.innerHTML = user.keys.map(k => `<div class="player-card p-4 border-l-2 border-blue-500 mb-2"><div class="flex justify-between text-[10px] mb-2 uppercase font-bold"><span>${k.name}</span><span class="opacity-40 italic">${new Date(k.expire).toLocaleDateString()}</span></div><div class="bg-black/40 p-3 rounded-lg text-[9px] font-mono break-all mb-3 border border-white/5">${k.key}</div><button onclick="navigator.clipboard.writeText('${k.key}'); Swal.fire('ОК','Скопировано','success')" class="w-full py-2 bg-white/5 rounded-lg text-[10px] font-bold uppercase">Копировать ключ</button></div>`).join('');
+        }
+
+        async function addTariffPrompt() {
+            const { value: name } = await Swal.fire({ title: 'НАЗВАНИЕ ТАРИФА', input: 'text', background: '#191c24', color: '#fff' });
+            if(name) { db.products.push({ id: Date.now(), name: name.toUpperCase(), pr: 100, h: 720, icon: '💎', discount: 0, stock: { ios: [], and: [] } }); save(); sync(); }
+        }
+
+        function addPromo() {
+            const code = document.getElementById('new_p_code').value.toUpperCase();
+            const sum = parseFloat(document.getElementById('new_p_sum').value);
+            const uses = parseInt(document.getElementById('new_p_uses').value);
+            if(code && sum) { db.promos.push({ code, sum, uses, used_by: [] }); save(); sync(); }
+        }
+
+        function adminGift() {
+            const id = document.getElementById('target_id').value;
+            const sum = parseFloat(document.getElementById('target_sum').value);
+            if(allUsers[id]) { allUsers[id].bal += sum; save(); sync(); Swal.fire('УСПЕХ', `Баланс юзера #${id} изменен`, 'success'); }
+            else { Swal.fire('ОШИБКА', 'Юзер не найден', 'error'); }
+        }
+
+        function deleteTariff(id) { db.products = db.products.filter(p => p.id !== id); save(); sync(); }
+        function save() { localStorage.setItem('dog_v29_db', JSON.stringify(db)); localStorage.setItem('dog_v29_me', JSON.stringify(user)); localStorage.setItem('dog_users_db', JSON.stringify(allUsers)); }
+        function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+        function topUp() { Swal.fire({ title: 'ПОПОЛНЕНИЕ', html: `<div class="text-sm opacity-70 mb-4">Переведите сумму на реквизиты и отправьте чек в поддержку</div><div class="p-4 bg-white/5 rounded-xl font-mono text-blue-400 mb-4">${db.card}</div><a href="https://t.me/sswckk" class="text-blue-500 font-bold">@sswckk</a>`, background: '#191c24', color: '#fff', showConfirmButton: false }); }
+        function installApp() { Swal.fire({ title: 'ИНСТРУКЦИЯ', html: `<div class="text-left text-xs space-y-2 opacity-80">1. Скачайте приложение Happ Plus<br>2. Скопируйте ключ из профиля<br>3. Нажмите "+" в приложении<br>4. Вставьте ключ и подключайтесь!</div>`, background: '#191c24', color: '#fff' }); }
     </script>
 </body>
 </html>
