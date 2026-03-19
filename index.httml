@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOG X VPN | Premium Access</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
+        .neon-text { text-shadow: 0 0 10px #4ade80, 0 0 20px #4ade80; }
+        .neon-border:hover { border-color: #4ade80; box-shadow: 0 0 15px rgba(74, 222, 128, 0.3); transition: 0.3s; }
+        .gradient-btn { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); color: black; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <nav class="flex justify-between items-center mb-10 max-w-6xl mx-auto">
+        <div class="text-2xl font-black tracking-tighter italic">DOG <span class="text-green-400">X</span> VPN</div>
+        <div class="space-x-4">
+            <button onclick="showTab('main')" class="hover:text-green-400">Главная</button>
+            <button onclick="showTab('lk')" class="hover:text-green-400">Профиль</button>
+            <button onclick="showTab('admin')" class="opacity-30 hover:opacity-100 italic text-xs">Admin</button>
+        </div>
+    </nav>
+
+    <div id="main" class="tab-content active max-w-6xl mx-auto">
+        <header class="text-center py-10">
+            <h1 class="text-5xl md:text-7xl font-bold mb-4 neon-text">DOG X VPN</h1>
+            <p class="text-gray-400 text-xl italic">Быстрее. Тише. Свободнее.</p>
+            <button class="gradient-btn px-10 py-4 rounded-full mt-8 shadow-lg shadow-green-500/20 transform hover:scale-105 transition">
+                <i class="fas fa-rocket mr-2"></i> ПОДКЛЮЧИТЬСЯ
+            </button>
+        </header>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-12">
+            <div class="glass p-6 text-center">
+                <i class="fas fa-bolt text-green-400 text-2xl mb-2"></i>
+                <p class="text-sm">Ultra Скорость</p>
+            </div>
+            <div class="glass p-6 text-center">
+                <i class="fas fa-shield-halved text-green-400 text-2xl mb-2"></i>
+                <p class="text-sm">Полная защита</p>
+            </div>
+            <div class="glass p-6 text-center">
+                <i class="fas fa-globe text-green-400 text-2xl mb-2"></i>
+                <p class="text-sm">Обход блоков</p>
+            </div>
+            <div class="glass p-6 text-center">
+                <i class="fas fa-fingerprint text-green-400 text-2xl mb-2"></i>
+                <p class="text-sm">No Logs</p>
+            </div>
+        </div>
+
+        <h2 class="text-center text-3xl font-bold mb-8">Выбери свой уровень свободы</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass p-8 neon-border cursor-pointer text-center relative overflow-hidden group">
+                <div class="text-gray-400 mb-2">Старт</div>
+                <div class="text-4xl font-bold mb-4">10₽</div>
+                <div class="text-sm text-gray-500 mb-6 italic">3 дня тест-драйва</div>
+                <button class="w-full border border-green-400/30 py-2 rounded-lg hover:bg-green-400 hover:text-black transition">Купить</button>
+            </div>
+            <div class="glass p-8 neon-border border-green-400 cursor-pointer text-center relative scale-105 shadow-2xl bg-white/5">
+                <div class="absolute top-0 right-0 bg-green-400 text-black text-[10px] px-3 py-1 font-bold uppercase">Хит</div>
+                <div class="text-gray-400 mb-2">Стандарт</div>
+                <div class="text-4xl font-bold mb-4">250₽</div>
+                <div class="text-sm text-gray-500 mb-6 italic">30 дней безлимита</div>
+                <button class="w-full gradient-btn py-2 rounded-lg">Купить сейчас</button>
+            </div>
+            <div class="glass p-8 neon-border cursor-pointer text-center">
+                <div class="text-gray-400 mb-2">Легенда</div>
+                <div class="text-4xl font-bold mb-4">1000₽</div>
+                <div class="text-sm text-gray-500 mb-6 italic">5 месяцев (Скидка 20%)</div>
+                <button class="w-full border border-green-400/30 py-2 rounded-lg hover:bg-green-400 hover:text-black transition">Купить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lk" class="tab-content max-w-4xl mx-auto">
+        <div class="glass p-8">
+            <div class="flex items-center space-x-6 mb-8">
+                <div class="w-20 h-20 rounded-full bg-green-400 flex items-center justify-center text-black text-3xl font-bold">A</div>
+                <div>
+                    <h2 class="text-2xl font-bold">@sswckk</h2>
+                    <p class="text-green-400 italic text-sm">Статус: Premium Активен</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white/5 p-4 rounded-xl">
+                    <p class="text-gray-400 text-xs">Осталось времени</p>
+                    <p class="text-xl">24 дня 12 часов</p>
+                </div>
+                <div class="bg-white/5 p-4 rounded-xl">
+                    <p class="text-gray-400 text-xs">Трафик</p>
+                    <p class="text-xl italic">∞ Безлимит</p>
+                </div>
+            </div>
+            <button class="w-full mt-6 bg-red-500/10 text-red-500 py-3 rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition">Выйти из аккаунта</button>
+        </div>
+    </div>
+
+    <div id="admin" class="tab-content max-w-6xl mx-auto">
+        <h2 class="text-3xl font-bold mb-6 text-red-400 italic underline">Панель управления</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="glass p-6 bg-red-500/5">
+                <p class="text-xs uppercase opacity-50">Всего юзеров</p>
+                <p class="text-3xl font-mono">1,482</p>
+            </div>
+            <div class="glass p-6 bg-blue-500/5">
+                <p class="text-xs uppercase opacity-50">Выручка (мес)</p>
+                <p class="text-3xl font-mono">42,500₽</p>
+            </div>
+            <div class="glass p-6 bg-green-500/5">
+                <p class="text-xs uppercase opacity-50">Серверов Online</p>
+                <p class="text-3xl font-mono">12</p>
+            </div>
+        </div>
+        <div class="glass overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-white/10 text-xs uppercase text-gray-400">
+                    <tr>
+                        <th class="p-4">User ID</th>
+                        <th class="p-4">Тариф</th>
+                        <th class="p-4">Действие</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <tr>
+                        <td class="p-4">@sswckk</td>
+                        <td class="p-4 text-green-400 text-xs">Premium</td>
+                        <td class="p-4"><button class="text-red-400">Ban</button></td>
+                    </tr>
+                    <tr>
+                        <td class="p-4">@ivan_vpn</td>
+                        <td class="p-4 text-gray-500 text-xs">Free</td>
+                        <td class="p-4"><button class="text-red-400">Ban</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
