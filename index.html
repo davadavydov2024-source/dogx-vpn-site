@@ -394,7 +394,7 @@
         function topUp() { Swal.fire('Оплата', 'Свяжитесь с @sswckk', 'info'); }
         function deleteProduct(id) { window.db.products = window.db.products.filter(p => p.id !== id); loadAdmin(); }
         function addTariff() { window.db.products.push({ id: Date.now(), name: "NEW", pr: 100, h: 24, icon: "⚡", discount: 0 }); loadAdmin(); }
-        function showHappyGuide() { Swal.fire({ title: 'ИНСТРУКЦИЯ', html: `<div class="text-left text-[11px] opacity-70">Скопируй ключ -> Happy Plus -> Лицензия -> Активировать.</div>`, icon: 'info' }); }
+        function showHappyGuide() { Swal.fire({ title: 'ИНСТРУКЦИЯ', html: `<div class="text-left text-[11px] opacity-70">Скопируй ключ -> Happ Plus(IOS/ADNROID) -> Лицензия -> Активировать.</div>`, icon: 'info' }); }
     </script>
 </body>
 </html>
