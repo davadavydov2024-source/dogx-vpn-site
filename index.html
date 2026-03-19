@@ -3,226 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOG X VPN | Server Edition</title>
+    <title>DOG X VPN | Cybernet Core 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=Manrope:wght@300;600;800&display=swap');
-        :root { --accent: #00ffa3; --bg: #030406; }
-        body { background: var(--bg); color: #fff; font-family: 'Manrope', sans-serif; overflow-x: hidden; }
-        .unbound { font-family: 'Unbounded', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; }
-        .btn-main { background: var(--accent); color: #000; font-weight: 900; transition: 0.3s; box-shadow: 0 0 20px rgba(0, 255, 163, 0.2); }
-        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 5px 30px rgba(0, 255, 163, 0.5); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: zoomFade 0.4s ease; }
-        @keyframes zoomFade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        .support-btn { position: fixed; bottom: 20px; right: 20px; z-index: 100; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;700;900&display=swap');
+        
+        :root { --neon: #00ffaa; --accent: #00ccff; --bg: #010204; --panel: rgba(255, 255, 255, 0.02); }
+        body { background-color: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+        
+        /* Киберпанк фон */
+        .grid-bg { 
+            background-image: linear-gradient(rgba(0, 255, 170, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 170, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            position: fixed; inset: 0; z-index: -2;
+        }
+        .glow-sphere {
+            position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 255, 170, 0.08) 0%, transparent 70%);
+            top: -200px; right: -200px; z-index: -1; filter: blur(100px); animation: pulse Glow 15s infinite alternate;
+        }
+        @keyframes pulseGlow { from { opacity: 0.4; transform: scale(1); } to { opacity: 0.8; transform: scale(1.2); } }
+
+        /* Стекломорфизм */
+        .glass { background: var(--panel); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; transition: 0.3s; }
+        .glass:hover { border-color: rgba(0, 255, 170, 0.2); background: rgba(0, 255, 170, 0.01); }
+        
+        /* Неон эффекты */
+        .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
+        .neon-border { border: 1px solid var(--neon); box-shadow: 0 0 15px rgba(0, 255, 170, 0.3); }
+        .btn-neon { background: var(--neon); color: #000; font-weight: 900; text-transform: uppercase; box-shadow: 0 0 20px rgba(0, 255, 170, 0.3); transition: 0.4s; }
+        .btn-neon:hover { box-shadow: 0 0 40px rgba(0, 255, 170, 0.6); transform: translateY(-2px); }
+
+        /* Анимация переключения вкладок */
+        .tab-content { display: none; animation: slideUp 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
+        .tab-content.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Кастомный скролл */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 255, 170, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon); }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-4 md:p-8">
+    <div class="grid-bg"></div>
+    <div class="glow-sphere"></div>
 
     <script>
-        const CONFIG = {
-            serverIP: "45.132.1.XX", // Сюда потом впишешь IP своего сервера
-            tgSupport: "https://t.me/sswckk",
-            card: "2200 0000 0000 0000"
+        const MY_CONFIG = {
+            card: "2200 0000 0000 0000(для оплаты пишите в тг)", // Твоя карта для оплаты
+            tgSupport: "https://t.me/sswckk"     // Твой ТГ для чеков
         };
     </script>
 
-    <a href="https://t.me/sswckk" target="_blank" class="support-btn glass p-4 text-[#00ffa3] hover:scale-110 transition shadow-2xl">
+    <a href="https://t.me/sswckk" target="_blank" class="fixed bottom-6 right-6 z-[100] glass p-5 text-[#00ffaa] hover:scale-110 transition shadow-2xl border-emerald-500/20">
         <i class="fab fa-telegram text-2xl"></i>
     </a>
 
-    <div id="authScreen" class="fixed inset-0 z-[200] bg-black/98 flex items-center justify-center hidden">
+    <div id="authOverlay" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center hidden backdrop-blur-xl">
         <div class="glass p-12 max-w-sm w-full text-center border-emerald-500/20">
-            <h2 class="unbound text-xl mb-8 italic">DOG <span class="text-[#00ffa3]">X</span> CORE</h2>
-            <input type="text" id="regName" placeholder="ВАШ НИК" class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 mb-6 text-center outline-none focus:border-emerald-500 transition font-bold">
-            <button onclick="authUser()" class="w-full py-4 btn-main rounded-2xl uppercase tracking-widest text-[10px]">Запустить систему</button>
+            <h2 class="orbitron text-2xl font-black mb-8 neon-text italic">LOGIN_ROOT</h2>
+            <input type="text" id="regName" placeholder="НИКНЕЙМ" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 mb-6 text-center tracking-widest outline-none focus:border-emerald-500 transition uppercase font-bold text-xs">
+            <button onclick="register()" class="w-full btn-neon py-4 rounded-xl text-xs tracking-widest">INITIALIZE SESSION</button>
         </div>
     </div>
 
     <div id="keyScreen" class="tab-content max-w-2xl mx-auto py-20 text-center">
-        <div class="glass p-10 border-emerald-500/30 shadow-[0_0_50px_rgba(0,255,163,0.1)]">
-            <div class="w-16 h-16 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fas fa-terminal"></i>
+        <div class="glass p-10 border-emerald-500/30 shadow-[0_0_60px_rgba(0,255,170,0.15)] relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent animate-pulse"></div>
+            <div class="w-20 h-20 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-inner border border-emerald-500/20">
+                <i class="fas fa-satellite-dish"></i>
             </div>
-            <h1 class="unbound text-2xl mb-2">КЛЮЧ АКТИВИРОВАН</h1>
-            <p class="text-gray-400 text-[10px] mb-8 uppercase tracking-widest">Протокол: VLESS + REALITY</p>
+            <h1 class="orbitron text-2xl font-black mb-2 italic">КЛЮЧ АКТИВИРОВАН</h1>
+            <p class="text-[10px] uppercase text-gray-500 tracking-[0.3em] mb-8">Протокол: VLESS + REALITY</p>
             
-            <div class="bg-black p-4 rounded-xl mb-6 text-left overflow-hidden border border-white/5">
-                <code id="finalKey" class="text-[10px] text-emerald-400 break-all leading-relaxed">vless://...</code>
+            <div class="bg-black/40 p-5 rounded-2xl mb-8 text-left border border-white/5 group relative overflow-hidden">
+                <code id="finalKey" class="text-[10px] text-emerald-400 break-all leading-relaxed font-mono">vless://generating_security_handshake...</code>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button onclick="copyKey()" class="py-4 bg-white/5 rounded-xl text-[10px] font-bold uppercase hover:bg-white/10 transition">Скопировать ключ</button>
-                <button onclick="openInApp()" class="py-4 btn-main rounded-xl text-[10px] uppercase font-black italic">Открыть в Happy Plus</button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <button onclick="copyKey()" class="py-4 glass border-white/10 rounded-xl text-[10px] font-bold uppercase hover:bg-white/5 transition">Скопировать ключ</button>
+                <button onclick="openInApp()" class="py-4 btn-neon rounded-xl text-[10px] font-black italic tracking-widest">Открыть в Happy Plus</button>
             </div>
             
-            <p class="mt-8 text-[9px] text-gray-500 uppercase italic italic">Инструкция: Скопируйте и вставьте в приложение или нажмите кнопку выше.</p>
+            <p class="text-[9px] text-gray-600 uppercase italic italic">Инструкция: Скопируйте ключ и вставьте в приложение Hiddify/v2rayNG или нажмите кнопку выше для авто-импорта.</p>
+            <button onclick="showTab('home')" class="mt-10 text-xs opacity-30 hover:opacity-100 transition underline">Вернуться в магазин</button>
         </div>
     </div>
 
-    <nav class="max-w-6xl mx-auto flex justify-between items-center mb-16 p-6 glass">
-        <div class="unbound font-black text-2xl italic tracking-tighter">DOG <span class="text-[#00ffa3]">X</span></div>
-        <div class="flex gap-8 text-[10px] font-black uppercase tracking-widest">
-            <button onclick="showTab('home')" class="hover:text-[#00ffa3] transition">Маркет</button>
-            <button onclick="showTab('profile')" class="hover:text-[#00ffa3] transition">Профиль</button>
-            <div id="adminBadge" class="hidden text-red-500 font-black">[ADMIN]</div>
+    <nav class="max-w-7xl mx-auto flex justify-between items-center mb-16 p-6 glass relative z-50 shadow-2xl">
+        <div class="orbitron font-black text-3xl italic tracking-tighter flex items-center gap-3">
+            <span class="bg-[#00ffaa] text-black px-2 rounded-lg">DOG</span> <span class="neon-text">X</span>
+        </div>
+        <div class="flex gap-10 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
+            <button onclick="showTab('home')" class="hover:neon-text transition">Магазин</button>
+            <button onclick="showTab('profile')" class="hover:neon-text transition">Кабинет</button>
+            <div id="adminBadge" class="hidden text-red-500 font-black border border-red-500 px-3 py-1 rounded-full text-[9px] animate-pulse">[ROOT]</div>
         </div>
     </nav>
 
-    <main id="home" class="tab-content active max-w-6xl mx-auto">
-        <div class="text-center mb-20">
-            <h1 class="unbound text-5xl md:text-8xl font-black italic uppercase leading-none mb-6">ULTRA <br> <span class="text-[#00ffa3]">SPEED.</span></h1>
-            <div class="inline-flex items-center gap-4 px-6 py-2 glass border-emerald-500/20">
-                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Все узлы серверов стабильны</span>
+    <main id="home" class="tab-content active max-w-7xl mx-auto">
+        <div class="flex flex-col lg:flex-row gap-12 items-center mb-24">
+            <div class="flex-1 text-center lg:text-left">
+                <div class="inline-flex items-center gap-3 px-4 py-1 glass border-emerald-500/20 rounded-full mb-4">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span class="text-[10px] font-bold uppercase text-emerald-500 tracking-widest">Quantum Encryption Active</span>
+                </div>
+                <h1 class="orbitron text-6xl md:text-9xl font-black mb-6 italic leading-[0.85] tracking-tighter uppercase">NO <span class="neon-text">LIMITS.</span></h1>
+                <p id="topTicker" class="text-gray-500 font-medium max-w-lg italic text-sm">Система шифрования DOG X VPN активна. Все узлы серверов в норме. Скорость: Оптимальная.</p>
+            </div>
+            
+            <div class="glass p-8 w-full lg:w-96 border-emerald-500/10">
+                <h3 class="orbitron text-sm font-bold mb-6 uppercase italic text-gray-400">Live Server Status</h3>
+                <div class="space-y-4 text-[10px] font-bold uppercase tracking-widest">
+                    <div class="flex justify-between items-center p-3 bg-black/30 rounded-lg"><span>DE_Frankfurt</span><span class="text-green-400">12% / 24ms</span></div>
+                    <div class="flex justify-between items-center p-3 bg-black/30 rounded-lg"><span>FI_Helsinki</span><span class="text-green-400">18% / 19ms</span></div>
+                    <div class="flex justify-between items-center p-3 bg-black/30 rounded-lg"><span>US_NewYork</span><span class="text-yellow-400">65% / 88ms</span></div>
+                    <div class="flex justify-between items-center p-3 bg-black/30 rounded-lg"><span>NL_Amsterdam</span><span class="text-green-400">ACTIVE</span></div>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="glass p-10 border-white/5 hover:border-emerald-500/20 transition group">
-                <div class="text-[10px] text-gray-500 mb-2 uppercase">Trial Access</div>
-                <div id="p1_price" class="unbound text-4xl font-black mb-10 group-hover:text-[#00ffa3] transition">10₽</div>
-                <button onclick="pay(0)" class="w-full py-4 glass border-white/10 font-bold text-[10px] uppercase hover:btn-main hover:text-black transition">Купить 3 дня</button>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
+            <div class="glass p-12 group border-white/5 hover:border-emerald-500/20 transition-all duration-500 hover:-translate-y-2">
+                <div class="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Trial Access</div>
+                <div id="p1_price" class="orbitron text-5xl font-black mb-10 italic">10₽</div>
+                <ul class="text-xs space-y-3 mb-12 text-gray-400 font-medium">
+                    <li><i class="fas fa-check text-emerald-500 mr-2"></i> Скорость до 100 Мбит</li>
+                    <li><i class="fas fa-check text-emerald-500 mr-2"></i> 3 Локации</li>
+                </ul>
+                <button onclick="pay(0)" class="w-full py-5 glass border-white/10 font-bold text-[10px] uppercase hover:btn-neon hover:text-black transition">Активировать</button>
             </div>
-            <div class="glass p-10 border-[#00ffa3]/30 scale-105 bg-emerald-500/[0.02] shadow-2xl relative">
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#00ffa3] text-black px-4 py-1 rounded-full text-[9px] font-black uppercase">🔥 Best Choice</div>
-                <div class="text-[10px] text-[#00ffa3] mb-2 uppercase font-black">Pro Plan</div>
-                <div id="p2_price" class="unbound text-6xl font-black mb-10 text-[#00ffa3]">250₽</div>
-                <button onclick="pay(1)" class="w-full py-5 btn-main rounded-2xl text-[10px] uppercase">Купить 30 дней</button>
+
+            <div class="glass p-12 neon-border scale-105 bg-emerald-500/[0.02] shadow-[0_0_60px_rgba(0,255,170,0.1)] relative">
+                <div class="absolute -top-4 left-8 bg-[#00ffaa] text-black px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter">Bestseller 2026</div>
+                <div class="text-[10px] text-emerald-500 mb-2 uppercase font-bold tracking-widest">Premium Access</div>
+                <div id="p2_price" class="orbitron text-7xl font-black mb-10 italic neon-text">250₽</div>
+                <ul class="text-xs space-y-3 mb-12 font-medium">
+                    <li><i class="fas fa-bolt text-emerald-500 mr-2"></i> Безлимитная скорость</li>
+                    <li><i class="fas fa-globe text-emerald-500 mr-2"></i> 50+ Локаций</li>
+                    <li><i class="fas fa-shield-halved text-emerald-500 mr-2"></i> Double VPN</li>
+                </ul>
+                <button onclick="pay(1)" class="w-full py-5 btn-neon rounded-2xl text-[10px] uppercase shadow-2xl">Активировать Pro</button>
             </div>
-            <div class="glass p-10 border-white/5 hover:border-emerald-500/20 transition group">
-                <div class="text-[10px] text-gray-500 mb-2 uppercase">Lifer Access</div>
-                <div id="p3_price" class="unbound text-4xl font-black mb-10 group-hover:text-[#00ffa3] transition">1000₽</div>
-                <button onclick="pay(2)" class="w-full py-4 glass border-white/10 font-bold text-[10px] uppercase hover:btn-main hover:text-black transition">Купить 150 дней</button>
+
+            <div class="glass p-12 group border-white/5 hover:border-emerald-500/20 transition-all duration-500 hover:-translate-y-2">
+                <div class="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Elite Access</div>
+                <div id="p3_price" class="orbitron text-5xl font-black mb-10 italic">1000₽</div>
+                <ul class="text-xs space-y-3 mb-12 text-gray-400 font-medium">
+                    <li><i class="fas fa-check text-emerald-500 mr-2"></i> Приоритетный канал</li>
+                    <li><i class="fas fa-clock text-emerald-500 mr-2"></i> 150 дней доступа</li>
+                </ul>
+                <button onclick="pay(2)" class="w-full py-5 glass border-white/10 font-bold text-[10px] uppercase hover:btn-neon hover:text-black transition">Активировать</button>
             </div>
         </div>
     </main>
 
     <section id="profile" class="tab-content max-w-5xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="glass p-10 text-center">
-                <div class="w-24 h-24 bg-gradient-to-tr from-emerald-500 to-blue-500 text-black rounded-3xl mx-auto mb-6 flex items-center justify-center text-4xl font-black shadow-lg">
-                    <span id="uAva">A</span>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="glass p-12 text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-10 opacity-5 italic orbitron text-9xl">DOG</div>
+                <div class="w-28 h-28 bg-gradient-to-tr from-[#00ffaa] to-[#00ccff] text-black rounded-full mx-auto mb-8 flex items-center justify-center text-5xl font-black orbitron shadow-2xl border-4 border-white/5">
+                    <span id="uAva">?</span>
                 </div>
-                <h2 id="uName" class="unbound text-xl font-bold mb-6 italic uppercase tracking-tighter">User</h2>
-                <div id="uBal" class="text-2xl font-black text-emerald-400 mb-10 tracking-tighter">0.00₽</div>
-                <button onclick="logout()" class="text-[9px] text-red-500 opacity-40 hover:opacity-100 transition uppercase font-black">Disconnect System</button>
+                <h2 id="uName" class="orbitron text-2xl font-black mb-2 italic">USER</h2>
+                <div id="uBal" class="text-3xl font-black text-emerald-400 mb-10 tracking-tighter">0.00₽</div>
+                <button onclick="logout()" class="text-[9px] text-red-500 uppercase font-black opacity-30 hover:opacity-100 transition tracking-widest">Disconnect System</button>
             </div>
-            <div class="md:col-span-2 space-y-6">
-                <div class="glass p-8">
-                    <p class="text-[10px] text-gray-500 uppercase mb-4 tracking-widest italic italic">Ввод спец-кода</p>
+
+            <div class="lg:col-span-2 space-y-8">
+                <div class="glass p-10 border-emerald-500/10 hover:border-emerald-500/30 transition">
+                    <h3 class="text-[10px] text-gray-500 uppercase mb-5 tracking-widest italic italic">System Authentication Key</h3>
                     <div class="flex gap-4">
-                        <input type="text" id="promoInp" placeholder="PROMO_CODE" class="flex-grow bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-emerald-500 transition text-xs font-mono uppercase tracking-widest">
-                        <button onclick="applyAdmin()" class="px-10 bg-white/5 border border-white/10 rounded-xl font-black text-[10px] uppercase hover:bg-[#00ffa3] hover:text-black transition">Run</button>
+                        <input type="text" id="promoInp" placeholder="PROMO_CODE / ACCESS_KEY" class="flex-grow bg-black/40 border border-white/10 p-5 rounded-2xl outline-none focus:border-emerald-500 transition text-xs font-mono uppercase tracking-widest">
+                        <button onclick="applyAdmin()" class="px-10 bg-white/5 border border-white/10 rounded-2xl font-black text-[10px] uppercase hover:bg-emerald-500 hover:text-black transition">Run</button>
                     </div>
                 </div>
-                <div class="glass p-8 overflow-hidden">
-                    <h3 class="text-[10px] text-gray-500 uppercase mb-6 tracking-widest italic italic">Ваши активные ключи</h3>
+                <div class="glass p-10 overflow-hidden">
+                    <h3 class="text-[10px] text-gray-500 uppercase mb-6 tracking-widest italic italic">Active Secure Tunnels</h3>
                     <div id="userKeys" class="space-y-4">
-                        <p class="text-[10px] opacity-20 italic">Ключи появятся здесь после оплаты...</p>
+                        <p class="text-[11px] opacity-20 italic font-medium">Ключи появятся здесь после подтверждения оплаты...</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="admin" class="tab-content max-w-6xl mx-auto">
-        <div class="flex justify-between items-end mb-12">
+    <section id="admin" class="tab-content max-w-7xl mx-auto">
+        <div class="flex justify-between items-end mb-12 border-b border-red-500/10 pb-8">
             <div>
-                <h1 class="unbound text-3xl text-red-500 font-black italic italic uppercase tracking-tighter">Root_Terminal</h1>
-                <p class="text-[9px] text-gray-500 mt-2 uppercase tracking-widest">Управление сервером и пользователями</p>
+                <h1 class="orbitron text-4xl text-red-500 font-black italic uppercase tracking-tighter">Root_Terminal</h1>
+                <p class="text-[10px] text-gray-600 mt-2 uppercase tracking-widest">Управление параметрами DOG X VPN</p>
             </div>
-            <button onclick="showTab('home')" class="text-[9px] border border-red-500/30 text-red-500 px-6 py-2 rounded-xl hover:bg-red-500 hover:text-white transition uppercase font-black">Выход</button>
+            <button onclick="showTab('home')" class="text-[10px] bg-red-500 text-white px-6 py-3 rounded-xl font-black uppercase">Выход</button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass p-8 border-red-500/20">
-                <h3 class="text-[10px] text-red-500 font-black mb-6 uppercase italic">Конфигурация сервера</h3>
-                <div class="space-y-4">
-                    <input type="text" id="admIP" placeholder="IP СЕРВЕРА (VPS)" class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs font-mono">
-                    <div class="grid grid-cols-3 gap-3">
-                        <input type="number" id="admP1" class="bg-black border border-white/10 p-3 rounded-xl text-xs text-center">
-                        <input type="number" id="admP2" class="bg-black border border-white/10 p-3 rounded-xl text-xs text-center">
-                        <input type="number" id="admP3" class="bg-black border border-white/10 p-3 rounded-xl text-xs text-center">
-                    </div>
-                    <button onclick="saveAdminData()" class="w-full py-4 bg-red-600/20 border border-red-600 text-red-500 rounded-xl font-black text-[10px] uppercase">Обновить данные</button>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <div class="glass p-10 border-red-500/20 bg-red-500/[0.01]">
+                <h3 class="text-[10px] text-red-500 font-black mb-8 uppercase italic tracking-widest">Configuration: Prices</h3>
+                <div class="grid grid-cols-3 gap-5 mb-8 text-center">
+                    <div><label class="text-[9px] opacity-40 uppercase">Lite</label><input type="number" id="admP1" class="w-full bg-black border border-red-500/30 p-4 rounded-xl text-xs mt-1 text-center font-mono text-red-400"></div>
+                    <div><label class="text-[9px] opacity-40 uppercase">Pro</label><input type="number" id="admP2" class="w-full bg-black border border-red-500/30 p-4 rounded-xl text-xs mt-1 text-center font-mono text-red-400"></div>
+                    <div><label class="text-[9px] opacity-40 uppercase">Elite</label><input type="number" id="admP3" class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs mt-1 text-center font-mono text-white"></div>
                 </div>
+                <button onclick="updatePrices()" class="w-full py-4 bg-red-600/20 border border-red-600 text-red-500 rounded-xl font-black text-[10px] uppercase hover:bg-red-600 hover:text-white transition">Update System Config</button>
             </div>
-            <div class="glass p-8 border-blue-500/20 overflow-hidden">
-                <h3 class="text-[10px] text-blue-500 font-black mb-6 uppercase italic">Логи транзакций</h3>
-                <div id="adminLogs" class="space-y-2 text-[9px] font-mono opacity-60 max-h-48 overflow-y-auto">
-                    [SYSTEM] Логи пусты.
-                </div>
+
+            <div class="glass p-10 border-blue-500/20 bg-blue-500/[0.01]">
+                <h3 class="text-[10px] text-blue-500 font-black mb-8 uppercase italic tracking-widest">Global Broadcast</h3>
+                <input type="text" id="admTicker" class="w-full bg-black border border-blue-500/30 p-5 rounded-xl text-xs mb-5 outline-none focus:border-blue-500" placeholder="Бегущая строка на главной...">
+                <button onclick="updateTicker()" class="w-full py-4 bg-blue-600/20 border border-blue-600 text-blue-500 rounded-2xl font-black text-[10px] uppercase hover:bg-blue-600 hover:text-white transition">Broadcast Message</button>
             </div>
+        </div>
+        
+        <div class="glass p-10 border-white/5">
+            <h3 class="text-[10px] text-gray-500 font-black mb-8 uppercase italic tracking-widest">Voucher Generation</h3>
+            <div class="flex gap-4 mb-8">
+                <input type="text" id="pName" placeholder="CODE" class="bg-black border border-white/10 p-4 rounded-xl flex-grow font-mono uppercase text-xs tracking-widest">
+                <input type="number" id="pPct" placeholder="%" class="w-24 bg-black border border-white/10 p-4 rounded-xl text-center text-xs">
+                <button onclick="makePromo()" class="px-12 bg-white/5 rounded-xl font-black text-[10px] uppercase hover:bg-white/10">Generate</button>
+            </div>
+            <div id="pList" class="flex flex-wrap gap-3"></div>
         </div>
     </section>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('dog_v5')) || {
+        // ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ
+        let db = JSON.parse(localStorage.getItem('dog_db_v6')) || {
             prices: [10, 250, 1000],
-            logs: [],
-            serverIP: "45.132.1.XX"
+            promos: [{n: 'DOGX2026', p: 15}],
+            ticker: "СИСТЕМА ШИФРОВАНИЯ DOG X VPN ВКЛЮЧЕНА И СТАБИЛЬНА. quantum secure v4.2",
+            serverIP: "45.132.1.XX" // Сюда потом впишешь IP своего VPS
         };
-        let me = JSON.parse(localStorage.getItem('dog_me_v5')) || null;
+        let me = JSON.parse(localStorage.getItem('dog_me_v6')) || null;
 
         window.onload = () => {
-            if(!me) document.getElementById('authScreen').classList.remove('hidden');
+            if(!me) document.getElementById('authOverlay').classList.remove('hidden');
             else sync();
         };
 
-        function authUser() {
+        function register() {
             const n = document.getElementById('regName').value.trim();
-            if(n.length < 2) return;
-            me = { name: n, balance: 0, keys: [] };
+            if(n.length < 2) return Swal.fire('Короткое имя', '', 'error');
+            me = { name: n, balance: 0, keys: [], disc: 0 };
             saveMe();
             location.reload();
         }
 
         function sync() {
+            // Главная
+            document.getElementById('ticker').innerText = db.ticker;
             document.getElementById('p1_price').innerText = db.prices[0] + '₽';
             document.getElementById('p2_price').innerText = db.prices[1] + '₽';
             document.getElementById('p3_price').innerText = db.prices[2] + '₽';
+            
+            // Профиль
             document.getElementById('uName').innerText = me.name.toUpperCase();
             document.getElementById('uAva').innerText = me.name[0].toUpperCase();
             document.getElementById('uBal').innerText = me.balance.toFixed(2) + '₽';
             
-            document.getElementById('admIP').value = db.serverIP;
-            document.getElementById('admP1').value = db.prices[0];
-            document.getElementById('admP2').value = db.prices[1];
-            document.getElementById('admP3').value = db.prices[2];
-
             const keysBox = document.getElementById('userKeys');
             if(me.keys.length > 0) {
                 keysBox.innerHTML = me.keys.map(k => `
-                    <div class="p-4 bg-white/5 border border-white/5 rounded-2xl flex justify-between items-center group">
+                    <div class="glass p-5 flex justify-between items-center group border-white/5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
                         <div class="overflow-hidden mr-4">
                             <p class="text-[10px] text-emerald-400 font-mono truncate tracking-tighter">${k.key}</p>
-                            <p class="text-[8px] opacity-30 uppercase font-bold mt-1">${k.plan}</p>
+                            <p class="text-[8px] opacity-30 uppercase font-bold mt-1 tracking-widest">${k.plan}</p>
                         </div>
-                        <button onclick="navigator.clipboard.writeText('${k.key}');Swal.fire('OK','Копировано','success')" class="p-2 text-gray-500 hover:text-white"><i class="fas fa-copy"></i></button>
+                        <button onclick="navigator.clipboard.writeText('${k.key}');Swal.fire('OK','Копировано','success')" class="p-3 text-gray-600 hover:text-white"><i class="fas fa-copy"></i></button>
                     </div>
                 `).join('');
             }
+
+            // Админка
+            document.getElementById('admP1').value = db.prices[0];
+            document.getElementById('admP2').value = db.prices[1];
+            document.getElementById('admP3').value = db.prices[2];
+            document.getElementById('admTicker').value = db.ticker;
+            renderAdminPromos();
         }
 
+        // АДМИН ПАНЕЛЬ
+        function applyAdmin() {
+            const code = document.getElementById('promoInp').value;
+            if(code === '67АРТЁМ67') {
+                document.getElementById('adminBadge').classList.remove('hidden');
+                showTab('admin');
+                Swal.fire({ title: 'ROOT ACCESS GRANTED', text: 'Welcome back, Creator', icon: 'success', background: '#010204', color: '#fff' });
+            } else {
+                Swal.fire('ERROR', 'INVALID ACCESS KEY', 'error');
+            }
+        }
+
+        function updatePrices() {
+            db.prices = [parseInt(document.getElementById('admP1').value), parseInt(document.getElementById('admP2').value), parseInt(document.getElementById('admP3').value)];
+            saveDB();
+            sync();
+            Swal.fire('UPDATED', 'Prices changed globally', 'success');
+        }
+
+        function updateTicker() {
+            db.ticker = document.getElementById('admTicker').value.toUpperCase();
+            saveDB();
+            sync();
+        }
+
+        function makePromo() {
+            const n = document.getElementById('pName').value.toUpperCase();
+            const p = parseInt(document.getElementById('pPct').value);
+            if(n && p) { db.promos.push({n, p}); saveDB(); renderAdminPromos(); }
+        }
+
+        function renderAdminPromos() {
+            document.getElementById('pList').innerHTML = db.promos.map((x, i) => `
+                <div class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-[10px] flex gap-3 items-center">
+                    ${x.n} (-${x.p}%) <button onclick="delPromo(${i})" class="text-red-500 hover:text-white">×</button>
+                </div>
+            `).join('');
+        }
+
+        function delPromo(i) { db.promos.splice(i, 1); saveDB(); renderAdminPromos(); }
+
+        // ОПЛАТА И ГЕНЕРАЦИЯ КЛЮЧЕЙ
         function pay(id) {
             Swal.fire({
                 title: 'ОПЛАТА',
-                background: '#030406',
+                background: '#010204',
                 color: '#fff',
                 html: `
-                    <div class="text-left text-xs p-4 bg-white/5 border border-white/10 rounded-2xl">
-                        <p class="mb-4 opacity-50 uppercase tracking-widest font-black italic">Переведите ${db.prices[id]}₽ на:</p>
-                        <p class="text-lg text-emerald-400 font-black mb-1">${CONFIG.card}</p>
-                        <p class="mb-6 opacity-70">СБП / Карта</p>
-                        <a href="${CONFIG.tgSupport}" target="_blank" class="block w-full py-4 btn-main rounded-xl text-center text-[10px] uppercase font-black shadow-none">Отправить чек в Telegram</a>
+                    <div class="text-left text-xs p-5 bg-white/5 border border-white/10 rounded-2xl">
+                        <p class="mb-4 text-[10px] opacity-40 uppercase tracking-widest font-black italic">Переведите ${db.prices[id]}₽ на реквизиты:</p>
+                        <p class="text-lg text-emerald-400 font-black mb-1">${MY_CONFIG.card}</p>
+                        <p class="mb-6 opacity-60">СБП / Карта ( Demo Mode )</p>
+                        <a href="${MY_CONFIG.tgSupport}" target="_blank" class="block w-full py-4 btn-neon rounded-xl text-center text-[10px] font-black shadow-none tracking-widest">Отправить чек в Telegram</a>
                     </div>
                 `,
-                footer: '<button onclick="generateRealKey('+id+')" class="text-[10px] uppercase opacity-20 hover:opacity-100 font-black underline">Я ОПЛАТИЛ (ДЕМО)</button>',
+                footer: '<button onclick="generateRealKey('+id+')" class="text-[9px] uppercase opacity-20 hover:opacity-100 font-black underline">Я ОПЛАТИЛ (ДЕМО АКТИВАЦИЯ)</button>',
                 showConfirmButton: false
             });
         }
@@ -230,17 +350,19 @@
         function generateRealKey(id) {
             Swal.close();
             const plans = ['3 ДНЯ', '30 ДНЕЙ', '150 ДНЕЙ'];
+            // ГенерацияUUID
             const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
             
-            // ФОРМИРУЕМ РЕАЛЬНЫЙ КОНФИГ VLESS
+            // ФОРМИРУЕМ РЕАЛЬНЫЙ КОНФИГ VLESS Reality
             const realVless = `vless://${uuid}@${db.serverIP}:443?security=reality&sni=google.com&fp=chrome&type=grpc&serviceName=grpc#DOGX_${me.name}_${plans[id].replace(' ','')}`;
             
             const newKey = { key: realVless, plan: plans[id] };
             me.keys.unshift(newKey);
             saveMe();
+            sync();
             
             document.getElementById('finalKey').innerText = realVless;
             showTab('keyScreen');
@@ -248,32 +370,15 @@
 
         function openInApp() {
             const key = document.getElementById('finalKey').innerText;
-            // Попытка открыть в приложении через deep link
+            // Попытка открыть в Hiddify через deep link
             window.location.href = `hiddify://import/${key}`;
-            // Если Happy Plus поддерживает v2ray:
+            // Если Happy Plus поддерживает v2ray links:
             setTimeout(() => { window.location.href = `v2rayng://install-config?url=${encodeURIComponent(key)}`; }, 500);
-        }
-
-        function applyAdmin() {
-            const code = document.getElementById('promoInp').value;
-            if(code === '67АРТЁМ67') {
-                document.getElementById('adminBadge').classList.remove('hidden');
-                showTab('admin');
-                Swal.fire({ title: 'ROOT ACCESS', icon: 'success', background: '#030406', color: '#fff' });
-            }
-        }
-
-        function saveAdminData() {
-            db.serverIP = document.getElementById('admIP').value;
-            db.prices = [parseInt(document.getElementById('admP1').value), parseInt(document.getElementById('admP2').value), parseInt(document.getElementById('admP3').value)];
-            saveDB();
-            sync();
-            Swal.fire('OK','Данные обновлены','success');
         }
 
         function copyKey() {
             navigator.clipboard.writeText(document.getElementById('finalKey').innerText);
-            Swal.fire({ toast: true, position: 'top-end', title: 'Скопировано', showConfirmButton: false, timer: 1000 });
+            Swal.fire({ toast: true, position: 'top-end', title: 'Скопировано', showConfirmButton: false, timer: 1000, background: '#111', color: '#fff' });
         }
 
         function showTab(id) {
@@ -282,8 +387,8 @@
             window.scrollTo(0,0);
         }
 
-        function saveMe() { localStorage.setItem('dog_me_v5', JSON.stringify(me)); }
-        function saveDB() { localStorage.setItem('dog_v5', JSON.stringify(db)); }
+        function saveMe() { localStorage.setItem('dog_me_v6', JSON.stringify(me)); }
+        function saveDB() { localStorage.setItem('dog_db_v6', JSON.stringify(db)); }
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
