@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | Premium Proxy</title>
+    <title>DOG X | Премиум VPN</title>
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/733/733641.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -15,32 +15,35 @@
         body { background-color: var(--bg); color: #fff; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
         .unbounded { font-family: 'Unbounded', sans-serif; }
 
-        /* Ультра-тонкое стекло */
+        /* Премиум стекло */
         .glass-card { background: var(--card); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 28px; transition: 0.3s cubic-bezier(0.2, 0, 0, 1); }
-        .glass-card:hover { border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .glass-card:hover { border-color: rgba(255, 255, 255, 0.08); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         
-        /* Кнопки премиум класса */
+        /* Кнопки супер-класса */
         .btn-premium { background: #fff; color: #000; font-weight: 800; border-radius: 16px; transition: 0.2s; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .btn-premium:hover { background: var(--accent); color: #fff; box-shadow: 0 0 20px var(--glow); transform: scale(1.02); }
-        .btn-premium:active { transform: scale(0.98); }
+        .btn-premium:hover { background: var(--accent); color: #fff; box-shadow: 0 0 25px var(--glow); transform: scale(1.03); }
+        .btn-premium:active { transform: scale(0.97); }
 
         /* Вкладки */
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: appear 0.4s ease forwards; }
         @keyframes appear { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Индикатор скидки */
-        .sale-badge { background: #ef4444; color: #fff; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 6px; position: absolute; top: -10px; right: 15px; text-transform: uppercase; }
+        /* Скидка */
+        .sale-badge { background: #ef4444; color: #fff; font-size: 8px; font-weight: 900; padding: 3px 7px; border-radius: 8px; position: absolute; top: -10px; right: 15px; text-transform: uppercase; }
 
         /* Текст ключа */
         .key-text { word-break: break-all; font-family: monospace; font-size: 10px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+        
+        /* Стили для PWA инструкции */
+        .step-ios { background: #1a1c20; border-radius: 15px; padding: 15px; text-align: left; }
     </style>
 </head>
 <body class="p-3 md:p-10">
 
     <div id="broadcast" class="max-w-xl mx-auto mb-4 hidden">
-        <div class="glass-card p-4 border-amber-500/30 text-center font-bold text-amber-400 italic text-xs">
-            <i class="fas fa-bullhorn mr-2"></i> <span id="bcText">Загрузка важного сообщения...</span>
+        <div class="glass-card p-4 border-amber-500/20 text-center font-bold text-amber-400 italic text-xs">
+            <i class="fas fa-bullhorn mr-2"></i> <span id="bcText">VPN Снова онлайн! Покупай выгодно.</span>
         </div>
     </div>
 
@@ -96,8 +99,8 @@
 
     <script>
         // ДАННЫЕ СЕРВЕРА
-        let db = JSON.parse(localStorage.getItem('dog_v16_db')) || {
-            broadcast: "VPN Снова онлайн! Покупай выгодно.", card: "sswckk (Т-Банк)",
+        let db = JSON.parse(localStorage.getItem('dog_v17_db')) || {
+            broadcast: "VPN Снова онлайн! Покупай выгодно.", card: "sswckk",
             products: [
                 { id: 0, name: "ПРОБНИК", pr: 10, old: 50, h: 24 },
                 { id: 1, name: "МЕСЯЦ", pr: 250, old: 400, h: 720 },
@@ -105,9 +108,9 @@
             ],
             stock_ios: [], stock_and: [], promos: []
         };
-        let user = JSON.parse(localStorage.getItem('dog_v16_user')) || { name: "User", bal: 0, keys: [] };
+        let user = JSON.parse(localStorage.getItem('dog_v17_user')) || { name: "User", bal: 0, keys: [] };
 
-        window.onload = () => { sync(); };
+        window.onload = () => { if(localStorage.getItem('dog_theme') === 'dark') document.body.classList.add('dark'); sync(); };
 
         function sync() {
             // Рассылка
@@ -163,13 +166,60 @@
         function renderKeys() {
             const list = document.getElementById('keysList');
             user.keys = user.keys.filter(k => k.expire > Date.now());
+            if(user.keys.length === 0) { list.innerHTML = `<p class="text-center opacity-20 py-20 italic">Активных ключей нет</p>`; return; }
             list.innerHTML = user.keys.map(k => `
-                <div class="glass-card p-4 border-white/5 space-y-2">
-                    <div class="text-[9px] font-bold uppercase opacity-30">${k.pft === 'stock_ios' ? 'APPLE IPHONE' : 'ANDROID OS'}</div>
+                <div class="glass-card p-4 border-white/5 space-y-2 relative">
+                    <div class="flex justify-between text-[9px] font-bold uppercase opacity-30">
+                        <span>${k.pft === 'stock_ios' ? 'APPLE IPHONE' : 'ANDROID OS'}</span>
+                        <span class="text-blue-500">АКТИВЕН</span>
+                    </div>
                     <div class="key-text p-3 bg-black/30 rounded-lg select-all">${k.key}</div>
                     <button onclick="navigator.clipboard.writeText('${k.key}'); Swal.fire('Скопировано','','success')" class="w-full py-2 bg-white/5 rounded-lg text-[10px] font-bold">СКОПИРОВАТЬ ВЕСЬ КЛЮЧ</button>
                 </div>
             `).join('');
+        }
+
+        // --- УСТАНОВКА ---
+        function installApp() {
+            const isiOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+            Swal.fire({
+                title: 'УСТАНОВИТЬ DOG X',
+                background: '#0a0c10', color: '#fff',
+                showConfirmButton: false,
+                html: isiOS ? `
+                    <div class="space-y-4">
+                        <div class="step-ios text-xs opacity-70">
+                            1. Нажми кнопку <b>"Поделиться"</b> <i class="fas fa-share-square text-blue-500 ml-1"></i> (внизу экрана)
+                        </div>
+                        <div class="step-ios text-xs opacity-70">
+                            2. Пролистай вниз и выбери <b>"На экран Домой"</b> <i class="fas fa-plus-square text-blue-500 ml-1"></i>
+                        </div>
+                        <div class="step-ios text-xs opacity-70">
+                            3. Нажми <b>"Добавить"</b>
+                        </div>
+                    </div>` : `
+                    <div class="space-y-4 text-center">
+                        <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400&auto=format&fit=crop" class="w-full h-40 object-cover rounded-2xl mb-4 border border-white/10" alt="Собака">
+                        <p class="text-xs opacity-70 uppercase tracking-widest mb-4">Инструкция для Android</p>
+                        <p class="text-sm opacity-90">Нажми на <b>три точки (⋮)</b> в углу Chrome и выбери <b>"Установить приложение"</b> или "Добавить на гл. экран".</p>
+                    </div>`
+            });
+        }
+
+        // --- ОПЛАТА НАПРЯМУЮ ---
+        function topUp() {
+            Swal.fire({
+                title: 'ПОПОЛНЕНИЕ',
+                background: '#0a0c10', color: '#fff',
+                html: `
+                    <p class="text-sm opacity-70 mb-6">Для пополнения баланса напишите владельцу</p>
+                    <div class="glass-card p-6 border-blue-500/20 mb-6">
+                        <b class="text-3xl neo-blueBounded font-black text-blue-500">@sswckk</b>
+                    </div>
+                    <a href="https://t.me/sswckk" target="_blank" class="w-full block py-4 btn-premium bg-blue-600 text-white shadow-xl shadow-blue-500/30">ОТКРЫТЬ ЧАТ</a>
+                `,
+                showConfirmButton: false
+            });
         }
 
         function checkAdmin() { if(document.getElementById('promoInp').value === '67АРТЁМ67') document.getElementById('adminBtn').classList.remove('hidden'); }
@@ -191,10 +241,9 @@
         function usePromo() {
             const code = document.getElementById('promoInp').value.toUpperCase();
             const i = db.promos.findIndex(p => p.code === code);
-            if(i !== -1) { user.bal += db.promos[i].val; db.promos.splice(i, 1); save(); sync(); Swal.fire('Ок!','','success'); }
+            if(i !== -1) { user.bal += db.promos[i].val; db.promos.splice(i, 1); save(); sync(); Swal.fire('Ок!','Баланс пополнен','success'); }
         }
-        function topUp() { Swal.fire('Top-Up', `Оплата: ${db.card}<br>Чек @sswckk`, 'info'); }
-        function save() { localStorage.setItem('dog_v16_db', JSON.stringify(db)); localStorage.setItem('dog_v16_user', JSON.stringify(user)); }
+        function save() { localStorage.setItem('dog_v17_db', JSON.stringify(db)); localStorage.setItem('dog_v17_user', JSON.stringify(user)); }
         function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
     </script>
 </body>
