@@ -23,7 +23,6 @@
         .tab-content.active { display: block; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Плавающая реклама */
         .promo-banner { 
             position: fixed; bottom: 20px; left: 20px; right: 20px; 
             background: #232733; border: 1px solid var(--accent);
@@ -54,8 +53,7 @@
 
     <main id="home" class="tab-content active px-6 space-y-6">
         <h2 class="text-xl font-extrabold">Все тарифы</h2>
-        <div id="productsGrid" class="grid grid-cols-1 gap-4">
-            </div>
+        <div id="productsGrid" class="grid grid-cols-1 gap-4"></div>
     </main>
 
     <section id="me" class="tab-content px-6 space-y-6">
@@ -116,7 +114,6 @@
     <script>
         let db = JSON.parse(localStorage.getItem('dog_v18_db')) || {
             promo: { text: "Скидки 50% на годовой тариф!", img: "", url: "https://t.me/sswckk", active: true },
-            card: "sswckk",
             products: [
                 { id: 0, name: "ПРОБНЫЙ", pr: 10, h: 24, icon: "⚡" },
                 { id: 1, name: "МЕСЯЦ", pr: 250, h: 720, icon: "💎" },
@@ -130,10 +127,7 @@
 
         function sync() {
             document.getElementById('userBal').innerText = user.bal.toFixed(2) + '₽';
-            renderProducts();
-            renderKeys();
-            renderPromo();
-            loadAdmin();
+            renderProducts(); renderKeys(); renderPromo(); loadAdmin();
         }
 
         function renderProducts() {
@@ -155,37 +149,16 @@
             `).join('');
         }
 
-        function renderPromo() {
-            const banner = document.getElementById('promoBanner');
-            // Если у юзера есть ключ на 30+ дней, рекламу не показываем
-            const hasPremium = user.keys.some(k => (k.expire - Date.now()) > 600000000); 
-            
-            if(db.promo.active && !hasPremium && db.promo.text) {
-                banner.style.display = 'flex';
-                document.getElementById('promoText').innerText = db.promo.text;
-                document.getElementById('promoLink').href = db.promo.url;
-                if(db.promo.img) {
-                    document.getElementById('promoImg').src = db.promo.img;
-                    document.getElementById('promoImg').classList.remove('hidden');
-                }
-            } else {
-                banner.style.display = 'none';
-            }
-        }
-
         function buyKey(id) {
             const p = db.products.find(x => x.id === id);
             if(user.bal < p.pr) return Swal.fire('Недостаточно средств', 'Пополни баланс в кабинете', 'error');
-            
             Swal.fire({
-                title: 'ВЫБЕРИ УСТРОЙСТВО',
-                background: '#191c24', color: '#fff',
+                title: 'ВЫБЕРИ УСТРОЙСТВО', background: '#191c24', color: '#fff',
                 showCancelButton: true, confirmButtonText: 'iPhone', cancelButtonText: 'Android',
                 confirmButtonColor: '#5865f2', cancelButtonColor: '#22c55e'
             }).then((r) => {
                 const type = r.isConfirmed ? 'stock_ios' : 'stock_and';
                 if(db[type].length === 0) return Swal.fire('Ключи закончились', 'Напиши владельцу @sswckk', 'warning');
-                
                 const key = db[type].shift();
                 user.bal -= p.pr;
                 user.keys.unshift({ key, name: p.name, expire: Date.now() + (p.h * 3600000) });
@@ -210,54 +183,62 @@
             `).join('');
         }
 
-        function checkAdmin() { if(document.getElementById('promoInp').value === '67АРТЁМ67') document.getElementById('adminBtn').classList.remove('hidden'); }
-        
-        function addNewProduct() {
-            const n = document.getElementById('nt_name').value;
-            const p = parseInt(document.getElementById('nt_price').value);
-            const h = parseInt(document.getElementById('nt_hours').value);
-            if(n && p && h) {
-                db.products.push({ id: Date.now(), name: n, pr: p, h: h, icon: "⭐️" });
-                save(); sync();
-            }
-        }
-
-        function loadAdmin() {
-            document.getElementById('a_promo_text').value = db.promo.text;
-            document.getElementById('a_promo_img').value = db.promo.img;
-            document.getElementById('a_promo_url').value = db.promo.url;
-            document.getElementById('a_ios').value = db.stock_ios.join('\n');
-            document.getElementById('a_and').value = db.stock_and.join('\n');
-        }
-
-        function saveAdmin() {
-            db.promo.text = document.getElementById('a_promo_text').value;
-            db.promo.img = document.getElementById('a_promo_img').value;
-            db.promo.url = document.getElementById('a_promo_url').value;
-            db.stock_ios = document.getElementById('a_ios').value.split('\n').filter(l => l.length > 5);
-            db.stock_and = document.getElementById('a_and').value.split('\n').filter(l => l.length > 5);
-            save(); location.reload();
-        }
-
-        function topUp() {
+        function installApp() {
+            const url = "https://davadavydov2024-source.github.io/dogx-vpn-site/";
             Swal.fire({
-                title: 'ПОПОЛНЕНИЕ',
-                background: '#191c24', color: '#fff',
-                html: `<p class="text-sm opacity-70 mb-4">Для оплаты напишите мне в Telegram:</p>
-                       <a href="https://t.me/sswckk" target="_blank" class="text-2xl font-black text-blue-500 underline">@sswckk</a>`,
+                title: 'УСТАНОВКА APP', background: '#191c24', color: '#fff',
+                html: `
+                    <div class="text-left space-y-4 p-2">
+                        <div class="p-4 player-card bg-blue-500/10">
+                            <p class="text-[11px] mb-3 opacity-80">Чтобы сделать приложение на своем главном экране нужно зайти на сайт:</p>
+                            <div class="flex gap-2">
+                                <a href="${url}" target="_blank" class="flex-1 py-3 btn-primary text-center text-[10px]">ОТКРЫТЬ САЙТ</a>
+                                <button onclick="navigator.clipboard.writeText('${url}'); Swal.fire('Ок!','','success')" class="px-4 player-card"><i class="fas fa-copy"></i></button>
+                            </div>
+                        </div>
+                        <div class="text-[10px] opacity-60 space-y-2 pl-2">
+                            <p>1. Нажмите кнопку <b>"Поделиться"</b> <i class="fas fa-share-square ml-1"></i></p>
+                            <p>2. Выберите <b>"На экран Домой"</b> <i class="fas fa-plus-square ml-1"></i></p>
+                            <p>3. Нажмите <b>"Добавить"</b> и все готово!</p>
+                        </div>
+                    </div>`,
                 showConfirmButton: false
             });
         }
 
-        function installApp() {
-            Swal.fire({
-                title: 'УСТАНОВКА',
-                background: '#191c24', color: '#fff',
-                text: '(все эти действия тут - https://davadavydov2024-source.github.io/dogx-vpn-site/ )Нажми "Поделиться" -> "На экран Домой"',
-                confirmButtonColor: '#5865f2'
-            });
+        function renderPromo() {
+            const banner = document.getElementById('promoBanner');
+            const hasPremium = user.keys.some(k => (k.expire - Date.now()) > 600000000); 
+            if(db.promo.active && !hasPremium && db.promo.text) {
+                banner.style.display = 'flex';
+                document.getElementById('promoText').innerText = db.promo.text;
+                document.getElementById('promoLink').href = db.promo.url;
+                if(db.promo.img) { document.getElementById('promoImg').src = db.promo.img; document.getElementById('promoImg').classList.remove('hidden'); }
+            } else { banner.style.display = 'none'; }
         }
 
+        function checkAdmin() { if(document.getElementById('promoInp').value === '67АРТЁМ67') document.getElementById('adminBtn').classList.remove('hidden'); }
+        function addNewProduct() {
+            const n = document.getElementById('nt_name').value, p = parseInt(document.getElementById('nt_price').value), h = parseInt(document.getElementById('nt_hours').value);
+            if(n && p && h) { db.products.push({ id: Date.now(), name: n, pr: p, h: h, icon: "⭐️" }); save(); sync(); }
+        }
+        function loadAdmin() {
+            document.getElementById('a_promo_text').value = db.promo.text; document.getElementById('a_promo_img').value = db.promo.img;
+            document.getElementById('a_promo_url').value = db.promo.url; document.getElementById('a_ios').value = db.stock_ios.join('\n'); document.getElementById('a_and').value = db.stock_and.join('\n');
+        }
+        function saveAdmin() {
+            db.promo.text = document.getElementById('a_promo_text').value; db.promo.img = document.getElementById('a_promo_img').value;
+            db.promo.url = document.getElementById('a_promo_url').value; db.stock_ios = document.getElementById('a_ios').value.split('\n').filter(l => l.length > 5);
+            db.stock_and = document.getElementById('a_and').value.split('\n').filter(l => l.length > 5);
+            save(); location.reload();
+        }
+        function topUp() {
+            Swal.fire({
+                title: 'ПОПОЛНЕНИЕ', background: '#191c24', color: '#fff',
+                html: `<p class="text-sm opacity-70 mb-4">Напишите мне для оплаты:</p><a href="https://t.me/sswckk" target="_blank" class="text-2xl font-black text-blue-500 underline">@sswckk</a>`,
+                showConfirmButton: false
+            });
+        }
         function save() { localStorage.setItem('dog_v18_db', JSON.stringify(db)); localStorage.setItem('dog_v18_user', JSON.stringify(user)); }
         function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
     </script>
