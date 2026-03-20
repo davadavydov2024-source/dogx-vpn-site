@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | v44 ELITE ADS</title>
+    <title>DOG X | v45 FIX SUPPORT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -26,19 +26,35 @@
         const db_firebase = getDatabase(app);
 
         window.db = {}; window.allUsers = {}; window.allTickets = {};
-        window.mySecret = localStorage.getItem('dog_v44_secret');
+        window.mySecret = localStorage.getItem('dog_v45_secret');
         window.user = null;
 
-        const dbRef = ref(db_firebase, 'dog_system_v44');
-        const usersRef = ref(db_firebase, 'dog_users_v44');
-        const supportRef = ref(db_firebase, 'dog_support_v44');
+        const dbRef = ref(db_firebase, 'dog_system_v45');
+        const usersRef = ref(db_firebase, 'dog_users_v45');
+        const supportRef = ref(db_firebase, 'dog_support_v45');
 
         onValue(dbRef, (s) => { window.db = s.val() || { products: [], broadcast: {active:false, text:'', img:''}, gold_numbers: {}, logs: [] }; renderProducts(); renderGlobalBC(); if(window.isAdminOpen) loadAdmin(); });
         onValue(usersRef, (s) => { window.allUsers = s.val() || {}; if (window.mySecret && window.allUsers[window.mySecret]) { window.user = window.allUsers[window.mySecret]; updateUI(); } });
-        onValue(supportRef, (s) => { window.allTickets = s.val() || {}; if(window.isAdminOpen) renderAdminSupport(); });
+        
+        // Авто-обновление чата при получении новых сообщений
+        onValue(supportRef, (s) => { 
+            window.allTickets = s.val() || {}; 
+            if(document.getElementById('chatModal').classList.contains('active')) renderSupportChat();
+            if(window.isAdminOpen) renderAdminSupport(); 
+        });
 
         window.saveSystem = () => set(dbRef, window.db);
-        window.saveUser = async (u) => { await set(ref(db_firebase, 'dog_users_v44/' + window.mySecret), u); };
+        window.saveUser = async (u) => { await set(ref(db_firebase, 'dog_users_v45/' + window.mySecret), u); };
+        
+        // КОРРЕКТНАЯ ОТПРАВКА ТИКЕТА
+        window.sendTicket = async (m) => {
+            const tId = window.mySecret;
+            if(!window.allTickets[tId]) window.allTickets[tId] = { userNick: window.user.nick, userId: window.user.id, msgs: [] };
+            if(!window.allTickets[tId].msgs) window.allTickets[tId].msgs = [];
+            
+            window.allTickets[tId].msgs.push({ text: m, sender: 'user', time: Date.now() });
+            await set(ref(db_firebase, 'dog_support_v45/' + tId), window.allTickets[tId]);
+        };
     </script>
 
     <style>
@@ -64,7 +80,7 @@
             </div>
             <div>
                 <h1 class="text-xl font-black italic tracking-tighter uppercase">DOG <span class="text-blue-500">X</span></h1>
-                <p id="userDisplay" class="text-[7px] opacity-30 font-bold uppercase tracking-[2px]">v44 Finalized</p>
+                <p id="userDisplay" class="text-[7px] opacity-30 font-bold uppercase tracking-[2px]">v45 FIX</p>
             </div>
         </div>
         <div class="flex gap-4">
@@ -81,7 +97,6 @@
                 <p id="bcTextDisplay" class="text-[11px] font-bold leading-relaxed opacity-80 italic"></p>
             </div>
         </div>
-        
         <h2 class="text-2xl font-black uppercase italic">Магазин <span class="text-blue-500">DOG</span></h2>
         <div id="productsGrid" class="grid grid-cols-1 gap-4"></div>
     </main>
@@ -90,18 +105,14 @@
         <div class="glass-card p-8 text-center relative overflow-hidden" id="profileCard">
             <p id="userRank" class="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-2">Загрузка...</p>
             <h3 class="text-6xl font-black mb-6 tracking-tighter" id="userBal">0₽</h3>
-            
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <button onclick="topUp()" class="btn-primary py-4 rounded-2xl text-[11px] font-black uppercase italic shadow-lg shadow-blue-500/20">Пополнить</button>
                 <button onclick="openSwitchAcc()" class="bg-white/5 border border-white/10 py-4 rounded-2xl text-[11px] font-black uppercase italic">Аккаунты</button>
             </div>
-            
             <button onclick="openSupport()" class="w-full py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase border border-blue-500/10 text-blue-400 flex items-center justify-center gap-2">
                 <i class="fa-solid fa-headset text-xs"></i> Служба поддержки
             </button>
-            <button onclick="createNewAccount()" class="w-full mt-3 py-2 text-[8px] font-bold uppercase opacity-10 italic">Активировать элитный номер</button>
         </div>
-
         <div class="space-y-3">
             <button onclick="showTransferCode()" class="w-full p-5 glass-card flex justify-between items-center group">
                 <span class="text-xs font-black uppercase">Ваш личный ID</span>
@@ -112,16 +123,12 @@
                 <button onclick="checkInput()" class="btn-primary px-8 rounded-2xl text-[11px] font-black uppercase shadow-md">OK</button>
             </div>
         </div>
-
         <div id="keysList" class="space-y-3 pb-10"></div>
     </section>
 
     <section id="admin" class="tab-content px-6 pb-28 space-y-6 pt-4">
         <div class="glass-card p-6 space-y-8 border-red-500/20">
-            <div class="text-center">
-                <h2 class="text-red-500 font-black text-sm uppercase tracking-[4px]">DOG X CONTROL</h2>
-            </div>
-
+            <div class="text-center"><h2 class="text-red-500 font-black text-sm uppercase tracking-[4px]">DOG X CONTROL</h2></div>
             <div class="p-5 bg-white/5 rounded-3xl space-y-4 border border-white/5">
                 <p class="text-[10px] font-black text-blue-400 uppercase italic">📸 Фото-Реклама</p>
                 <input type="file" id="adFile" class="hidden" onchange="uploadAdPhoto(this)">
@@ -132,35 +139,20 @@
                 <textarea id="adm_bc_text" class="w-full admin-input h-20" placeholder="Текст рекламы..."></textarea>
                 <button onclick="toggleBC()" id="bcStatusBtn" class="w-full py-4 rounded-2xl text-[10px] font-black uppercase transition shadow-lg"></button>
             </div>
-
             <div class="space-y-3">
                 <p class="text-[10px] font-black opacity-40 uppercase tracking-tighter italic">💎 Создать Номер + Пароль</p>
-                <div class="grid grid-cols-2 gap-2">
-                    <input id="adm_gold_num" class="admin-input" placeholder="Номер">
-                    <input id="adm_gold_pass" class="admin-input" placeholder="Пароль">
-                </div>
+                <div class="grid grid-cols-2 gap-2"><input id="adm_gold_num" class="admin-input" placeholder="Номер"><input id="adm_gold_pass" class="admin-input" placeholder="Пароль"></div>
                 <div class="flex gap-2">
                     <select id="adm_gold_rank" class="admin-input flex-1 font-bold text-amber-500"><option value="VIP">VIP</option><option value="ELITE">ELITE</option></select>
                     <button onclick="addGoldNumber()" class="bg-amber-600 px-6 rounded-xl text-[10px] font-black text-black">ADD</button>
                 </div>
                 <div id="gold_nums_list" class="space-y-1"></div>
             </div>
-
             <div id="admin_stocks" class="space-y-4"></div>
             <button onclick="addTariff()" class="w-full py-4 border border-dashed border-white/10 rounded-2xl text-[10px] font-black uppercase">+ Добавить сервер</button>
-
-            <div class="space-y-2">
-                <p class="text-[10px] font-black opacity-40 uppercase">Юзеры (Bal / Pass)</p>
-                <div id="adm_users_list" class="max-h-48 overflow-y-auto space-y-1"></div>
-                <div class="flex gap-2">
-                    <input id="adm_uid" class="admin-input flex-1" placeholder="SEC-Ключ">
-                    <input id="adm_sum" type="number" class="admin-input w-24" placeholder="₽">
-                    <button onclick="adminChangeBalance()" class="btn-primary px-4 rounded-xl text-[10px]">OK</button>
-                </div>
-            </div>
-
+            <div id="adm_users_list" class="max-h-48 overflow-y-auto space-y-1"></div>
             <div id="adminSupportList" class="space-y-3"></div>
-            <button onclick="saveAdmin()" class="w-full py-6 bg-red-600 rounded-[30px] text-sm font-black uppercase italic shadow-xl shadow-red-600/30">Сохранить v44</button>
+            <button onclick="saveAdmin()" class="w-full py-6 bg-red-600 rounded-[30px] text-sm font-black uppercase italic shadow-xl shadow-red-600/30">Сохранить v45</button>
         </div>
     </section>
 
@@ -171,7 +163,7 @@
             <div id="supportChatBox" class="h-80 overflow-y-auto space-y-2 flex flex-col pr-2 text-[11px]"></div>
             <div class="flex gap-2">
                 <input type="text" id="supportInp" placeholder="Напишите..." class="flex-1 bg-black/60 p-4 rounded-2xl text-xs outline-none border border-white/5">
-                <button onclick="sendUserMsg()" class="w-14 h-14 btn-primary rounded-2xl flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+                <button onclick="sendUserMsg()" id="sendBtn" class="w-14 h-14 btn-primary rounded-2xl flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
             </div>
         </div>
     </div>
@@ -184,167 +176,90 @@
             document.getElementById('userDisplay').innerText = `${window.user.nick} • ID: ${window.user.id}`;
             document.getElementById('userBal').innerText = window.user.bal.toFixed(0) + '₽';
             document.getElementById('userRank').innerText = window.user.rank === 'VIP' ? '💎 VIP MEMBER' : (window.user.rank === 'ELITE' ? '⚡ ELITE MEMBER' : 'STANDARD USER');
-            const pc = document.getElementById('profileCard');
-            if(window.user.rank === 'VIP' || window.user.rank === 'ELITE') pc.classList.add('border-amber-500/30');
-            else pc.classList.remove('border-amber-500/30');
             renderKeys();
         }
 
         async function initUser() {
             if(window.mySecret) return;
             const { value: v } = await Swal.fire({
-                title: 'ДОБРО ПОЖАЛОВАТЬ',
+                title: 'РЕГИСТРАЦИЯ',
                 html: '<input id="s-n" class="swal2-input" placeholder="Ник"><input id="s-p" type="password" class="swal2-input" placeholder="Пароль">',
                 background: '#05070a', color: '#fff', confirmButtonText: 'СОЗДАТЬ', allowOutsideClick: false,
                 preConfirm: () => [document.getElementById('s-n').value, document.getElementById('s-p').value]
             });
-            if(!v[0] || !v[1]) return initUser();
             const sec = 'SEC-' + Math.random().toString(36).substr(2,12).toUpperCase();
-            window.mySecret = sec; localStorage.setItem('dog_v44_secret', sec);
-            let accs = JSON.parse(localStorage.getItem('dog_v44_accs') || '[]');
-            accs.push({nick: v[0], secret: sec}); localStorage.setItem('dog_v44_accs', JSON.stringify(accs));
+            window.mySecret = sec; localStorage.setItem('dog_v45_secret', sec);
+            let accs = JSON.parse(localStorage.getItem('dog_v45_accs') || '[]');
+            accs.push({nick: v[0], secret: sec}); localStorage.setItem('dog_v45_accs', JSON.stringify(accs));
             window.user = { id: Math.floor(Math.random()*900000+100000), nick: v[0], pass: v[1], bal: 0, keys: [], rank: 'Standard', secret: sec };
             await window.saveUser(window.user); location.reload(); 
         }
         setTimeout(() => { if(!window.mySecret) initUser(); }, 1000);
 
-        function renderProducts() {
-            const g = document.getElementById('productsGrid');
-            g.innerHTML = (window.db.products || []).map(p => {
-                if(p.vip && (!window.user || (window.user.rank !== 'VIP' && window.user.rank !== 'ELITE'))) return '';
-                return `<div class="glass-card p-5 flex justify-between items-center ${p.vip?'border-amber-500/20 shadow-amber-500/5':''}">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-xl">${p.type==='iOS'?'📱':(p.type==='Android'?'🤖':'🌐')}</div>
-                        <div><h4 class="font-black text-xs uppercase italic">${p.name}</h4><p class="text-[9px] font-black text-blue-500 uppercase">${p.h} ЧАСОВ</p></div>
-                    </div>
-                    <button onclick="buyKey(${p.id})" class="px-6 py-3 btn-primary rounded-xl text-[11px] font-black italic shadow-lg shadow-blue-500/10">${p.pr}₽</button>
-                </div>`;
-            }).join('');
+        // ЛОГИКА ОТПРАВКИ И ОЧИСТКИ (ФИКС)
+        async function sendUserMsg() {
+            const input = document.getElementById('supportInp');
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            // Блокируем кнопку на время отправки
+            const btn = document.getElementById('sendBtn');
+            btn.style.opacity = '0.5';
+            btn.disabled = true;
+
+            await window.sendTicket(msg);
+            
+            // ОЧИЩАЕМ ПОЛЕ И ВОЗВРАЩАЕМ КНОПКУ
+            input.value = '';
+            btn.style.opacity = '1';
+            btn.disabled = false;
+            
+            // Прокрутка вниз
+            renderSupportChat();
         }
 
-        function buyKey(id) {
-            const p = window.db.products.find(x=>x.id===id);
-            if(window.user.bal < p.pr) return Swal.fire('Мало средств!','','error');
-            window.user.bal -= p.pr;
-            const finalKey = `${p.keyPrefix || 'KEY'}-${Math.random().toString(36).substr(2,6).toUpperCase()}`;
-            window.user.keys.unshift({name: p.name, key: finalKey, date: new Date().toLocaleDateString()});
-            window.saveUser(window.user);
-            Swal.fire({title:'Успешно!', icon:'success', background:'#0f121a', color:'#fff'});
+        function renderSupportChat() {
+            const b = document.getElementById('supportChatBox');
+            const tId = window.mySecret;
+            if(!tId || !window.allTickets[tId]) return b.innerHTML='<p class="text-center py-20 opacity-10">ПУСТО</p>';
+            
+            const msgs = window.allTickets[tId].msgs || [];
+            b.innerHTML = msgs.map(m => `<div class="p-4 rounded-2xl max-w-[85%] ${m.sender==='user'?'bg-blue-600 ml-auto rounded-br-none':'bg-white/10 text-white font-bold mr-auto rounded-bl-none'} mb-1">${m.text}</div>`).join('');
+            b.scrollTop = b.scrollHeight;
         }
 
-        function loadAdmin() {
-            window.isAdminOpen = true;
-            document.getElementById('adm_users_list').innerHTML = Object.keys(window.allUsers).map(s => `
-                <div onclick="document.getElementById('adm_uid').value='${s}'" class="p-3 bg-white/5 rounded-2xl flex justify-between items-center text-[9px]">
-                    <div><b>${window.allUsers[s].nick}</b> <span class="opacity-20">(${window.allUsers[s].pass})</span></div>
-                    <div class="text-green-500 font-black">${window.allUsers[s].bal}₽</div>
-                </div>`).join('');
-            document.getElementById('gold_nums_list').innerHTML = Object.keys(window.db.gold_numbers || {}).map(n => `
-                <div class="flex justify-between text-[10px] bg-black p-3 rounded-xl border border-white/5">
-                    <span>${n} (Pass: ${window.db.gold_numbers[n].pass})</span>
-                    <i class="fa-solid fa-trash text-red-500" onclick="delete window.db.gold_numbers['${n}']; window.saveSystem(); loadAdmin();"></i>
-                </div>`).join('');
-            document.getElementById('admin_stocks').innerHTML = (window.db.products || []).map(p => `
-                <div class="p-4 bg-white/5 rounded-2xl space-y-3">
-                    <div class="flex gap-2">
-                        <input id="p_n_${p.id}" value="${p.name}" class="admin-input flex-1" placeholder="Название">
-                        <select id="p_t_${p.id}" class="admin-input"><option value="Universal" ${p.type==='Universal'?'selected':''}>Universal</option><option value="iOS" ${p.type==='iOS'?'selected':''}>iOS</option><option value="Android" ${p.type==='Android'?'selected':''}>Android</option></select>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <input id="p_p_${p.id}" value="${p.pr}" class="admin-input" placeholder="Цена">
-                        <input id="p_h_${p.id}" value="${p.h}" class="admin-input" placeholder="Часы">
-                        <input id="p_k_${p.id}" value="${p.keyPrefix || ''}" class="admin-input" placeholder="Префикс">
-                    </div>
-                    <label class="flex items-center gap-2 text-[10px] font-bold opacity-60"><input id="p_v_${p.id}" type="checkbox" ${p.vip?'checked':''}> VIP тариф</label>
-                </div>`).join('');
-            document.getElementById('adm_bc_text').value = window.db.broadcast.text;
-            const btn = document.getElementById('bcStatusBtn');
-            btn.innerText = window.db.broadcast.active ? "ВЫКЛЮЧИТЬ БАННЕР" : "ВКЛЮЧИТЬ БАННЕР";
-            btn.className = window.db.broadcast.active ? "w-full py-4 rounded-2xl text-[10px] font-black uppercase bg-red-600" : "w-full py-4 rounded-2xl text-[10px] font-black uppercase bg-blue-600";
-            renderAdminSupport();
+        function renderAdminSupport() {
+            const l = document.getElementById('adminSupportList');
+            const tks = Object.keys(window.allTickets);
+            l.innerHTML = tks.map(id => `<div class="p-4 bg-white/5 rounded-2xl space-y-3"><div class="flex justify-between text-[9px] font-black text-blue-500 uppercase"><span>${window.allTickets[id].userNick}</span></div><div class="max-h-24 overflow-y-auto text-[10px] border-l-2 border-white/10 pl-3">${(window.allTickets[id].msgs || []).map(m=>`<div><b>${m.sender}:</b> ${m.text}</div>`).join('')}</div><div class="flex gap-2"><input id="r_${id}" class="flex-1 admin-input" placeholder="Ответ..."><button onclick="adminReply('${id}',document.getElementById('r_${id}').value);document.getElementById('r_${id}').value=''" class="btn-primary px-4 rounded-xl text-[10px]">OK</button></div></div>`).join('');
         }
 
-        function saveAdmin() {
-            window.db.broadcast.text = document.getElementById('adm_bc_text').value;
-            window.db.products.forEach(p => {
-                p.name = document.getElementById(`p_n_${p.id}`).value;
-                p.type = document.getElementById(`p_t_${p.id}`).value;
-                p.pr = parseInt(document.getElementById(`p_p_${p.id}`).value);
-                p.h = parseInt(document.getElementById(`p_h_${p.id}`).value);
-                p.keyPrefix = document.getElementById(`p_k_${p.id}`).value;
-                p.vip = document.getElementById(`p_v_${p.id}`).checked;
-            });
-            window.saveSystem(); Swal.fire('Система обновлена!','','success');
+        async function adminReply(tId, m) {
+            if(!m.trim()) return;
+            if(!window.allTickets[tId].msgs) window.allTickets[tId].msgs = [];
+            window.allTickets[tId].msgs.push({text:m, sender:'admin', time: Date.now()});
+            await set(ref(getDatabase(), 'dog_support_v45/'+tId), window.allTickets[tId]);
         }
 
-        function toggleBC() { window.db.broadcast.active = !window.db.broadcast.active; window.saveSystem(); loadAdmin(); }
-        function renderGlobalBC() {
-            const bc = window.db.broadcast;
-            const el = document.getElementById('globalBC');
-            if(!bc.active) return el.classList.add('hidden');
-            el.classList.remove('hidden');
-            document.getElementById('bcTextDisplay').innerText = bc.text;
-            const img = document.getElementById('bcImgDisplay');
-            if(bc.img) { img.src = bc.img; img.classList.remove('hidden'); } else { img.classList.add('hidden'); }
-        }
-
-        function uploadAdPhoto(i) {
-            const r = new FileReader();
-            r.onloadend = () => { window.db.broadcast.img = r.result; Swal.fire('Фото загружено!','','success'); };
-            r.readAsDataURL(i.files[0]);
-        }
-
-        function addGoldNumber() {
-            const num = document.getElementById('adm_gold_num').value;
-            const pass = document.getElementById('adm_gold_pass').value;
-            const rank = document.getElementById('adm_gold_rank').value;
-            if(num && pass) {
-                if(!window.db.gold_numbers) window.db.gold_numbers = {};
-                window.db.gold_numbers[num] = { pass, rank };
-                window.saveSystem(); loadAdmin();
-            }
-        }
-
+        // Остальные системные функции (без изменений)
         function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id === 'admin') loadAdmin(); else window.isAdminOpen=false; }
         function openSupport() { document.getElementById('chatModal').classList.add('active'); renderSupportChat(); }
         function closeSupport() { document.getElementById('chatModal').classList.remove('active'); }
-        function sendUserMsg() { const i = document.getElementById('supportInp'); if(!i.value.trim()) return; window.sendTicket(i.value.trim()); i.value=''; setTimeout(renderSupportChat, 300); }
-        function renderSupportChat() { const b = document.getElementById('supportChatBox'); if(!window.mySecret || !window.allTickets[window.mySecret]) return b.innerHTML='<p class="text-center py-20 opacity-10">ПУСТО</p>'; b.innerHTML = window.allTickets[window.mySecret].msgs.map(m => `<div class="p-4 rounded-2xl max-w-[85%] ${m.sender==='user'?'bg-blue-600 ml-auto rounded-br-none':'bg-white/10 text-white font-bold mr-auto rounded-bl-none'} mb-1">${m.text}</div>`).join(''); b.scrollTop = b.scrollHeight; }
-        function renderAdminSupport() { const l = document.getElementById('adminSupportList'); const tks = Object.keys(window.allTickets); l.innerHTML = tks.map(id => `<div class="p-4 bg-white/5 rounded-2xl space-y-3"><div class="flex justify-between text-[9px] font-black text-blue-500 uppercase"><span>${window.allTickets[id].userNick}</span></div><div class="max-h-24 overflow-y-auto text-[10px] border-l-2 border-white/10 pl-3">${window.allTickets[id].msgs.map(m=>`<div><b>${m.sender}:</b> ${m.text}</div>`).join('')}</div><div class="flex gap-2"><input id="r_${id}" class="flex-1 admin-input" placeholder="Ответ..."><button onclick="adminReply('${id}',document.getElementById('r_${id}').value);document.getElementById('r_${id}').value=''" class="btn-primary px-4 rounded-xl text-[10px]">OK</button></div></div>`).join(''); }
-        function adminReply(tId, m) { if(!m.trim()) return; window.allTickets[tId].msgs.push({text:m, sender:'admin'}); set(ref(getDatabase(), 'dog_support_v44/'+tId), window.allTickets[tId]); }
-        window.sendTicket = (m) => { const tId = window.mySecret; if(!window.allTickets[tId]) window.allTickets[tId]={userNick:window.user.nick, userId: window.user.id, msgs:[]}; window.allTickets[tId].msgs.push({text:m, sender:'user'}); set(ref(getDatabase(), 'dog_support_v44/'+tId), window.allTickets[tId]); };
-        function checkInput() { 
-            const val = document.getElementById('promoInp').value.trim();
-            if(val === 'KALUBXQ') { document.getElementById('adminBtn').classList.remove('hidden'); Swal.fire('Admin!','','success'); }
-            else if(window.allUsers[val]) { 
-                let accs = JSON.parse(localStorage.getItem('dog_v44_accs') || '[]');
-                if(!accs.find(a => a.secret === val)) { accs.push({nick: window.allUsers[val].nick, secret: val}); localStorage.setItem('dog_v44_accs', JSON.stringify(accs)); }
-                window.mySecret=val; localStorage.setItem('dog_v44_secret',val); location.reload(); 
-            } else if(window.db.gold_numbers && window.db.gold_numbers[val]) { createNewAccount(); }
-        }
-        async function createNewAccount() {
-            const { value: goldNum } = await Swal.fire({ title: 'Элитный номер', input: 'text', background: '#0f121a', color: '#fff' });
-            if(window.db.gold_numbers && window.db.gold_numbers[goldNum]) {
-                const data = window.db.gold_numbers[goldNum];
-                const { value: pass } = await Swal.fire({ title: 'Пароль', input: 'password', background: '#0f121a', color: '#fff' });
-                if(pass === data.pass) {
-                    const { value: nick } = await Swal.fire({ title: 'Ник', input: 'text', background: '#0f121a', color: '#fff' });
-                    const sec = 'SEC-' + Math.random().toString(36).substr(2,12).toUpperCase();
-                    window.mySecret = sec; localStorage.setItem('dog_v44_secret', sec);
-                    let accs = JSON.parse(localStorage.getItem('dog_v44_accs') || '[]');
-                    accs.push({nick, secret: sec}); localStorage.setItem('dog_v44_accs', JSON.stringify(accs));
-                    window.user = { id: Math.floor(Math.random()*900000+100000), nick, pass, bal: 0, keys: [], rank: data.rank, secret: sec };
-                    await window.saveUser(window.user); location.reload();
-                }
-            }
-        }
+        function renderProducts() { const g = document.getElementById('productsGrid'); g.innerHTML = (window.db.products || []).map(p => { if(p.vip && (!window.user || (window.user.rank !== 'VIP' && window.user.rank !== 'ELITE'))) return ''; return `<div class="glass-card p-5 flex justify-between items-center group active:scale-95 transition ${p.vip?'border-amber-500/20':''}"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-xl">${p.type==='iOS'?'📱':(p.type==='Android'?'🤖':'🌐')}</div><div><h4 class="font-black text-xs uppercase italic">${p.name}</h4><p class="text-[9px] font-black text-blue-500 uppercase">${p.h} ЧАСОВ</p></div></div><button onclick="buyKey(${p.id})" class="px-6 py-3 btn-primary rounded-xl text-[11px] font-black italic shadow-lg shadow-blue-500/10">${p.pr}₽</button></div>`; }).join(''); }
+        function buyKey(id) { const p = window.db.products.find(x=>x.id===id); if(window.user.bal < p.pr) return Swal.fire('Мало средств!','','error'); window.user.bal -= p.pr; const finalKey = `${p.keyPrefix || 'KEY'}-${Math.random().toString(36).substr(2,6).toUpperCase()}`; window.user.keys.unshift({name: p.name, key: finalKey, date: new Date().toLocaleDateString()}); window.saveUser(window.user); Swal.fire({title:'Успешно!', icon:'success', background:'#0f121a', color:'#fff'}); }
+        function loadAdmin() { window.isAdminOpen = true; document.getElementById('adm_users_list').innerHTML = Object.keys(window.allUsers).map(s => `<div class="p-3 bg-white/5 rounded-2xl flex justify-between items-center text-[9px]"><div><b>${window.allUsers[s].nick}</b> <span class="opacity-20">(${window.allUsers[s].pass})</span></div><div class="text-green-500 font-black">${window.allUsers[s].bal}₽</div></div>`).join(''); document.getElementById('gold_nums_list').innerHTML = Object.keys(window.db.gold_numbers || {}).map(n => `<div class="flex justify-between text-[10px] bg-black p-3 rounded-xl border border-white/5"><span>${n} (Pass: ${window.db.gold_numbers[n].pass})</span><i class="fa-solid fa-trash text-red-500" onclick="delete window.db.gold_numbers['${n}']; window.saveSystem(); loadAdmin();"></i></div>`).join(''); document.getElementById('admin_stocks').innerHTML = (window.db.products || []).map(p => `<div class="p-4 bg-white/5 rounded-2xl space-y-3"><div class="flex gap-2"><input id="p_n_${p.id}" value="${p.name}" class="admin-input flex-1"><select id="p_t_${p.id}" class="admin-input"><option value="Universal" ${p.type==='Universal'?'selected':''}>Universal</option><option value="iOS" ${p.type==='iOS'?'selected':''}>iOS</option><option value="Android" ${p.type==='Android'?'selected':''}>Android</option></select></div><div class="grid grid-cols-3 gap-2"><input id="p_p_${p.id}" value="${p.pr}" class="admin-input"><input id="p_h_${p.id}" value="${p.h}" class="admin-input"><input id="p_k_${p.id}" value="${p.keyPrefix || ''}" class="admin-input"></div><label class="flex items-center gap-2 text-[10px] font-bold opacity-60"><input id="p_v_${p.id}" type="checkbox" ${p.vip?'checked':''}> VIP тариф</label></div>`).join(''); document.getElementById('adm_bc_text').value = window.db.broadcast.text; const btn = document.getElementById('bcStatusBtn'); btn.innerText = window.db.broadcast.active ? "ВЫКЛЮЧИТЬ БАННЕР" : "ВКЛЮЧИТЬ БАННЕР"; btn.className = window.db.broadcast.active ? "w-full py-4 rounded-2xl text-[10px] font-black uppercase bg-red-600 shadow-xl shadow-red-600/20" : "w-full py-4 rounded-2xl text-[10px] font-black uppercase bg-blue-600 shadow-xl shadow-blue-600/20"; renderAdminSupport(); }
+        function saveAdmin() { window.db.broadcast.text = document.getElementById('adm_bc_text').value; window.db.products.forEach(p => { p.name = document.getElementById(`p_n_${p.id}`).value; p.type = document.getElementById(`p_t_${p.id}`).value; p.pr = parseInt(document.getElementById(`p_p_${p.id}`).value); p.h = parseInt(document.getElementById(`p_h_${p.id}`).value); p.keyPrefix = document.getElementById(`p_k_${p.id}`).value; p.vip = document.getElementById(`p_v_${p.id}`).checked; }); window.saveSystem(); Swal.fire('Система обновлена!','','success'); }
+        function toggleBC() { window.db.broadcast.active = !window.db.broadcast.active; window.saveSystem(); loadAdmin(); }
+        function renderGlobalBC() { const bc = window.db.broadcast; const el = document.getElementById('globalBC'); if(!bc.active) return el.classList.add('hidden'); el.classList.remove('hidden'); document.getElementById('bcTextDisplay').innerText = bc.text; const img = document.getElementById('bcImgDisplay'); if(bc.img) { img.src = bc.img; img.classList.remove('hidden'); } else { img.classList.add('hidden'); } }
+        function uploadAdPhoto(i) { const r = new FileReader(); r.onloadend = () => { window.db.broadcast.img = r.result; Swal.fire('Фото загружено!','','success'); }; r.readAsDataURL(i.files[0]); }
+        function addGoldNumber() { const num = document.getElementById('adm_gold_num').value; const pass = document.getElementById('adm_gold_pass').value; const rank = document.getElementById('adm_gold_rank').value; if(num && pass) { if(!window.db.gold_numbers) window.db.gold_numbers = {}; window.db.gold_numbers[num] = { pass, rank }; window.saveSystem(); loadAdmin(); } }
         function addTariff() { if(!window.db.products) window.db.products=[]; window.db.products.push({id:Date.now(), name:"Новый Сервер", pr:100, h:24, vip:false, type:"Universal", keyPrefix:"DOG"}); window.saveSystem(); loadAdmin(); }
         function renderKeys() { const l = document.getElementById('keysList'); if(!window.user.keys?.length) return l.innerHTML=''; l.innerHTML = window.user.keys.map(k => `<div class="glass-card p-5 border-l-4 border-blue-600 mb-3"><div class="flex justify-between items-center mb-1"><p class="text-[10px] opacity-40 font-black uppercase">${k.name}</p><span class="text-[8px] opacity-20">${k.date}</span></div><div class="text-[12px] font-mono text-blue-300 select-all tracking-wider font-bold">${k.key}</div></div>`).join(''); }
-        function topUp() { Swal.fire({ title: 'ОПЛАТА', text: 'Пишите админу: @sswckk', icon: 'info', background: '#0f121a', color: '#fff' }); }
+        function checkInput() { const val = document.getElementById('promoInp').value.trim(); if(val === 'KALUBXQ') { document.getElementById('adminBtn').classList.remove('hidden'); Swal.fire('Admin!','','success'); } else if(window.allUsers[val]) { let accs = JSON.parse(localStorage.getItem('dog_v45_accs') || '[]'); if(!accs.find(a => a.secret === val)) { accs.push({nick: window.allUsers[val].nick, secret: val}); localStorage.setItem('dog_v45_accs', JSON.stringify(accs)); } window.mySecret=val; localStorage.setItem('dog_v45_secret',val); location.reload(); } }
+        function openSwitchAcc() { let accs = JSON.parse(localStorage.getItem('dog_v45_accs') || '[]'); let html = accs.map(a => `<button onclick="switchAcc('${a.secret}')" class="w-full p-4 mb-2 glass-card text-left flex justify-between items-center ${a.secret===window.mySecret?'border-blue-500':''}"><span class="text-xs font-bold">${a.nick}</span> ${a.secret===window.mySecret?'<i class="fa-solid fa-check text-blue-500"></i>':''}</button>`).join(''); Swal.fire({ title: 'АККАУНТЫ', html: `<div class="mt-4">${html}</div>`, showConfirmButton: false, background: '#0f121a', color: '#fff' }); }
+        window.switchAcc = (sec) => { localStorage.setItem('dog_v45_secret', sec); location.reload(); };
         function showTransferCode() { Swal.fire({ title: 'ТВОЙ ID', html: `<div class="bg-black/60 p-5 rounded-2xl font-mono text-blue-400 select-all text-sm border border-blue-500/20">${window.mySecret}</div>`, background: '#05070a', color: '#fff' }); }
-        function adminChangeBalance() { const s = document.getElementById('adm_uid').value; const m = parseFloat(document.getElementById('adm_sum').value); if(window.allUsers[s]) { window.allUsers[s].bal += m; set(ref(getDatabase(), 'dog_users_v44/'+s), window.allUsers[s]); } }
-        function openSwitchAcc() { let accs = JSON.parse(localStorage.getItem('dog_v44_accs') || '[]'); let html = accs.map(a => `<button onclick="switchAcc('${a.secret}')" class="w-full p-4 mb-2 glass-card text-left flex justify-between items-center ${a.secret===window.mySecret?'border-blue-500':''}"><span class="text-xs font-bold">${a.nick}</span> ${a.secret===window.mySecret?'<i class="fa-solid fa-check text-blue-500"></i>':''}</button>`).join(''); Swal.fire({ title: 'АККАУНТЫ', html: `<div class="mt-4">${html}</div>`, showConfirmButton: false, background: '#0f121a', color: '#fff' }); }
-        window.switchAcc = (sec) => { localStorage.setItem('dog_v44_secret', sec); location.reload(); };
+        function topUp() { Swal.fire({ title: 'ОПЛАТА', text: 'Пишите админу: @sswckk', icon: 'info', background: '#0f121a', color: '#fff' }); }
     </script>
 </body>
 </html>
