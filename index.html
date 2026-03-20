@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | v56 SUPREME</title>
+    <title>DOG X | v57 OMNIPOTENT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI",
@@ -23,195 +23,237 @@
         const db = getDatabase(app);
         window.f_db = db;
 
-        window.db_data = { products: [], broadcast: {active:false}, stock: {} };
+        window.db_data = { products: [], broadcast: {active:false, text:'', img:''}, logs: [], settings: {maintenance: false} };
         window.allUsers = {};
         window.allTickets = {};
-        window.mySecret = localStorage.getItem('dog_v56_sec');
-        window.isAuthChecking = true;
+        window.mySecret = localStorage.getItem('dog_v57_sec');
         
-        // Главный слушатель системы
-        onValue(ref(db, 'system_v56'), (s) => { 
-            window.db_data = s.val() || { products: [], broadcast: {active:false}, stock: {} };
+        onValue(ref(db, 'system_v57'), (s) => { 
+            window.db_data = s.val() || window.db_data; 
             renderProducts(); renderBC();
         });
 
-        // Слушатель пользователей с фиксом бесконечной регистрации
-        onValue(ref(db, 'users_v56'), (s) => { 
+        onValue(ref(db, 'users_v57'), (s) => { 
             window.allUsers = s.val() || {}; 
             if (window.mySecret && window.allUsers[window.mySecret]) {
-                window.user = window.allUsers[window.mySecret];
-                window.isAuthChecking = false;
-                updateUI();
-            } else if (!window.isRegOpen) {
-                window.isAuthChecking = false;
-                startAuthProcess();
-            }
+                window.user = window.allUsers[window.mySecret]; updateUI();
+            } else if (!window.isAuthProc) { startAuth(); }
         });
 
-        onValue(ref(db, 'support_v56'), (s) => { 
+        onValue(ref(db, 'support_v57'), (s) => { 
             window.allTickets = s.val() || {}; 
-            checkSupportNotif();
             if(window.currentTab === 'admin') renderAdmSupport();
             if(window.isChatOpen) renderUserChat();
+            checkNotif();
         });
 
-        window.saveSys = () => set(ref(db, 'system_v56'), window.db_data);
-        window.saveUsr = (u, sec) => set(ref(db, 'users_v56/' + (sec || window.mySecret)), u);
-        window.saveTicket = (id, data) => set(ref(db, 'support_v56/' + id), data);
+        window.saveSys = () => set(ref(db, 'system_v57'), window.db_data);
+        window.saveUsr = (u, sec) => set(ref(db, 'users_v57/' + (sec || window.mySecret)), u);
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        body { background: #020408; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); border-radius: 28px; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap');
+        
+        body { background: #010205; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .neon-text { text-shadow: 0 0 10px rgba(99, 102, 241, 0.5); }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; }
         .tab { display: none; }
-        .tab.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .btn-supreme { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); transition: 0.3s; font-weight: 800; text-transform: uppercase; }
-        .btn-supreme:active { transform: scale(0.95); }
-        .nav-btn { width: 54px; height: 54px; border-radius: 18px; display: flex; align-items: center; justify-content: center; transition: 0.3s; color: rgba(255,255,255,0.2); }
-        .nav-btn.active { background: rgba(79, 70, 229, 0.15); color: #4f46e5; border: 1px solid rgba(79, 70, 229, 0.2); }
-        .gold-id { background: linear-gradient(90deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .tab.active { display: block; animation: slideUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .btn-main { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .btn-main:active { transform: scale(0.92); }
+        
+        .nav-bar { background: rgba(2, 4, 8, 0.8); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.05); }
+        .nav-item { transition: 0.3s; color: rgba(255,255,255,0.2); }
+        .nav-item.active { color: #6366f1; transform: translateY(-5px); }
+        
+        .gold-glow { background: linear-gradient(90deg, #ffd700, #ffa500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3)); }
+        
+        /* Custom Scroll */
+        ::-webkit-scrollbar { width: 0px; }
     </style>
 </head>
 <body class="pb-32">
 
-    <header class="p-6 flex justify-between items-center sticky top-0 z-40 bg-[#020408]/80 backdrop-blur-xl">
+    <header class="p-6 flex justify-between items-center sticky top-0 z-50 bg-[#010205]/60 backdrop-blur-md">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-indigo-500/20 shadow-lg">
-                <i class="fa-solid fa-bolt-auto text-white"></i>
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/30">
+                <i class="fa-solid fa-ghost text-white text-xl"></i>
             </div>
             <div>
-                <h1 class="text-xl font-black italic">DOG <span class="text-indigo-500">X</span></h1>
-                <p id="topInfo" class="text-[8px] font-bold opacity-30 tracking-[3px] uppercase">Supreme v56</p>
+                <h1 class="text-xl font-black italic tracking-tighter orbitron">DOG <span class="text-indigo-500">X</span></h1>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <p id="topInfo" class="text-[9px] font-bold opacity-30 uppercase tracking-[2px]">System: Stable</p>
+                </div>
             </div>
         </div>
-        <div class="flex gap-2">
-            <button onclick="setTab('home')" id="nav-home" class="nav-btn active"><i class="fa-solid fa-house"></i></button>
-            <button onclick="setTab('me')" id="nav-me" class="nav-btn relative"><i class="fa-solid fa-user"></i><div id="notif-dot" class="hidden absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-[#020408]"></div></button>
-            <button id="adm-btn" onclick="setTab('admin')" class="hidden nav-btn text-amber-500 bg-amber-500/5 border border-amber-500/10"><i class="fa-solid fa-crown"></i></button>
+        <div class="flex gap-4">
+            <button onclick="toggleChat(true)" class="relative">
+                <i class="fa-solid fa-comment-dots text-xl opacity-40"></i>
+                <div id="notif-dot" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border-2 border-[#010205]"></div>
+            </button>
         </div>
     </header>
 
     <main id="home" class="tab active px-6 space-y-6">
-        <div id="bc-banner" class="hidden glass overflow-hidden h-40 relative">
-            <img id="bc-img" class="w-full h-full object-cover opacity-30">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#020408] to-transparent"></div>
-            <p id="bc-text" class="absolute bottom-4 left-4 right-4 text-xs font-bold italic"></p>
+        <div id="bc-box" class="hidden glass overflow-hidden h-44 relative group">
+            <img id="bc-img" class="w-full h-full object-cover opacity-40 group-hover:scale-110 transition duration-1000">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#010205] via-transparent"></div>
+            <div class="absolute bottom-5 left-5 right-5">
+                <span class="text-[8px] font-black bg-indigo-600 px-2 py-1 rounded mb-2 inline-block uppercase">Update Info</span>
+                <p id="bc-text" class="text-xs font-bold leading-tight italic"></p>
+            </div>
         </div>
-        <div id="product-list" class="space-y-4"></div>
+        
+        <div class="flex justify-between items-center px-1">
+            <h2 class="text-[10px] font-black opacity-30 uppercase tracking-[4px]">Marketplace</h2>
+            <i class="fa-solid fa-arrow-down-short-wide opacity-20 text-xs"></i>
+        </div>
+        
+        <div id="product-list" class="space-y-4 pb-10"></div>
     </main>
 
     <section id="me" class="tab px-6 space-y-6">
         <div class="glass p-10 text-center relative overflow-hidden">
-            <p id="u-rank" class="text-[10px] font-black text-indigo-500 tracking-[5px] uppercase mb-2 italic">Standard</p>
-            <h3 class="text-6xl font-black italic mb-8" id="u-bal">0₽</h3>
+            <div class="absolute -top-10 -left-10 w-40 h-40 bg-indigo-600/10 blur-[100px] rounded-full"></div>
+            <p id="u-rank" class="text-[10px] font-black text-indigo-500 tracking-[6px] uppercase mb-2">Shadow User</p>
+            <h3 class="text-7xl font-black italic mb-10 tracking-tighter" id="u-bal">0₽</h3>
             
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="showPay()" class="btn-supreme py-4 rounded-2xl text-[11px] italic">Пополнить</button>
-                <button onclick="copyMySecret()" class="bg-white/5 py-4 rounded-2xl text-[11px] font-bold uppercase italic">Ключ</button>
-            </div>
-
-            <button onclick="toggleChat(true)" class="w-full py-4 bg-indigo-500/10 rounded-2xl text-indigo-400 text-[10px] font-black uppercase flex items-center justify-center gap-3 border border-indigo-500/20">
-                <i class="fa-solid fa-comments"></i> Поддержка
-            </button>
-
-            <div class="mt-8 pt-6 border-t border-white/5">
-                <input type="password" id="admin-code" oninput="checkAdm(this.value)" class="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-center text-[10px] tracking-[6px] outline-none" placeholder="ADMIN CODE">
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="showPay()" class="btn-main py-5 rounded-3xl text-[12px] italic">Deposit</button>
+                <button onclick="showSecret()" class="bg-white/5 border border-white/10 py-5 rounded-3xl text-[12px] font-bold uppercase italic">Security</button>
             </div>
         </div>
 
-        <div class="space-y-4">
-            <p class="text-[10px] font-black opacity-30 uppercase tracking-[3px] ml-2 italic">Мои Лицензии</p>
-            <div id="user-keys" class="space-y-3 pb-20"></div>
+        <div class="glass p-6 space-y-4">
+            <p class="text-[9px] font-black opacity-40 uppercase tracking-[3px] text-center mb-4 italic">Инструкция: Для доступа в Командный Центр введите секретную комбинацию ниже</p>
+            <div class="relative">
+                <input type="password" id="admin-input" oninput="verifyAdmin(this.value)" class="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-center text-xs tracking-[8px] outline-none focus:border-indigo-500/50 transition" placeholder="CODE/NUMBERS">
+                <div class="absolute right-5 top-1/2 -translate-y-1/2 opacity-20"><i class="fa-solid fa-shield-halved"></i></div>
+            </div>
+        </div>
+
+        <div class="space-y-4 pb-20">
+            <p class="text-[10px] font-black opacity-20 uppercase tracking-[4px] ml-2 italic">Active Licenses</p>
+            <div id="user-keys" class="space-y-3"></div>
         </div>
     </section>
 
     <section id="admin" class="tab px-6 space-y-6 pb-40">
-        <div class="glass p-6 space-y-8">
-            <h2 class="text-center text-xs font-black tracking-[10px] text-indigo-500 uppercase">Supreme Panel</h2>
-            
-            <div class="p-5 bg-indigo-500/5 rounded-3xl border border-indigo-500/10 space-y-3">
-                <p class="text-[10px] font-black text-indigo-400 uppercase italic">Управление Пользователем</p>
-                <input id="adm-find-id" class="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-xs" placeholder="Введите ID юзера">
-                <div class="grid grid-cols-2 gap-2">
-                    <input id="adm-set-bal" class="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-xs" placeholder="Баланс">
-                    <input id="adm-set-id" class="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-xs" placeholder="Новый ID (крутой)">
-                </div>
-                <button onclick="admUpdateUser()" class="w-full py-3 bg-indigo-600 rounded-xl text-[10px] font-black">ПРИМЕНИТЬ</button>
-            </div>
-
-            <div id="adm-support-list" class="space-y-3"></div>
-            <div id="adm-products" class="space-y-4"></div>
-            
-            <button onclick="admSaveAll()" class="w-full py-6 btn-supreme rounded-[30px] text-xs italic">Зафиксировать v56</button>
+        <div class="text-center py-6">
+            <h2 class="orbitron text-sm font-black text-indigo-500 tracking-[12px]">TERMINAL v57</h2>
+            <p class="text-[8px] opacity-20 uppercase mt-2">Omnipotent Administrative Interface</p>
         </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="glass p-5 text-center">
+                <p class="text-[8px] opacity-40 uppercase mb-1">Total Users</p>
+                <p id="adm-count-users" class="text-xl font-black">0</p>
+            </div>
+            <div class="glass p-5 text-center">
+                <p class="text-[8px] opacity-40 uppercase mb-1">System Cash</p>
+                <p id="adm-count-money" class="text-xl font-black text-green-500">0</p>
+            </div>
+        </div>
+
+        <div class="glass p-6 space-y-4 border-indigo-500/20">
+            <p class="text-[10px] font-black text-indigo-400 uppercase italic"><i class="fa-solid fa-user-gear mr-2"></i> Менеджер пользователей</p>
+            <input id="adm-user-id" class="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-xs" placeholder="ID пользователя">
+            <div class="grid grid-cols-2 gap-2">
+                <input id="adm-user-bal" class="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-xs" placeholder="Сет Баланса">
+                <input id="adm-user-gold" class="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-xs" placeholder="Сет ID (Крутой)">
+            </div>
+            <button onclick="admUpdateUser()" class="w-full py-3 bg-indigo-600 rounded-xl text-[10px] font-black">UPDATE DATA</button>
+        </div>
+
+        <div class="glass p-6 space-y-4">
+            <p class="text-[10px] font-black text-blue-400 uppercase italic"><i class="fa-solid fa-headset mr-2"></i> Тикет-система</p>
+            <div id="adm-support-list" class="space-y-3 max-h-60 overflow-y-auto pr-2"></div>
+        </div>
+
+        <div class="glass p-6 space-y-4">
+            <div class="flex justify-between items-center">
+                <p class="text-[10px] font-black text-purple-400 uppercase italic"><i class="fa-solid fa-box-open mr-2"></i> Склад товаров</p>
+                <button onclick="admAddProd()" class="text-[10px] font-black text-indigo-500">+ NEW</button>
+            </div>
+            <div id="adm-prods-list" class="space-y-4"></div>
+        </div>
+
+        <div class="glass p-6 space-y-3">
+            <p class="text-[10px] font-black text-amber-500 uppercase italic"><i class="fa-solid fa-bullhorn mr-2"></i> Глобальное объявление</p>
+            <input type="file" id="bc-file" class="hidden" onchange="uploadBC(this)">
+            <button onclick="document.getElementById('bc-file').click()" class="w-full py-2 bg-white/5 rounded-xl text-[9px] font-bold">ОБНОВИТЬ КАРТИНКУ</button>
+            <textarea id="bc-text-input" class="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-xs h-20" placeholder="Текст баннера..."></textarea>
+            <button onclick="admToggleBC()" id="bc-btn" class="w-full py-3 rounded-xl text-[10px] font-black"></button>
+        </div>
+
+        <div class="glass p-6">
+             <p class="text-[10px] font-black text-red-500 uppercase italic mb-3"><i class="fa-solid fa-shield-virus mr-2"></i> Системные логи</p>
+             <div id="adm-logs" class="bg-black/40 rounded-xl p-3 h-32 overflow-y-auto text-[8px] font-mono opacity-50 space-y-1"></div>
+        </div>
+
+        <button onclick="admSaveSystem()" class="w-full py-6 btn-main rounded-[40px] text-xs shadow-2xl shadow-indigo-500/40">SYNCHRONIZE TERMINAL</button>
     </section>
 
-    <div id="chat-window" class="fixed inset-0 bg-[#020408] z-[100] hidden flex-col">
-        <header class="p-6 border-b border-white/5 flex justify-between items-center">
-            <h3 class="text-sm font-black italic uppercase">Live Support</h3>
-            <button onclick="toggleChat(false)" class="text-xs opacity-40 uppercase font-bold">Закрыть</button>
+    <nav class="nav-bar fixed bottom-0 left-0 right-0 h-24 flex justify-around items-center px-10 z-[60]">
+        <button onclick="setTab('home')" id="btn-home" class="nav-item active flex flex-col items-center gap-1">
+            <i class="fa-solid fa-house-chimney text-xl"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest">Main</span>
+        </button>
+        <button onclick="setTab('me')" id="btn-me" class="nav-item flex flex-col items-center gap-1">
+            <i class="fa-solid fa-user-astronaut text-xl"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest">Profile</span>
+        </button>
+    </nav>
+
+    <div id="chat-window" class="fixed inset-0 bg-[#010205] z-[100] hidden flex-col">
+        <header class="p-8 flex justify-between items-center border-b border-white/5">
+            <div>
+                <h3 class="text-xl font-black italic orbitron">SUPPORT</h3>
+                <p class="text-[9px] font-bold opacity-30 uppercase tracking-widest">v57 Live Response</p>
+            </div>
+            <button onclick="toggleChat(false)" class="w-12 h-12 glass flex items-center justify-center"><i class="fa-solid fa-xmark opacity-40"></i></button>
         </header>
-        <div id="chat-content" class="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col"></div>
-        <div class="p-6 bg-[#020408] flex gap-2 border-t border-white/5 pb-12">
-            <input type="text" id="chat-input" class="flex-1 bg-white/5 border border-white/10 rounded-2xl p-4 text-sm outline-none" placeholder="Сообщение...">
-            <button onclick="sendUserMsg()" class="w-14 h-14 btn-supreme rounded-2xl flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
+        <div id="chat-msgs" class="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col"></div>
+        <div class="p-6 pb-12 flex gap-3 bg-[#010205]">
+            <input type="text" id="chat-inp" class="flex-1 bg-white/5 border border-white/10 rounded-2xl p-5 text-sm outline-none focus:border-indigo-500/50" placeholder="Type your message...">
+            <button onclick="sendMsg()" class="w-16 h-16 btn-main rounded-2xl flex items-center justify-center"><i class="fa-solid fa-paper-plane-top"></i></button>
         </div>
     </div>
 
     <script>
-        function checkAdm(v) { if(v.toUpperCase() === 'KALUBXQ') document.getElementById('adm-btn').classList.remove('hidden'); }
-        
+        function verifyAdmin(v) { if(v.toUpperCase() === 'KALUBXQ') document.getElementById('adm-btn')?.remove(), setTab('admin'); }
+
         function setTab(t) {
             window.currentTab = t;
-            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
             document.getElementById(t).classList.add('active');
-            document.getElementById('nav-' + t)?.classList.add('active');
+            document.getElementById('btn-' + t)?.classList.add('active');
             if(t === 'admin') renderAdmin();
             if(t === 'me') document.getElementById('notif-dot').classList.add('hidden');
         }
 
-        // --- AUTH SYSTEM (FIXED) ---
-        async function startAuthProcess() {
-            if(window.isRegOpen || window.user) return;
-            window.isRegOpen = true;
-
-            const { value: form } = await Swal.fire({
-                title: 'ВХОД / РЕГИСТРАЦИЯ',
-                html: `
-                    <input id="swal-nick" class="swal2-input" placeholder="Ваш Ник" style="font-size: 14px">
-                    <input id="swal-pass" type="password" class="swal2-input" placeholder="Пароль" style="font-size: 14px">
-                `,
-                background: '#020408', color: '#fff',
-                confirmButtonText: 'ПРОДОЛЖИТЬ',
-                preConfirm: () => {
-                    return [document.getElementById('swal-nick').value, document.getElementById('swal-pass').value]
-                }
+        // --- AUTH ---
+        async function startAuth() {
+            if(window.isAuthProc) return; window.isAuthProc = true;
+            const { value: res } = await Swal.fire({
+                title: 'TERMINAL LOGIN',
+                html: '<input id="a-n" class="swal2-input" placeholder="Nickname"><input id="a-p" type="password" class="swal2-input" placeholder="Password">',
+                background: '#010205', color: '#fff', confirmButtonText: 'AUTHORIZE',
+                preConfirm: () => [document.getElementById('a-n').value, document.getElementById('a-p').value]
             });
-
-            if(form && form[0] && form[1]) {
-                const nick = form[0]; const pass = form[1];
-                // Пытаемся найти существующего по нику и паролю
-                const foundKey = Object.keys(window.allUsers).find(k => window.allUsers[k].nick === nick && window.allUsers[k].pass === pass);
-                
-                if(foundKey) {
-                    window.mySecret = foundKey;
-                    localStorage.setItem('dog_v56_sec', foundKey);
-                    location.reload();
+            if(res && res[0] && res[1]) {
+                const exist = Object.keys(window.allUsers).find(k => window.allUsers[k].nick === res[0] && window.allUsers[k].pass === res[1]);
+                if(exist) {
+                    window.mySecret = exist; localStorage.setItem('dog_v57_sec', exist); location.reload();
                 } else {
-                    // Создаем нового
-                    const s = 'SUP-' + Math.random().toString(36).substr(2,10).toUpperCase();
-                    const newUser = {
-                        id: Math.floor(Math.random()*90000+10000),
-                        nick: nick, pass: pass, bal: 0, 
-                        purchases: [], rank: 'Member', secret: s
-                    };
-                    window.mySecret = s;
-                    localStorage.setItem('dog_v56_sec', s);
-                    await window.saveUsr(newUser, s);
-                    location.reload();
+                    const s = 'SEC-' + Math.random().toString(36).substr(2,12).toUpperCase();
+                    const u = { id: Math.floor(Math.random()*90000+10000), nick: res[0], pass: res[1], bal: 0, purchases: [], rank: 'Shadow User', secret: s };
+                    window.mySecret = s; localStorage.setItem('dog_v57_sec', s);
+                    await window.saveUsr(u, s); location.reload();
                 }
             }
         }
@@ -219,110 +261,160 @@
         function updateUI() {
             if(!window.user) return;
             document.getElementById('u-bal').innerText = (window.user.bal || 0).toLocaleString() + '₽';
-            document.getElementById('u-rank').innerText = window.user.rank || 'Member';
-            
-            const isGold = String(window.user.id).length <= 4 || /^(.)\1+$/.test(String(window.user.id));
-            const idHtml = isGold ? `<span class="gold-id">ID: ${window.user.id}</span>` : `ID: ${window.user.id}`;
-            document.getElementById('topInfo').innerHTML = `${idHtml} • ${window.user.nick}`;
+            document.getElementById('u-rank').innerText = window.user.rank || 'Shadow User';
+            const isGold = String(window.user.id).length <= 5;
+            document.getElementById('topInfo').innerHTML = `<span class="${isGold?'gold-glow':''}">ID: ${window.user.id}</span> • ${window.user.nick}`;
             
             const list = document.getElementById('user-keys');
             list.innerHTML = (window.user.purchases || []).map(k => `
-                <div class="glass p-5 flex justify-between items-center">
-                    <div><p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${k.name}</p><p class="text-xs font-mono font-bold">${k.key}</p></div>
-                    <button onclick="copy('${k.key}')" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center"><i class="fa-solid fa-copy text-[10px]"></i></button>
+                <div class="glass p-5 flex justify-between items-center group">
+                    <div><p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${k.name}</p><p class="text-xs font-mono font-bold select-all">${k.key}</p></div>
+                    <button onclick="copy('${k.key}')" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center border border-white/10"><i class="fa-solid fa-copy text-[10px]"></i></button>
                 </div>`).join('');
         }
 
-        // --- ADMIN LOGIC ---
+        function renderProducts() {
+            document.getElementById('product-list').innerHTML = (window.db_data.products || []).map(p => {
+                const stock = (window.db_data.stock && window.db_data.stock[p.id]) ? window.db_data.stock[p.id].length : 0;
+                return `
+                <div class="glass p-6 flex justify-between items-center active:scale-95 transition">
+                    <div class="flex items-center gap-5">
+                        <div class="w-14 h-14 bg-indigo-600/10 rounded-2xl flex items-center justify-center text-indigo-500"><i class="fa-solid fa-bolt text-xl"></i></div>
+                        <div><h4 class="text-sm font-black uppercase italic">${p.name}</h4><p class="text-[9px] font-bold text-indigo-500/50 uppercase">STOCK: ${stock}</p></div>
+                    </div>
+                    <button onclick="buyP(${p.id})" class="btn-main px-8 py-4 rounded-2xl text-[11px]">${p.pr}₽</button>
+                </div>`;
+            }).join('');
+        }
+
+        async function buyP(id) {
+            const p = window.db_data.products.find(x => x.id === id);
+            if(window.user.bal < p.pr) return Swal.fire('Error', 'Insufficient funds', 'error');
+            const stock = window.db_data.stock[id];
+            if(!stock || stock.length === 0) return Swal.fire('Error', 'Out of stock', 'warning');
+            
+            const k = stock.shift(); window.user.bal -= p.pr;
+            if(!window.user.purchases) window.user.purchases = [];
+            window.user.purchases.unshift({name: p.name, key: k});
+            addLog(`Purchase: ${window.user.nick} bought ${p.name}`);
+            await window.saveUsr(window.user); await window.saveSys();
+            Swal.fire('Success', 'License activated', 'success');
+        }
+
+        // --- ADMIN ENGINE ---
         function renderAdmin() {
-            document.getElementById('adm-products').innerHTML = (window.db_data.products || []).map(p => `
-                <div class="bg-white/5 p-5 rounded-3xl border border-white/5 space-y-2">
-                    <input id="pn_${p.id}" value="${p.name}" class="bg-transparent text-xs font-bold w-full outline-none">
-                    <textarea id="ps_${p.id}" class="w-full bg-black/40 p-3 rounded-xl text-[9px] h-20 outline-none" placeholder="Ключи..."></textarea>
-                    <button onclick="admDelP(${p.id})" class="text-[8px] text-red-500 font-bold uppercase">Удалить тариф</button>
+            document.getElementById('adm-count-users').innerText = Object.keys(window.allUsers).length;
+            let total = 0; Object.values(window.allUsers).forEach(u => total += (u.bal || 0));
+            document.getElementById('adm-count-money').innerText = total.toLocaleString() + '₽';
+
+            const bc = window.db_data.broadcast;
+            const bBtn = document.getElementById('bc-btn');
+            bBtn.innerText = bc.active ? 'DISABLE BANNER' : 'ENABLE BANNER';
+            bBtn.className = bc.active ? 'w-full py-3 bg-red-600 rounded-xl text-[10px] font-black' : 'w-full py-3 bg-indigo-600 rounded-xl text-[10px] font-black';
+            
+            document.getElementById('adm-prods-list').innerHTML = (window.db_data.products || []).map(p => `
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-3">
+                    <input id="ap-n-${p.id}" value="${p.name}" class="bg-transparent text-xs font-bold w-full outline-none">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="ap-p-${p.id}" value="${p.pr}" class="bg-black/40 p-2 rounded-lg text-[10px]" placeholder="Price">
+                        <input id="ap-h-${p.id}" value="${p.h || 24}" class="bg-black/40 p-2 rounded-lg text-[10px]" placeholder="Hours">
+                    </div>
+                    <textarea id="ap-s-${p.id}" class="w-full bg-black/60 p-3 rounded-xl text-[9px] h-20 outline-none" placeholder="Keys (one per line)"></textarea>
+                    <button onclick="admDelP(${p.id})" class="text-[8px] text-red-500 font-bold uppercase opacity-30">Delete Product</button>
                 </div>`).join('');
+            
+            document.getElementById('adm-logs').innerHTML = (window.db_data.logs || []).reverse().map(l => `<div>[${l.time}] ${l.txt}</div>`).join('');
             renderAdmSupport();
         }
 
         function admUpdateUser() {
-            const findId = document.getElementById('adm-find-id').value;
-            const targetSec = Object.keys(window.allUsers).find(k => String(window.allUsers[k].id) === String(findId));
-            if(!targetSec) return Swal.fire('Error', 'User not found', 'error');
-            
-            const u = window.allUsers[targetSec];
-            const newBal = document.getElementById('adm-set-bal').value;
-            const newId = document.getElementById('adm-set-id').value;
-            
-            if(newBal) u.bal = parseInt(newBal);
-            if(newId) u.id = parseInt(newId);
-            
-            window.saveUsr(u, targetSec);
-            Swal.fire('Updated', 'User data saved', 'success');
+            const id = document.getElementById('adm-user-id').value;
+            const sec = Object.keys(window.allUsers).find(k => String(window.allUsers[k].id) === String(id));
+            if(!sec) return Swal.fire('Error', 'User ID not found', 'error');
+            const u = window.allUsers[sec];
+            const nb = document.getElementById('adm-user-bal').value;
+            const ng = document.getElementById('adm-user-gold').value;
+            if(nb) u.bal = parseInt(nb);
+            if(ng) u.id = parseInt(ng);
+            window.saveUsr(u, sec);
+            addLog(`Admin updated user ${u.nick}`);
+            Swal.fire('Updated', 'User synced', 'success');
         }
 
-        function renderProducts() {
-            document.getElementById('product-list').innerHTML = (window.db_data.products || []).map(p => `
-                <div class="glass p-6 flex justify-between items-center group active:scale-95 transition-all">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500"><i class="fa-solid fa-key"></i></div>
-                        <div><h4 class="text-sm font-black italic uppercase">${p.name}</h4><p class="text-[9px] font-bold opacity-40 uppercase">Stock: ${(window.db_data.stock && window.db_data.stock[p.id]) ? window.db_data.stock[p.id].length : 0}</p></div>
-                    </div>
-                    <button onclick="buy(${p.id})" class="btn-supreme px-8 py-4 rounded-2xl text-[11px] italic">${p.pr}₽</button>
-                </div>`).join('');
+        function admAddProd() { 
+            if(!window.db_data.products) window.db_data.products = [];
+            window.db_data.products.push({id: Date.now(), name: "NEW LICENSE", pr: 500, h: 24});
+            renderAdmin(); 
         }
 
-        async function buy(id) {
-            const p = window.db_data.products.find(x => x.id === id);
-            if(window.user.bal < p.pr) return Swal.fire('Error', 'Баланс 0', 'error');
-            const stock = window.db_data.stock[id];
-            if(!stock || stock.length === 0) return Swal.fire('Error', 'Нет ключей', 'warning');
-
-            const key = stock.shift();
-            window.user.bal -= p.pr;
-            if(!window.user.purchases) window.user.purchases = [];
-            window.user.purchases.unshift({name: p.name, key: key});
-            await window.saveUsr(window.user); await window.saveSys();
-            Swal.fire('Success', 'Ключ получен', 'success');
+        function admSaveSystem() {
+            window.db_data.products.forEach(p => {
+                p.name = document.getElementById(`ap-n-${p.id}`).value;
+                p.pr = parseInt(document.getElementById(`ap-p-${p.id}`).value);
+                p.h = parseInt(document.getElementById(`ap-h-${p.id}`).value);
+                const ks = document.getElementById(`ap-s-${p.id}`).value.split('\n').filter(x => x.trim().length > 2);
+                if(ks.length > 0) {
+                    if(!window.db_data.stock) window.db_data.stock = {};
+                    window.db_data.stock[p.id] = [...(window.db_data.stock[p.id] || []), ...ks];
+                }
+            });
+            window.db_data.broadcast.text = document.getElementById('bc-text-input').value;
+            window.saveSys();
+            Swal.fire('Terminal Synced', 'Global data updated', 'success');
         }
 
         // --- SUPPORT ---
         function toggleChat(o) { window.isChatOpen = o; document.getElementById('chat-window').classList.toggle('hidden', !o); if(o) renderUserChat(); }
-        async function sendUserMsg() {
-            const i = document.getElementById('chat-input'); if(!i.value.trim()) return;
+        async function sendMsg() {
+            const i = document.getElementById('chat-inp'); if(!i.value.trim()) return;
             if(!window.allTickets[window.mySecret]) window.allTickets[window.mySecret] = {nick: window.user.nick, msgs: []};
-            window.allTickets[window.mySecret].msgs.push({text: i.value, sender: 'user'});
-            await window.saveTicket(window.mySecret, window.allTickets[window.mySecret]); i.value = '';
+            window.allTickets[window.mySecret].msgs.push({t: i.value, s: 'u', time: Date.now()});
+            await set(ref(window.f_db, 'support_v57/' + window.mySecret), window.allTickets[window.mySecret]); i.value = '';
         }
         function renderUserChat() {
-            const c = document.getElementById('chat-content'); const t = window.allTickets[window.mySecret];
-            if(!t) return;
-            c.innerHTML = t.msgs.map(m => `<div class="p-4 rounded-2xl max-w-[80%] ${m.sender==='user'?'bg-indigo-600 self-end':'bg-white/10 self-start'}"><p class="text-xs font-bold">${m.text}</p></div>`).join('');
+            const c = document.getElementById('chat-msgs'); const t = window.allTickets[window.mySecret];
+            if(!t) return c.innerHTML = '<p class="text-center opacity-10 mt-20 uppercase font-black tracking-widest">No history</p>';
+            c.innerHTML = t.msgs.map(m => `<div class="p-5 rounded-3xl max-w-[85%] ${m.s==='u'?'bg-indigo-600 self-end rounded-tr-none':'bg-white/5 self-start rounded-tl-none'}"><p class="text-xs font-bold leading-relaxed">${m.t}</p></div>`).join('');
             c.scrollTop = c.scrollHeight;
         }
         function renderAdmSupport() {
             document.getElementById('adm-support-list').innerHTML = Object.keys(window.allTickets).map(id => `
                 <div class="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-3">
-                    <p class="text-[10px] font-black">${window.allTickets[id].nick}</p>
-                    <div class="text-[9px] opacity-60">${window.allTickets[id].msgs.slice(-1)[0].text}</div>
-                    <div class="flex gap-2"><input id="rep_${id}" class="flex-1 bg-black/40 rounded-xl p-2 text-[10px]" placeholder="Ответ..."><button onclick="admReply('${id}')" class="bg-indigo-600 px-3 rounded-xl text-[10px]">OK</button></div>
+                    <div class="flex justify-between items-center"><p class="text-[10px] font-black">${window.allTickets[id].nick}</p><button onclick="admDelTicket('${id}')" class="text-red-500 opacity-20 text-[10px]">DEL</button></div>
+                    <div class="text-[9px] opacity-40 max-h-20 overflow-y-auto">${window.allTickets[id].msgs.slice(-1)[0].t}</div>
+                    <div class="flex gap-2"><input id="rep-${id}" class="flex-1 bg-black/40 rounded-xl p-2 text-[10px]" placeholder="Reply..."><button onclick="admReply('${id}')" class="bg-indigo-600 px-3 rounded-xl text-[10px]">SEND</button></div>
                 </div>`).join('');
         }
-        function admReply(id) {
-            const m = document.getElementById('rep_'+id).value; if(!m) return;
-            window.allTickets[id].msgs.push({text: m, sender: 'admin'});
-            window.saveTicket(id, window.allTickets[id]);
+        async function admReply(id) {
+            const m = document.getElementById('rep-'+id).value; if(!m) return;
+            window.allTickets[id].msgs.push({t: m, s: 'a', time: Date.now()});
+            await set(ref(window.f_db, 'support_v57/' + id), window.allTickets[id]);
         }
 
-        function checkSupportNotif() {
+        // --- UTILS ---
+        function checkNotif() {
             const t = window.allTickets[window.mySecret];
-            if(t && t.msgs.length && t.msgs[t.msgs.length-1].sender === 'admin' && !window.isChatOpen) document.getElementById('notif-dot').classList.remove('hidden');
+            if(t && t.msgs.length && t.msgs[t.msgs.length-1].s === 'a' && !window.isChatOpen) document.getElementById('notif-dot').classList.remove('hidden');
         }
-
+        function addLog(txt) {
+            if(!window.db_data.logs) window.db_data.logs = [];
+            window.db_data.logs.push({time: new Date().toLocaleTimeString(), txt: txt});
+            if(window.db_data.logs.length > 50) window.db_data.logs.shift();
+        }
+        function uploadBC(i) {
+            const r = new FileReader(); r.onloadend = () => { window.db_data.broadcast.img = r.result; Swal.fire('Image Ready','','success'); };
+            r.readAsDataURL(i.files[0]);
+        }
+        function admToggleBC() { window.db_data.broadcast.active = !window.db_data.broadcast.active; window.saveSys(); renderAdmin(); }
         function copy(t) { navigator.clipboard.writeText(t); Swal.fire({title:'Copied', toast:true, position:'top', timer:1000, showConfirmButton:false, icon:'success'}); }
-        function showPay() { Swal.fire('ПОПОЛНЕНИЕ', 'Напишите @sswckk свой ID: ' + window.user.id, 'info'); }
-        function copyMySecret() { Swal.fire('SECRET KEY', window.mySecret, 'info'); }
-        function renderBC() { /* Banner Logic */ }
-        function admSaveAll() { window.saveSys(); Swal.fire('Saved', 'System updated', 'success'); }
+        function showPay() { Swal.fire('DEPOSIT', 'Send your ID to @sswckk: ' + window.user.id, 'info'); }
+        function showSecret() { Swal.fire('SECURITY KEY', window.mySecret, 'info'); }
+        function renderBC() {
+            const bc = window.db_data.broadcast; const el = document.getElementById('bc-box');
+            if(!bc.active) return el.classList.add('hidden');
+            el.classList.remove('hidden'); document.getElementById('bc-text').innerText = bc.text;
+            if(bc.img) document.getElementById('bc-img').src = bc.img;
+        }
     </script>
 </body>
 </html>
