@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | v38 Ultimate</title>
+    <title>DOG X | v39 Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -28,255 +28,266 @@
         window.db = {};
         window.allUsers = {};
         window.allTickets = {};
-        window.mySecret = localStorage.getItem('dog_v38_secret'); // Новый ключ для новой базы
+        window.mySecret = localStorage.getItem('dog_v39_secret');
         window.user = null;
 
-        // Новые пути v38 для обнуления
-        const dbRef = ref(db_firebase, 'dog_system_db_v38');
-        const usersRef = ref(db_firebase, 'dog_users_v38');
-        const supportRef = ref(db_firebase, 'dog_support_v38');
+        const dbRef = ref(db_firebase, 'dog_system_v39');
+        const usersRef = ref(db_firebase, 'dog_users_v39');
+        const supportRef = ref(db_firebase, 'dog_support_v39');
 
-        onValue(dbRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) { 
-                window.db = data; 
-                renderProducts(); 
-                renderGlobalBC(); 
-                if(document.getElementById('admin').classList.contains('active')) loadAdmin();
-            }
-        });
-
-        onValue(usersRef, (snapshot) => {
-            window.allUsers = snapshot.val() || {};
-            if (window.mySecret && window.allUsers[window.mySecret]) {
-                window.user = window.allUsers[window.mySecret];
-                updateUI();
-            }
-        });
-
-        onValue(supportRef, (snapshot) => { 
-            window.allTickets = snapshot.val() || {}; 
-            if(document.getElementById('admin').classList.contains('active')) renderAdminSupport(); 
-        });
+        onValue(dbRef, (snapshot) => { window.db = snapshot.val() || { products: [], broadcast: {}, gold_numbers: {} }; renderProducts(); renderGlobalBC(); if(window.isAdminOpen) loadAdmin(); });
+        onValue(usersRef, (snapshot) => { window.allUsers = snapshot.val() || {}; if (window.mySecret && window.allUsers[window.mySecret]) { window.user = window.allUsers[window.mySecret]; updateUI(); } });
+        onValue(supportRef, (snapshot) => { window.allTickets = snapshot.val() || {}; if(window.isAdminOpen) renderAdminSupport(); });
 
         window.saveSystem = () => set(dbRef, window.db);
-        window.saveUser = (u) => set(ref(db_firebase, 'dog_users_v38/' + window.mySecret), u);
-        window.sendTicket = (msg) => {
-            const tId = window.mySecret;
-            const newMsg = { text: msg, sender: 'user', time: Date.now() };
-            if(!window.allTickets[tId]) window.allTickets[tId] = { userNick: window.user.nick, userId: window.user.id, msgs: [] };
-            window.allTickets[tId].msgs.push(newMsg);
-            set(ref(db_firebase, 'dog_support_v38/' + tId), window.allTickets[tId]);
-        };
-        window.adminReply = (tId, msg) => {
-            if(!msg.trim()) return;
-            window.allTickets[tId].msgs.push({ text: msg, sender: 'admin', time: Date.now() });
-            set(ref(db_firebase, 'dog_support_v38/' + tId), window.allTickets[tId]);
-        };
-
+        window.saveUser = (u) => set(ref(db_firebase, 'dog_users_v39/' + window.mySecret), u);
+        window.adminReply = (tId, m) => { window.allTickets[tId].msgs.push({text:m, sender:'admin'}); set(ref(db_firebase, 'dog_support_v39/'+tId), window.allTickets[tId]); };
+        window.sendTicket = (m) => { const tId = window.mySecret; if(!window.allTickets[tId]) window.allTickets[tId]={userNick:window.user.nick, msgs:[]}; window.allTickets[tId].msgs.push({text:m, sender:'user'}); set(ref(db_firebase, 'dog_support_v39/'+tId), window.allTickets[tId]); };
         window.firebase_db_mod = { set, ref, getDatabase };
     </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
-        :root { --bg: #0f1117; --card: #191c24; --accent: #5865f2; }
+        :root { --bg: #0b0d11; --card: #151921; --accent: #5865f2; }
         body { background: var(--bg); color: #fff; font-family: 'Manrope', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .player-card { background: var(--card); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .player-card { background: var(--card); border-radius: 20px; border: 1px solid rgba(255,255,255,0.03); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .chat-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
-        .chat-modal.active { display: flex; }
+        .vip-border { border: 1px solid #fbbf24 !important; box-shadow: 0 0 15px rgba(251,191,36,0.1); }
     </style>
 </head>
-<body class="pb-20">
-
-    <div id="globalBC" class="max-w-xl mx-auto m-4 hidden">
-        <div class="player-card border border-blue-500/30 overflow-hidden">
-            <img id="bcImgDisplay" src="" class="w-full h-32 object-cover hidden">
-            <div class="p-4 flex items-center justify-between">
-                <p id="bcTextDisplay" class="text-[11px] font-bold italic uppercase"></p>
-                <div id="bcBtnBox"></div>
-            </div>
-        </div>
-    </div>
+<body class="pb-24">
 
     <header class="p-6 flex justify-between items-center">
-        <div><div class="text-2xl font-extrabold text-blue-500 italic uppercase">Dog X</div><div id="userDisplay" class="text-[9px] opacity-40 italic">system v38.0</div></div>
-        <div class="flex gap-4 text-[10px] font-bold uppercase">
-            <button onclick="showTab('home')" class="opacity-60">Маркет</button>
-            <button onclick="showTab('me')" class="opacity-60">Профиль</button>
+        <div><div class="text-2xl font-black text-blue-500 italic uppercase">DOG X</div><div id="userDisplay" class="text-[9px] opacity-40 uppercase">v39 Elite System</div></div>
+        <div class="flex gap-4 text-[10px] font-black uppercase">
+            <button onclick="showTab('home')">Маркет</button>
+            <button onclick="showTab('me')">Профиль</button>
             <button id="adminBtn" onclick="showTab('admin')" class="hidden text-red-500">Admin</button>
         </div>
     </header>
 
     <main id="home" class="tab-content active px-6 space-y-4">
-        <h2 class="text-xl font-extrabold italic uppercase">Тарифы</h2>
-        <div id="productsGrid" class="grid grid-cols-1 gap-4"></div>
+        <div id="globalBC" class="hidden player-card p-4 mb-4 border-amber-500/30">
+            <img id="bcImgDisplay" src="" class="w-full h-32 object-cover rounded-xl mb-3 hidden">
+            <p id="bcTextDisplay" class="text-xs font-bold mb-2"></p>
+            <div id="bcBtnBox"></div>
+        </div>
+        <h2 class="text-lg font-black italic uppercase">Доступные сервера</h2>
+        <div id="productsGrid" class="grid grid-cols-1 gap-3"></div>
     </main>
 
     <section id="me" class="tab-content px-6 space-y-6">
-        <div class="player-card p-8 text-center border-b-4 border-blue-600/20">
-            <p class="text-[10px] opacity-40 uppercase mb-1">Баланс</p>
-            <h3 class="text-5xl font-extrabold text-blue-500" id="userBal">0₽</h3>
+        <div class="player-card p-8 text-center" id="profileCard">
+            <p id="userRank" class="text-[9px] text-blue-400 font-black uppercase mb-1">Обычный аккаунт</p>
+            <h3 class="text-5xl font-black text-white" id="userBal">0₽</h3>
             <div class="mt-6 flex gap-2">
-                <button onclick="topUp()" class="flex-1 py-4 bg-blue-600 rounded-xl text-xs font-black italic uppercase">Пополнить</button>
-                <button onclick="openSupport()" class="px-5 bg-blue-600/10 border border-blue-500/20 rounded-xl text-blue-400 text-[10px] font-black uppercase">Help</button>
-                <button onclick="showTransferCode()" class="px-4 bg-white/5 rounded-xl border border-white/10"><i class="fa-solid fa-key text-blue-400"></i></button>
+                <button onclick="topUp()" class="flex-1 py-4 bg-blue-600 rounded-2xl text-[10px] font-black uppercase">Пополнить</button>
+                <button onclick="createNewAccount()" class="px-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase border border-white/10">Создать Акк</button>
             </div>
         </div>
-        <div id="keysList" class="space-y-3"></div>
-        <input type="text" id="promoInp" placeholder="Код или промо" class="w-full p-4 player-card bg-transparent text-center text-sm outline-none border-blue-500/10 focus:border-blue-500/40">
-        <div class="grid grid-cols-2 gap-2">
-            <button onclick="checkInput()" class="py-4 bg-white/5 rounded-xl text-[10px] font-bold uppercase">Ввод</button>
-            <button onclick="importAccount()" class="py-4 bg-blue-600/20 rounded-xl text-blue-400 text-[10px] font-bold uppercase">Перенос</button>
+
+        <div class="space-y-3">
+            <div class="flex justify-between items-center px-1"><p class="text-[10px] font-black opacity-30 uppercase">Инструменты</p></div>
+            <button onclick="showTransferCode()" class="w-full p-4 player-card flex justify-between items-center">
+                <span class="text-xs font-bold">Инструкция и Перенос</span>
+                <i class="fa-solid fa-chevron-right opacity-30"></i>
+            </button>
+            <input type="text" id="promoInp" placeholder="Код / Промо / Золотой номер" class="w-full p-4 player-card bg-transparent text-center text-xs outline-none border-blue-500/20">
+            <button onclick="checkInput()" class="w-full py-4 bg-blue-600/20 text-blue-400 rounded-2xl text-[10px] font-black uppercase border border-blue-500/30">Активировать</button>
         </div>
+        <div id="keysList" class="space-y-3"></div>
     </section>
 
     <section id="admin" class="tab-content px-6 pb-20 space-y-6">
-        <div class="player-card p-6 space-y-6 border border-red-500/30">
-            <h2 class="text-red-500 font-black uppercase text-xs italic">Admin Control v38</h2>
+        <div class="player-card p-6 space-y-6 border-red-500/20">
+            <h2 class="text-red-500 font-black text-xs uppercase italic">Admin Full Control</h2>
             
-            <div class="p-4 bg-white/5 rounded-2xl space-y-3">
-                <p class="text-[9px] font-black text-green-500 uppercase">Юзеры (Ник : Пароль)</p>
-                <div id="adm_users_list" class="space-y-2 max-h-40 overflow-y-auto pr-2 text-[9px]"></div>
+            <div class="space-y-2">
+                <p class="text-[9px] font-black opacity-40 uppercase">Золотые Номера (Привилегии)</p>
                 <div class="flex gap-2">
-                    <input id="adm_uid" class="flex-1 p-3 bg-black/40 rounded-xl text-[10px]" placeholder="Key">
+                    <input id="adm_gold_num" class="flex-1 p-3 bg-black/40 rounded-xl text-[10px]" placeholder="888-000-00-00">
+                    <select id="adm_gold_rank" class="bg-black/40 rounded-xl text-[10px] px-2 text-amber-500 font-bold">
+                        <option value="VIP">VIP</option>
+                        <option value="ELITE">ELITE</option>
+                    </select>
+                    <button onclick="addGoldNumber()" class="bg-amber-600 px-4 rounded-xl text-[10px] font-bold">ADD</button>
+                </div>
+                <div id="gold_nums_list" class="max-h-32 overflow-y-auto space-y-1"></div>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-[9px] font-black opacity-40 uppercase">Пользователи</p>
+                <div id="adm_users_list" class="space-y-2 max-h-60 overflow-y-auto pr-2"></div>
+                <div class="flex gap-2">
+                    <input id="adm_uid" class="flex-1 p-3 bg-black/40 rounded-xl text-[10px]" placeholder="ID или SEC">
                     <input id="adm_sum" type="number" class="w-20 p-3 bg-black/40 rounded-xl text-[10px]" placeholder="₽">
                     <button onclick="adminChangeBalance()" class="bg-blue-600 px-4 rounded-xl text-[10px] font-bold uppercase">OK</button>
                 </div>
             </div>
 
-            <div class="p-4 bg-amber-500/5 rounded-2xl space-y-3 border border-amber-500/10">
+            <div class="p-4 bg-amber-500/5 rounded-2xl space-y-3">
                 <p class="text-[9px] font-black text-amber-500 uppercase">Рассылка / Реклама</p>
-                <label class="block w-full py-3 bg-white/10 rounded-xl text-center text-[10px] cursor-pointer border border-dashed border-amber-500/30">
-                    <span>📸 Выбрать фото</span>
-                    <input type="file" accept="image/*" class="hidden" onchange="uploadAdPhoto(this)">
-                </label>
+                <input type="file" id="adFile" class="hidden" onchange="uploadAdPhoto(this)">
+                <button onclick="document.getElementById('adFile').click()" class="w-full py-3 bg-white/5 border border-dashed border-amber-500/30 rounded-xl text-[9px]">Выбрать фото</button>
                 <textarea id="adm_bc_text" class="w-full p-2 bg-black/40 rounded text-[10px]" placeholder="Текст"></textarea>
-                <input id="adm_bc_url" class="w-full p-2 bg-black/40 rounded text-[9px]" placeholder="URL">
-                <button onclick="toggleStatus('bc')" class="w-full py-3 bg-amber-600 text-black text-[10px] font-black rounded uppercase">Запуск / Стоп</button>
+                <button onclick="toggleStatus('bc')" class="w-full py-3 bg-amber-600 text-black text-[10px] font-black rounded uppercase">Запустить</button>
             </div>
 
-            <div id="adminSupportList" class="space-y-3"></div>
             <div id="admin_stocks" class="space-y-4"></div>
-            <button onclick="addTariff()" class="w-full py-4 border-2 border-dashed border-white/10 rounded-2xl text-[10px] uppercase font-bold">+ Товар</button>
-            <button onclick="saveAdmin()" class="w-full py-6 bg-red-600 rounded-2xl text-sm font-black uppercase italic">Сохранить v38</button>
+            <button onclick="addTariff()" class="w-full py-4 border-2 border-dashed border-white/5 rounded-2xl text-[10px] font-black">+ Добавить тариф</button>
+            <button onclick="saveAdmin()" class="w-full py-6 bg-red-600 rounded-3xl text-sm font-black uppercase italic">Сохранить v39</button>
         </div>
     </section>
 
-    <div id="chatModal" class="chat-modal">
-        <div class="player-card w-full max-w-sm p-6 space-y-4 relative border border-blue-500/20">
-            <button onclick="closeSupport()" class="absolute top-4 right-4 opacity-40"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-xs font-black uppercase text-blue-400 italic">Support</h3>
-            <div id="supportChatBox" class="h-64 overflow-y-auto space-y-2 flex flex-col pr-2 text-[10px]"></div>
-            <div class="flex gap-2">
-                <input type="text" id="supportInp" placeholder="Вопрос..." class="flex-1 bg-black/40 p-3 rounded-xl text-xs outline-none">
-                <button onclick="sendUserMsg()" class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
-            </div>
-        </div>
-    </div>
-
     <script>
+        window.isAdminOpen = false;
+
         function updateUI() {
             if(!window.user) return;
             document.getElementById('userDisplay').innerText = `${window.user.nick} | ID: ${window.user.id}`;
             document.getElementById('userBal').innerText = window.user.bal.toFixed(0) + '₽';
+            document.getElementById('userRank').innerText = window.user.rank || "Обычный аккаунт";
+            if(window.user.rank === 'VIP' || window.user.rank === 'ELITE') {
+                document.getElementById('profileCard').classList.add('vip-border');
+                document.getElementById('userRank').classList.replace('text-blue-400', 'text-amber-500');
+            }
             renderKeys();
         }
 
         async function initUser() {
             if(window.mySecret) return;
-            let localAccs = JSON.parse(localStorage.getItem('dog_accs') || '[]');
-            if(localAccs.length >= 5) return Swal.fire('Лимит!', 'Не более 5 аккаунтов на устройство', 'error');
-
-            const { value: formValues } = await Swal.fire({
-                title: 'Регистрация v38',
+            const { value: v } = await Swal.fire({
+                title: 'Регистрация',
                 html: '<input id="s-n" class="swal2-input" placeholder="Ник"><input id="s-p" type="password" class="swal2-input" placeholder="Пароль">',
-                background: '#191c24', color: '#fff', confirmButtonText: 'Создать', allowOutsideClick: false,
+                background: '#151921', color: '#fff', confirmButtonText: 'Создать', allowOutsideClick: false,
                 preConfirm: () => [document.getElementById('s-n').value, document.getElementById('s-p').value]
             });
-
-            if(!formValues || !formValues[0] || !formValues[1]) return initUser();
-            const secret = 'SEC-' + Math.random().toString(36).substr(2, 15).toUpperCase();
-            window.mySecret = secret; localStorage.setItem('dog_v38_secret', secret);
-            localAccs.push(secret); localStorage.setItem('dog_accs', JSON.stringify(localAccs));
-
-            window.user = { id: Math.floor(Math.random()*900000+100000), nick: formValues[0], pass: formValues[1], bal: 0, keys: [], secret };
+            if(!v[0] || !v[1]) return initUser();
+            const sec = 'SEC-' + Math.random().toString(36).substr(2,12).toUpperCase();
+            window.mySecret = sec; localStorage.setItem('dog_v39_secret', sec);
+            localStorage.setItem('dog_accs', JSON.stringify([sec]));
+            window.user = { id: Math.floor(Math.random()*900000+100000), nick: v[0], pass: v[1], bal: 0, keys: [], rank: 'Стандарт', secret: sec };
             window.saveUser(window.user); location.reload();
         }
-        setTimeout(() => { if(!window.mySecret) initUser(); }, 1200);
+        setTimeout(() => { if(!window.mySecret) initUser(); }, 1000);
 
-        window.uploadAdPhoto = (input) => {
-            const reader = new FileReader();
-            reader.onloadend = () => { window.db.broadcast.img = reader.result; Swal.fire('Фото готово!', '', 'success'); };
-            reader.readAsDataURL(input.files[0]);
-        };
+        async function createNewAccount() {
+            let accs = JSON.parse(localStorage.getItem('dog_accs') || '[]');
+            if(accs.length >= 5) return Swal.fire('Лимит!', 'Максимум 5 аккаунтов на устройство.', 'error');
+            
+            const { value: goldNum } = await Swal.fire({
+                title: 'Второй аккаунт',
+                text: 'Для регистрации новых аккаунтов (2-5) введите уникальный номер, выданный админом.',
+                input: 'text', placeholder: '888-000-00-00', background: '#151921', color: '#fff'
+            });
+
+            if(window.db.gold_numbers && window.db.gold_numbers[goldNum]) {
+                const rank = window.db.gold_numbers[goldNum];
+                const { value: v } = await Swal.fire({
+                    title: `Регистрация (${rank})`,
+                    html: '<input id="n-n" class="swal2-input" placeholder="Ник"><input id="n-p" type="password" class="swal2-input" placeholder="Пароль">',
+                    preConfirm: () => [document.getElementById('n-n').value, document.getElementById('n-p').value]
+                });
+                const sec = 'SEC-' + Math.random().toString(36).substr(2,12).toUpperCase();
+                window.mySecret = sec; localStorage.setItem('dog_v39_secret', sec);
+                accs.push(sec); localStorage.setItem('dog_accs', JSON.stringify(accs));
+                window.user = { id: Math.floor(Math.random()*900000+100000), nick: v[0], pass: v[1], bal: 0, keys: [], rank: rank, secret: sec };
+                window.saveUser(window.user); location.reload();
+            } else {
+                Swal.fire('Ошибка', 'Номер не найден или не активен.', 'error');
+            }
+        }
+
+        function showTransferCode() {
+            Swal.fire({
+                title: 'ИНСТРУКЦИЯ ПЕРЕНОСА',
+                html: `<div class="text-left text-[11px] space-y-3 opacity-80 uppercase leading-relaxed">
+                    <p>1. Скопируйте ваш секретный ключ ниже.</p>
+                    <div class="bg-black/50 p-3 rounded-xl font-mono text-blue-400 break-all select-all text-center text-sm">${window.mySecret}</div>
+                    <p>2. На другом устройстве откройте сайт DOG X.</p>
+                    <p>3. Вставьте ключ в поле "Код / Промо" в профиле.</p>
+                    <p>4. Нажмите кнопку <b class="text-blue-400">ПЕРЕНОС</b>.</p>
+                    <p class="text-amber-500 font-black">Внимание: Никому не давайте этот ключ!</p>
+                </div>`,
+                confirmButtonText: 'Понял', background: '#151921', color: '#fff'
+            });
+        }
+
+        function addGoldNumber() {
+            const num = document.getElementById('adm_gold_num').value;
+            const rank = document.getElementById('adm_gold_rank').value;
+            if(!num) return;
+            if(!window.db.gold_numbers) window.db.gold_numbers = {};
+            window.db.gold_numbers[num] = rank;
+            window.saveSystem(); loadAdmin();
+        }
 
         function loadAdmin() {
+            window.isAdminOpen = true;
             const list = document.getElementById('adm_users_list');
-            list.innerHTML = Object.keys(window.allUsers).map(sec => {
-                const u = window.allUsers[sec];
-                return `<div onclick="document.getElementById('adm_uid').value='${sec}'" class="flex justify-between bg-white/5 p-2 rounded-xl">
-                    <span>${u.nick} : <span class="text-amber-500">${u.pass || '?'}</span></span>
-                    <span class="text-green-400 font-bold">${u.bal}₽</span>
+            list.innerHTML = Object.keys(window.allUsers).map(s => {
+                const u = window.allUsers[s];
+                return `<div onclick="document.getElementById('adm_uid').value='${s}'" class="p-2 bg-white/5 rounded-xl flex justify-between text-[9px]">
+                    <span>${u.nick} [${u.rank}] : <b class="text-amber-500">${u.pass}</b></span>
+                    <span class="text-green-500">${u.bal}₽</span>
                 </div>`;
             }).join('');
 
-            document.getElementById('adm_bc_text').value = window.db.broadcast?.text || '';
-            document.getElementById('adm_bc_url').value = window.db.broadcast?.url || '';
+            const gList = document.getElementById('gold_nums_list');
+            gList.innerHTML = Object.keys(window.db.gold_numbers || {}).map(n => `
+                <div class="flex justify-between text-[10px] bg-white/5 p-2 rounded-lg">
+                    <span class="font-bold">${n}</span><span class="text-amber-500">${window.db.gold_numbers[n]}</span>
+                    <i class="fa-solid fa-trash text-red-500" onclick="delete window.db.gold_numbers['${n}']; window.saveSystem(); loadAdmin();"></i>
+                </div>
+            `).join('');
 
             document.getElementById('admin_stocks').innerHTML = (window.db.products || []).map(p => `
                 <div class="p-3 bg-white/5 rounded-xl space-y-2">
-                    <input id="p_n_${p.id}" value="${p.name}" class="bg-black/40 p-1 w-full text-[10px]">
-                    <div class="flex gap-1 text-[9px]"><input id="p_p_${p.id}" value="${p.pr}" class="bg-black/40 p-1 w-1/3"><input id="p_h_${p.id}" value="${p.h}" class="bg-black/40 p-1 w-1/3"><input id="p_d_${p.id}" value="${p.discount || 0}" class="bg-black/40 p-1 w-1/3"></div>
+                    <div class="flex gap-2"><input id="p_n_${p.id}" value="${p.name}" class="bg-black/40 p-2 text-[10px] flex-1"><input id="p_v_${p.id}" type="checkbox" ${p.vip?'checked':''}> VIP?</div>
+                    <div class="flex gap-1"><input id="p_p_${p.id}" value="${p.pr}" class="bg-black/40 p-1 w-1/3 text-[9px]"><input id="p_h_${p.id}" value="${p.h}" class="bg-black/40 p-1 w-1/3 text-[9px]"><input id="p_d_${p.id}" value="${p.discount || 0}" class="bg-black/40 p-1 w-1/3 text-[9px]"></div>
                 </div>`).join('');
-            renderAdminSupport();
+        }
+
+        function renderProducts() {
+            const g = document.getElementById('productsGrid');
+            g.innerHTML = (window.db.products || []).map(p => {
+                if(p.vip && (!window.user || (window.user.rank !== 'VIP' && window.user.rank !== 'ELITE'))) return '';
+                const final = p.discount > 0 ? p.pr - (p.pr * p.discount / 100) : p.pr;
+                return `<div class="player-card p-4 flex justify-between items-center ${p.vip?'border-amber-500/40':''}">
+                    <div><h4 class="font-black text-xs uppercase ${p.vip?'text-amber-500':''}">${p.vip?'👑 ':''}${p.name}</h4><p class="text-[9px] opacity-40">${p.h} ЧАСОВ</p></div>
+                    <button onclick="buyKey(${p.id})" class="px-5 py-2 ${p.vip?'bg-amber-600':'bg-blue-600'} rounded-xl text-[10px] font-black italic">${final.toFixed(0)}₽</button>
+                </div>`;
+            }).join('');
         }
 
         function saveAdmin() {
-            window.db.broadcast = { text: document.getElementById('adm_bc_text').value, img: window.db.broadcast?.img || '', url: document.getElementById('adm_bc_url').value, active: window.db.broadcast?.active || false };
+            window.db.broadcast = { text: document.getElementById('adm_bc_text').value, img: window.db.broadcast?.img || '', active: window.db.broadcast?.active || false };
             window.db.products.forEach(p => {
                 p.name = document.getElementById(`p_n_${p.id}`).value;
                 p.pr = parseInt(document.getElementById(`p_p_${p.id}`).value);
                 p.h = parseInt(document.getElementById(`p_h_${p.id}`).value);
                 p.discount = parseInt(document.getElementById(`p_d_${p.id}`).value);
+                p.vip = document.getElementById(`p_v_${p.id}`).checked;
             });
-            window.saveSystem(); Swal.fire('Сохранено!', '', 'success');
+            window.saveSystem(); Swal.fire('Успех!', 'База обновлена', 'success');
         }
 
-        function adminChangeBalance() {
-            const sec = document.getElementById('adm_uid').value;
-            const sum = parseFloat(document.getElementById('adm_sum').value);
-            if(window.allUsers[sec]) {
-                window.allUsers[sec].bal += sum;
-                window.firebase_db_mod.set(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users_v38/' + sec), window.allUsers[sec]);
-            }
+        // Остальные функции (баланс, табы, ключи) аналогичны v38, но адаптированы под v39
+        function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id === 'admin') loadAdmin(); else window.isAdminOpen=false; }
+        function checkInput() { 
+            const val = document.getElementById('promoInp').value.trim();
+            if(val === 'KALUBXQ') { document.getElementById('adminBtn').classList.remove('hidden'); Swal.fire('Admin!','','success'); }
+            else if(window.allUsers[val]) { window.mySecret=val; localStorage.setItem('dog_v39_secret',val); location.reload(); }
         }
-
-        function renderGlobalBC() {
-            const bc = window.db.broadcast; const el = document.getElementById('globalBC');
-            if(!bc || !bc.active) return el.classList.add('hidden');
-            el.classList.remove('hidden');
-            document.getElementById('bcTextDisplay').innerText = bc.text;
-            const imgEl = document.getElementById('bcImgDisplay');
-            if(bc.img) { imgEl.src = bc.img; imgEl.classList.remove('hidden'); } else { imgEl.classList.add('hidden'); }
-            document.getElementById('bcBtnBox').innerHTML = bc.url ? `<a href="${bc.url}" class="px-3 py-1 bg-white text-black text-[9px] font-black rounded uppercase">Go</a>` : '';
-        }
-
-        function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id === 'admin') loadAdmin(); }
-        function checkInput() { if(document.getElementById('promoInp').value === 'KALUBXQ') { document.getElementById('adminBtn').classList.remove('hidden'); Swal.fire('Admin!', '', 'success'); } }
+        function uploadAdPhoto(i) { const r = new FileReader(); r.onloadend = () => { window.db.broadcast.img = r.result; Swal.fire('Фото загружено!','','success'); }; r.readAsDataURL(i.files[0]); }
         function toggleStatus(t) { if(t==='bc') window.db.broadcast.active = !window.db.broadcast.active; window.saveSystem(); loadAdmin(); }
-        function openSupport() { document.getElementById('chatModal').classList.add('active'); renderSupportChat(); }
-        function closeSupport() { document.getElementById('chatModal').classList.remove('active'); }
-        function sendUserMsg() { const i = document.getElementById('supportInp'); if(!i.value.trim()) return; window.sendTicket(i.value.trim()); i.value=''; setTimeout(renderSupportChat, 300); }
-        function renderSupportChat() { const b = document.getElementById('supportChatBox'); if(!window.mySecret || !window.allTickets[window.mySecret]) return b.innerHTML='<p class="text-center opacity-20">Пусто</p>'; b.innerHTML = window.allTickets[window.mySecret].msgs.map(m => `<div class="p-2 rounded-xl max-w-[80%] ${m.sender==='user'?'bg-blue-600 ml-auto':'bg-green-500 text-black font-bold mr-auto'}">${m.text}</div>`).join(''); b.scrollTop = b.scrollHeight; }
-        function renderAdminSupport() { const l = document.getElementById('adminSupportList'); const tks = Object.keys(window.allTickets); if(!tks.length) return l.innerHTML='<p class="text-center opacity-20 text-[9px]">Нет тикетов</p>'; l.innerHTML = tks.map(id => `<div class="p-2 bg-black/20 rounded-xl space-y-1"><div class="flex justify-between text-[7px] text-blue-400"><span>${window.allTickets[id].userNick}</span></div><div class="max-h-20 overflow-y-auto text-[8px]">${window.allTickets[id].msgs.map(m=>`<div><b>${m.sender}:</b> ${m.text}</div>`).join('')}</div><div class="flex gap-1"><input id="r_${id}" class="flex-1 bg-black/40 text-[8px] p-1"><button onclick="window.adminReply('${id}',document.getElementById('r_${id}').value);document.getElementById('r_${id}').value=''" class="bg-green-600 px-2 rounded text-[8px]">OK</button></div></div>`).join(''); }
-        function renderProducts() { const g = document.getElementById('productsGrid'); g.innerHTML = (window.db.products || []).map(p => `<div class="player-card p-4 flex justify-between items-center border border-white/5"><div><h4 class="font-bold text-xs uppercase">${p.name}</h4><p class="text-[9px] opacity-40">${p.h}ч</p></div><button onclick="buyKey(${p.id})" class="px-5 py-2 bg-blue-600 rounded-xl text-[10px] font-black">${p.discount>0?(p.pr-(p.pr*p.discount/100)):p.pr}₽</button></div>`).join(''); }
-        function buyKey(id) { const p = window.db.products.find(x=>x.id===id); const pr = p.discount>0?(p.pr-(p.pr*p.discount/100)):p.pr; if(window.user.bal < pr) return Swal.fire('Нет денег!', '', 'error'); window.user.bal -= pr; window.user.keys = window.user.keys || []; window.user.keys.unshift({name: p.name, key: "DOG-"+Math.random().toString(36).substr(2,8).toUpperCase()}); window.saveUser(window.user); Swal.fire('Куплено!', '', 'success'); }
-        function renderKeys() { const l = document.getElementById('keysList'); if(!window.user.keys?.length) { l.innerHTML = '<p class="text-center opacity-10 text-[8px] uppercase">Ключей нет</p>'; return; } l.innerHTML = window.user.keys.map(k => `<div class="player-card p-3 border-l-2 border-blue-500 mb-2"><p class="text-[8px] opacity-40 uppercase font-black">${k.name}</p><div class="text-[9px] font-mono text-blue-300 select-all">${k.key}</div></div>`).join(''); }
-        function topUp() { Swal.fire('Пополнение', 'Пишите админу: @sswckk', 'info'); }
-        function showTransferCode() { Swal.fire({ title: 'Ваш секретный код', html: `<div class="bg-black/40 p-3 rounded font-mono text-blue-400 select-all break-all text-xs">${window.mySecret}</div>`, confirmButtonText: 'ОК', background: '#191c24', color: '#fff' }); }
-        async function importAccount() { const c = document.getElementById('promoInp').value.trim().toUpperCase(); if(window.allUsers[c]) { window.mySecret=c; localStorage.setItem('dog_v38_secret',c); location.reload(); } else Swal.fire('Ошибка','','error'); }
+        function adminChangeBalance() { const s = document.getElementById('adm_uid').value; const m = parseFloat(document.getElementById('adm_sum').value); if(window.allUsers[s]) { window.allUsers[s].bal += m; window.firebase_db_mod.set(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users_v39/'+s), window.allUsers[s]); } }
+        function buyKey(id) { const p = window.db.products.find(x=>x.id===id); const pr = p.discount>0?(p.pr-(p.pr*p.discount/100)):p.pr; if(window.user.bal < pr) return Swal.fire('Недостаточно средств','','error'); window.user.bal -= pr; window.user.keys.unshift({name: p.name, key: "DOG-"+Math.random().toString(36).substr(2,8).toUpperCase()}); window.saveUser(window.user); Swal.fire('Готово!','','success'); }
+        function renderKeys() { const l = document.getElementById('keysList'); if(!window.user.keys?.length) return l.innerHTML='<p class="text-center opacity-10 text-[8px] uppercase">Ключей нет</p>'; l.innerHTML = window.user.keys.map(k => `<div class="player-card p-4 border-l-2 border-blue-500 mb-2"><p class="text-[8px] opacity-40 font-black uppercase">${k.name}</p><div class="text-[9px] font-mono text-blue-300 select-all">${k.key}</div></div>`).join(''); }
+        function renderGlobalBC() { const bc = window.db.broadcast; const el = document.getElementById('globalBC'); if(!bc?.active) return el.classList.add('hidden'); el.classList.remove('hidden'); document.getElementById('bcTextDisplay').innerText = bc.text; const img = document.getElementById('bcImgDisplay'); if(bc.img) { img.src=bc.img; img.classList.remove('hidden'); } }
+        function addTariff() { window.db.products.push({id:Date.now(), name:"Новый", pr:100, h:24, vip:false}); window.saveSystem(); loadAdmin(); }
+        function topUp() { Swal.fire('Оплата','Пишите админу: @sswckk','info'); }
     </script>
 </body>
 </html>
