@@ -2,291 +2,145 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | Final Live Mail v42</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>DOG X VPN</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI",
-            authDomain: "dogx-base.firebaseapp.com",
-            databaseURL: "https://dogx-base-default-rtdb.firebaseio.com",
-            projectId: "dogx-base",
-            storageBucket: "dogx-base.firebasestorage.app",
-            messagingSenderId: "81713249793",
-            appId: "1:81713249793:web:1b44a13e6faf5acfa78a00"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db_firebase = getDatabase(app);
-
-        window.db = {};
-        window.allUsers = {};
-        window.allTickets = {};
-        window.mySecret = localStorage.getItem('dog_v31_secret');
-        window.user = null;
-
-        const dbRef = ref(db_firebase, 'dog_system_db');
-        const usersRef = ref(db_firebase, 'dog_users');
-        const supportRef = ref(db_firebase, 'dog_support');
-
-        onValue(dbRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) { 
-                window.db = data; 
-                renderProducts(); 
-                renderGlobalBC(); 
-                renderFooterAd();
-                if(document.getElementById('admin').classList.contains('active')) loadAdmin();
-            }
-        });
-
-        onValue(usersRef, (snapshot) => {
-            window.allUsers = snapshot.val() || {};
-            if (window.mySecret && window.allUsers[window.mySecret]) {
-                window.user = window.allUsers[window.mySecret];
-                updateUI();
-            }
-        });
-
-        onValue(supportRef, (snapshot) => { window.allTickets = snapshot.val() || {}; if(document.getElementById('admin').classList.contains('active')) renderAdminSupport(); });
-
-        window.saveSystem = () => set(dbRef, window.db);
-        window.saveUser = (u) => set(ref(db_firebase, 'dog_users/' + window.mySecret), u);
-        window.adminReply = (tId, msg) => {
-            if(!msg.trim()) return;
-            const reply = { text: msg, sender: 'admin', time: Date.now() };
-            window.allTickets[tId].msgs.push(reply);
-            set(ref(db_firebase, 'dog_support/' + tId), window.allTickets[tId]);
-        };
-        window.sendTicket = (msg) => {
-            const tId = window.mySecret;
-            const newMsg = { text: msg, sender: 'user', time: Date.now() };
-            if(!window.allTickets[tId]) window.allTickets[tId] = { userNick: window.user.nick, userId: window.user.id, msgs: [] };
-            window.allTickets[tId].msgs.push(newMsg);
-            set(ref(db_firebase, 'dog_support/' + tId), window.allTickets[tId]);
-        };
-        window.firebase_db_mod = { getDatabase, ref, set, remove, get };
-    </script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
-        :root { --bg: #0f1117; --card: #191c24; --accent: #5865f2; }
-        body { background: var(--bg); color: #fff; font-family: 'Manrope', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .player-card { background: var(--card); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .btn-primary { background: var(--accent); color: #fff; border-radius: 12px; font-weight: 700; transition: 0.2s; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .chat-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
-        .chat-modal.active { display: flex; }
+        /* Твои стили проекта */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0e14; color: #ffffff; margin: 0; padding: 0; overflow-x: hidden; }
+        .container { padding: 20px; padding-bottom: 80px; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #5865f2; }
+        .balance-card { background: linear-gradient(135deg, #1d222d 0%, #161a23 100%); padding: 25px; border-radius: 20px; text-align: center; border: 1px solid #2a3142; margin-bottom: 25px; }
+        .balance-amount { font-size: 32px; font-weight: 800; color: #5865f2; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .menu-item { background: #191c24; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #2a3142; transition: transform 0.2s; }
+        .menu-item:active { transform: scale(0.95); }
+        .menu-item i { font-size: 24px; color: #5865f2; margin-bottom: 10px; display: block; }
+        .navbar { position: fixed; bottom: 0; left: 0; right: 0; background: #161a23; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #2a3142; }
+        .nav-link { color: #8a8f9d; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .nav-link.active { color: #5865f2; }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="pb-60">
+<body>
 
-    <div id="globalBC" class="max-w-xl mx-auto m-4 hidden">
-        <div class="player-card border border-blue-500/30 overflow-hidden">
-            <img id="bcImgDisplay" src="" class="w-full h-32 object-cover hidden">
-            <div class="p-4 flex items-center justify-between">
-                <p id="bcTextDisplay" class="text-[11px] font-bold italic uppercase"></p>
-                <div id="bcBtnBox"></div>
+<div class="container">
+    <div id="home-page">
+        <div class="header">
+            <div class="user-info">
+                <img src="" id="user-photo" class="user-avatar" alt="Ava">
+                <span id="user-name" style="font-weight: 600;">Пользователь</span>
+            </div>
+            <i class="fas fa-cog" onclick="showPage('admin-page')" id="admin-icon" style="display: none; color: #8a8f9d; font-size: 20px;"></i>
+        </div>
+
+        <div class="balance-card">
+            <div style="font-size: 14px; opacity: 0.7; margin-bottom: 10px;">Ваш баланс</div>
+            <div class="balance-amount"><span id="balance-val">0</span>₽</div>
+        </div>
+
+        <div class="menu-grid">
+            <div class="menu-item" onclick="showPage('vpn-page')">
+                <i class="fas fa-shield-halved"></i>
+                <span>VPN Подключить</span>
+            </div>
+            <div class="menu-item" onclick="showPage('profile-page')">
+                <i class="fas fa-user"></i>
+                <span>Профиль</span>
+            </div>
+            <div class="menu-item" onclick="showPage('help-page')">
+                <i class="fas fa-headset"></i>
+                <span>Поддержка</span>
+            </div>
+            <div class="menu-item" onclick="Swal.fire({title:'Скоро!', text:'Реферальная система в разработке', icon:'info', background:'#191c24', color:'#fff'})">
+                <i class="fas fa-users"></i>
+                <span>Друзья</span>
             </div>
         </div>
     </div>
 
-    <header class="p-6 flex justify-between items-center">
-        <div><div class="text-2xl font-extrabold text-blue-500 italic uppercase">Dog X</div><div id="userDisplay" class="text-[9px] opacity-40 italic">v42 mail engine</div></div>
-        <div class="flex gap-4">
-            <button onclick="showTab('home')" class="text-xs font-bold opacity-60">Маркет</button>
-            <button onclick="showTab('me')" class="text-xs font-bold opacity-60">Профиль</button>
-            <button id="adminBtn" onclick="showTab('admin')" class="hidden text-red-500 text-xs font-bold uppercase italic">Admin Panel</button>
+    <div id="profile-page" class="hidden">
+        <h2>Мой профиль</h2>
+        <div class="menu-item" style="text-align: left; display: flex; justify-content: space-between; align-items: center;">
+            <span>ID Пользователя:</span>
+            <span id="user-id-val" style="color: #5865f2;">0000</span>
         </div>
-    </header>
-
-    <main id="home" class="tab-content active px-6 space-y-4">
-        <h2 class="text-xl font-extrabold italic">Тарифы</h2>
-        <div id="productsGrid" class="grid grid-cols-1 gap-4"></div>
-    </main>
-
-    <section id="me" class="tab-content px-6 space-y-6">
-        <div id="profileToCapture" class="player-card p-8 text-center border-b-4 border-blue-600/20 shadow-xl">
-            <p class="text-[10px] opacity-40 uppercase mb-1">Баланс</p>
-            <h3 class="text-5xl font-extrabold text-blue-500" id="userBal">0.00₽</h3>
-            <div class="mt-6 flex flex-wrap gap-2 justify-center">
-                <button onclick="topUp()" class="flex-1 min-w-[120px] py-4 btn-primary text-xs uppercase italic">Пополнить</button>
-                <button onclick="openSupport()" class="px-5 bg-blue-600/10 border border-blue-500/20 rounded-xl text-blue-400 text-[10px] font-black uppercase">Help</button>
-                <button onclick="takeScreenshot()" class="px-4 bg-white/5 rounded-xl border border-white/10 text-blue-400"><i class="fa-solid fa-camera"></i></button>
-                <button onclick="showTransferCode()" class="px-4 bg-white/5 rounded-xl border border-white/10 text-blue-400"><i class="fa-solid fa-key"></i></button>
-            </div>
-        </div>
-
-        <div id="emailBonusBox" class="player-card p-4 flex items-center justify-between border border-amber-500/20">
-            <div>
-                <p class="text-[10px] font-bold text-amber-500 uppercase">Привязка E-mail</p>
-                <p id="emailStatusText" class="text-[9px] opacity-40 italic">Придет код: получи +10₽</p>
-            </div>
-            <button id="emailBtn" onclick="startEmailAuth()" class="bg-amber-500/10 text-amber-500 px-4 py-2 rounded-xl text-[9px] font-black uppercase">Привязать</button>
-        </div>
-
-        <div id="keysList" class="space-y-3"></div>
-
-        <div class="space-y-2">
-            <input type="text" id="promoInp" placeholder="Код переноса или промо" class="w-full p-4 player-card bg-transparent text-center text-sm outline-none border-blue-500/10">
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="checkInput()" class="py-4 bg-white/5 rounded-xl text-[10px] font-bold uppercase border border-white/10">Активировать</button>
-                <button onclick="importAccount()" class="py-4 bg-blue-600/20 rounded-xl text-blue-400 text-[10px] font-bold uppercase border border-blue-500/30">Перенос акка</button>
-            </div>
-        </div>
-    </section>
-
-    <div id="footerAd" class="fixed bottom-24 left-6 right-6 z-50 hidden">
-        <div class="player-card p-3 border border-white/10 flex items-center gap-3 bg-black/80 backdrop-blur">
-            <div class="w-10 h-10 bg-blue-600 rounded flex items-center justify-center text-white"><i class="fa-solid fa-bullhorn text-xs"></i></div>
-            <div class="flex-1"><p id="footerAdText" class="text-[9px] font-bold italic uppercase"></p></div>
-            <div id="footerAdBtnBox"></div>
-        </div>
+        <button onclick="showPage('home-page')" style="width: 100%; margin-top: 20px; padding: 15px; border-radius: 10px; background: #5865f2; border: none; color: #fff; font-weight: bold;">Назад</button>
     </div>
 
-    <section id="admin" class="tab-content px-6 pb-20 space-y-6">
-        <div class="player-card p-6 space-y-6 border border-red-500/30">
-            <div class="flex justify-between items-center pb-4 border-b border-red-500/20">
-                <h2 class="text-red-500 font-black uppercase text-xs italic">Admin v42</h2>
-                <div id="adm_stats" class="text-[8px] opacity-50 uppercase"></div>
-            </div>
-            <div id="adm_users_list" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div>
-            <div class="flex gap-2">
-                <input id="adm_uid" class="flex-1 p-3 bg-black/40 rounded-xl text-[10px]" placeholder="Secret Key">
-                <input id="adm_sum" type="number" class="w-20 p-3 bg-black/40 rounded-xl text-[10px]" placeholder="₽">
-                <button onclick="adminChangeBalance()" class="bg-blue-600 px-4 rounded-xl text-[10px] font-bold uppercase">OK</button>
-            </div>
-
-            <div class="p-4 bg-amber-500/5 rounded-2xl space-y-2 border border-amber-500/10">
-                <p class="text-[9px] font-black text-amber-500 uppercase">Верхний баннер</p>
-                <input id="adm_bc_img" class="w-full p-2 bg-black/40 rounded text-[9px]" placeholder="URL Картинки">
-                <input id="adm_bc_text" class="w-full p-2 bg-black/40 rounded text-[9px]" placeholder="Текст">
-                <input id="adm_bc_url" class="w-full p-2 bg-black/40 rounded text-[9px]" placeholder="URL Кнопки">
-                <button onclick="toggleStatus('bc')" class="w-full py-2 bg-amber-600/20 text-amber-500 text-[9px] font-bold rounded">Вкл/Выкл</button>
-            </div>
-
-            <div class="p-4 bg-blue-500/5 rounded-2xl space-y-2 border border-blue-500/10">
-                <p class="text-[9px] font-black text-blue-400 uppercase italic">Нижний баннер (Footer)</p>
-                <input id="adm_footer_text" class="w-full p-2 bg-black/40 rounded text-[9px]" placeholder="Текст">
-                <input id="adm_footer_url" class="w-full p-2 bg-black/40 rounded text-[9px]" placeholder="Ссылка">
-                <button onclick="toggleStatus('footer')" class="w-full py-2 bg-blue-600/20 text-blue-400 text-[9px] font-bold rounded">Вкл/Выкл</button>
-            </div>
-
-            <div id="adminSupportList" class="space-y-4"></div>
-            <div id="admin_stocks" class="space-y-4"></div>
-            <button onclick="addTariff()" class="w-full py-4 border-2 border-dashed border-white/10 rounded-2xl text-[10px] uppercase font-bold">+ Товар</button>
-            <button onclick="saveAdmin()" class="w-full py-6 btn-primary bg-red-600 text-sm font-black italic uppercase">Сохранить v42</button>
-        </div>
-    </section>
-
-    <div id="chatModal" class="chat-modal">
-        <div class="player-card w-full max-w-sm p-6 space-y-4 relative border border-blue-500/30">
-            <button onclick="closeSupport()" class="absolute top-4 right-4 opacity-40"><i class="fa-solid fa-xmark"></i></button>
-            <div id="supportChatBox" class="h-64 overflow-y-auto space-y-2 flex flex-col pr-2 text-[10px]"></div>
-            <div class="flex gap-2">
-                <input type="text" id="supportInp" placeholder="Сообщение..." class="flex-1 bg-black/40 p-3 rounded-xl text-xs outline-none">
-                <button onclick="sendUserMsg()" class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
-            </div>
-        </div>
+    <div id="help-page" class="hidden">
+        <h2>Поддержка</h2>
+        <div id="tickets-list" style="margin-bottom: 20px;"></div>
+        <button onclick="createNewTicket()" style="width: 100%; padding: 15px; border-radius: 10px; background: #5865f2; border: none; color: #fff; font-weight: bold;">Создать обращение</button>
+        <button onclick="showPage('home-page')" style="width: 100%; margin-top: 10px; padding: 10px; background: none; border: 1px solid #2a3142; color: #8a8f9d;">Назад</button>
     </div>
+</div>
 
-    <script>
-        // ИНИЦИАЛИЗАЦИЯ ТВОИХ ДАННЫХ
-        (function() {
-            emailjs.init("JewpMG9zVAE12FrR6"); 
-        })();
+<div class="navbar">
+    <a href="#" class="nav-link active" onclick="showPage('home-page')"><i class="fas fa-home"></i>Главная</a>
+    <a href="#" class="nav-link" onclick="showPage('profile-page')"><i class="fas fa-user"></i>Профиль</a>
+    <a href="#" class="nav-link" onclick="showPage('help-page')"><i class="fas fa-question-circle"></i>Помощь</a>
+</div>
 
-        async function startEmailAuth() {
-            if(window.user.emailVerified) return;
-            const { value: email } = await Swal.fire({ 
-                title: 'Привязка почты', 
-                input: 'email', 
-                placeholder: 'Введите ваш email',
-                background: '#191c24', 
-                color: '#fff',
-                confirmButtonColor: '#5865f2'
-            });
-            if(!email) return;
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-            const code = Math.floor(1000 + Math.random() * 9000);
-            Swal.fire({ title: 'Отправка...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+    // Инициализация пользователя
+    window.user = {
+        id: tg.initDataUnsafe.user?.id || 12345,
+        name: tg.initDataUnsafe.user?.first_name || "Артём",
+        bal: 0,
+        isAdmin: false
+    };
 
-            emailjs.send("dog_x_vpn", "template_amliwse", {
-                to_email: email,
-                code: code 
-            }).then(async () => {
-                const { value: userCode } = await Swal.fire({
-                    title: 'DOG X VPN (tg)',
-                    html: `<div class="text-sm">Ваш код для DOG X VPN (tg) — Ваш код:<br><b>${email}</b></div>`,
-                    input: 'text',
-                    inputPlaceholder: 'Введите код из письма',
-                    background: '#191c24',
-                    color: '#fff'
-                });
+    // Заглушка админа для теста (замени на свой ID)
+    if(window.user.id === 12345678 || window.user.id === 5158671607) {
+        window.user.isAdmin = true;
+        document.getElementById('admin-icon').style.display = 'block';
+    }
 
-                if(userCode == code) {
-                    window.user.bal += 10;
-                    window.user.emailVerified = true;
-                    window.user.email = email;
-                    window.saveUser(window.user);
-                    Swal.fire('Успех!', '+10₽ на баланс', 'success');
-                } else {
-                    Swal.fire('Ошибка', 'Неверный код', 'error');
-                }
-            }, (err) => {
-                Swal.fire('Ошибка', 'Проверьте настройки EmailJS', 'error');
-            });
+    function initApp() {
+        document.getElementById('user-name').innerText = window.user.name;
+        document.getElementById('balance-val').innerText = window.user.bal;
+        document.getElementById('user-id-val').innerText = window.user.id;
+        const photo = tg.initDataUnsafe.user?.photo_url;
+        if(photo) document.getElementById('user-photo').src = photo;
+    }
+
+    function showPage(pageId) {
+        document.getElementById('home-page').classList.add('hidden');
+        document.getElementById('profile-page').classList.add('hidden');
+        document.getElementById('help-page').classList.add('hidden');
+        document.getElementById(pageId).classList.remove('hidden');
+    }
+
+    async function createNewTicket() {
+        const { value: text } = await Swal.fire({
+            title: 'Ваш вопрос',
+            input: 'textarea',
+            background: '#191c24',
+            color: '#fff',
+            confirmButtonColor: '#5865f2'
+        });
+        if(text) {
+            Swal.fire('Отправлено!', 'Админ ответит вам в ближайшее время.', 'success');
+            // Здесь должна быть твоя функция отправки сообщения в ТГ
         }
+    }
 
-        // БАЗОВЫЙ ФУНКЦИОНАЛ
-        function takeScreenshot() {
-            const el = document.getElementById('profileToCapture');
-            html2canvas(el, { backgroundColor: '#191c24', scale: 2 }).then(canvas => {
-                const link = document.createElement('a'); link.download = `DogX_ID${window.user.id}.png`; link.href = canvas.toDataURL(); link.click();
-                Swal.fire('Сохранено!', '', 'success');
-            });
-        }
+    // Сохранение (заглушка)
+    window.saveUser = function(userData) {
+        console.log("Saving user...", userData);
+        document.getElementById('balance-val').innerText = userData.bal;
+    };
 
-        function updateUI() {
-            if(!window.user) return;
-            document.getElementById('userDisplay').innerText = `${window.user.nick} | ID: ${window.user.id}`;
-            document.getElementById('userBal').innerText = window.user.bal.toFixed(0) + '₽';
-            if(window.user.emailVerified) {
-                document.getElementById('emailStatusText').innerText = `Привязано: ${window.user.email}`;
-                document.getElementById('emailBtn').classList.add('hidden');
-                document.getElementById('emailBonusBox').style.borderColor = "#22c55e";
-            }
-            renderKeys();
-        }
+    initApp();
+</script>
 
-        async function initUser() {
-            if(window.mySecret) return;
-            const { value: nick } = await Swal.fire({ title: 'DOG X', input: 'text', text: 'Никнейм', background: '#191c24', color: '#fff', allowOutsideClick: false });
-            if(!nick) return initUser();
-            const secret = 'SEC-' + Math.random().toString(36).substr(2, 15).toUpperCase();
-            window.mySecret = secret; localStorage.setItem('dog_v31_secret', secret);
-            window.user = { id: Math.floor(Math.random()*900000+100000), nick, bal: 0, keys: [], secret, emailVerified: false };
-            window.saveUser(window.user);
-        }
-        setTimeout(() => { if(!window.mySecret) initUser(); }, 1000);
-
-        function showTransferCode() { Swal.fire({ title: 'SECRET KEY', html: `<div class="bg-black/40 p-4 rounded-xl font-mono text-blue-400 select-all break-all">${window.mySecret}</div>`, background: '#191c24', color: '#fff' }); }
-
-        async function importAccount() {
-            const code = document.getElementById('promoInp').value.trim().toUpperCase();
-            if(window.allUsers[code]) { window.mySecret = code; localStorage.setItem('dog_v31_secret', code); location.reload(); }
-            else { Swal.fire('Ошибка', 'Аккаунт не найден', 'error'); }
-        }
-
-        // АДМИНКА
-        function loadAdmin() {
-            document.getElementById('adm_stats').innerText = `Юзеров: ${Object.keys(window.allUsers).length} | Банк: ${Object.values(window
+</body>
+</html>
