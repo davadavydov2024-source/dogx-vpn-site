@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | v51 OMNI</title>
+    <title>DOG X | v52 EUPHORIA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI",
@@ -22,371 +22,419 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        window.db_data = { products: [], broadcast: {active:false, img:''}, push: {time:0}, gold_numbers: [], music: '' };
+        window.db_data = { products: [], broadcast: {active:false, img:''}, gold_numbers: [], music: '', vpn_keys: {} };
         window.allUsers = {};
         window.allTickets = {};
-        window.mySecret = localStorage.getItem('dog_v51_sec');
-        window.user = null;
-
-        // Главный слушатель системы
-        onValue(ref(db, 'system_v51'), (s) => { 
-            const data = s.val();
-            if(data) {
-                window.db_data = data;
-                renderProducts(); renderBC(); checkPush(); handleGlobalMusic();
-            }
+        window.mySecret = localStorage.getItem('dog_v52_sec');
+        
+        onValue(ref(db, 'system_v52'), (s) => { 
+            const data = s.val(); if(data) { window.db_data = data; renderProducts(); renderBC(); handleMusic(); }
         });
 
-        onValue(ref(db, 'users_v51'), (s) => { 
+        onValue(ref(db, 'users_v52'), (s) => { 
             window.allUsers = s.val() || {}; 
             if (window.mySecret && window.allUsers[window.mySecret]) {
-                window.user = window.allUsers[window.mySecret];
-                updateUI();
+                window.user = window.allUsers[window.mySecret]; updateUI();
             }
         });
 
-        onValue(ref(db, 'support_v51'), (s) => { window.allTickets = s.val() || {}; if(window.isAdminOpen) renderAdmSupport(); renderUserChat(); });
+        onValue(ref(db, 'support_v52'), (s) => { 
+            window.allTickets = s.val() || {}; 
+            if(window.isAdminOpen) renderAdmSupport(); 
+            renderUserChat();
+            checkSupportNotif();
+        });
 
-        window.saveSys = () => set(ref(db, 'system_v51'), window.db_data);
-        window.saveUsr = (u, sec) => set(ref(db, 'users_v51/' + (sec || window.mySecret)), u);
-        window.delUsr = (sec) => remove(ref(db, 'users_v51/' + sec));
-        window.saveTicket = (id, data) => set(ref(db, 'support_v51/' + id), data);
+        window.saveSys = () => set(ref(db, 'system_v52'), window.db_data);
+        window.saveUsr = (u, sec) => set(ref(db, 'users_v52/' + (sec || window.mySecret)), u);
+        window.saveTicket = (id, data) => set(ref(db, 'support_v52/' + id), data);
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap');
-        body { background: #05070a; color: #fff; font-family: 'Manrope', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .glass { background: #0f121a; border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { background: #020408; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(15, 20, 30, 0.7); backdrop-filter: blur(20px); border-radius: 28px; border: 1px solid rgba(255,255,255,0.08); }
         .tab { display: none; }
-        .tab.active { display: block; animation: fadeIn 0.3s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .btn-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        .inp { background: #000; border: 1px solid #222; border-radius: 14px; padding: 14px; font-size: 12px; color: #fff; width: 100%; outline: none; }
-        .gold-badge { background: linear-gradient(45deg, #f59e0b, #fbbf24); color: #000; font-weight: 900; }
+        .tab.active { display: block; animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.98) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .btn-main { background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); transition: all 0.3s ease; box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4); }
+        .btn-main:active { transform: scale(0.95); opacity: 0.8; }
+        .inp { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 16px; font-size: 13px; color: #fff; width: 100%; transition: 0.3s; }
+        .inp:focus { border-color: #4f46e5; box-shadow: 0 0 15px rgba(79, 70, 229, 0.2); outline: none; }
+        .nav-btn { position: relative; width: 50px; height: 50px; border-radius: 16px; background: rgba(255,255,255,0.03); display: flex; items-center justify-center; transition: 0.3s; }
+        .nav-btn.active { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .badge-dot { position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; border: 2px solid #020408; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-28">
 
     <audio id="globalAudio" loop></audio>
 
-    <header class="p-6 flex justify-between items-center sticky top-0 bg-[#05070a]/90 backdrop-blur-xl z-50 border-b border-white/5">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20"><i class="fa-solid fa-shield-dog"></i></div>
+    <header class="p-6 flex justify-between items-center sticky top-0 z-50 bg-[#020408]/60 backdrop-blur-xl">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-2xl flex items-center justify-center shadow-xl">
+                <i class="fa-solid fa-bolt-lightning text-xl text-white"></i>
+            </div>
             <div>
-                <h1 class="text-xl font-black italic uppercase leading-none">DOG <span class="text-blue-500">X</span></h1>
-                <p id="topId" class="text-[7px] opacity-40 font-bold tracking-[3px] mt-1 uppercase">Loading System...</p>
+                <h1 class="text-xl font-extrabold tracking-tighter uppercase italic">DOG <span class="text-blue-500">X</span></h1>
+                <div id="statusDot" class="flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                    <span id="topId" class="text-[9px] font-bold opacity-40 uppercase tracking-widest">System Online</span>
+                </div>
             </div>
         </div>
         <div class="flex gap-2">
-            <button onclick="setTab('home')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fa-solid fa-house-chimney text-[10px]"></i></button>
-            <button onclick="setTab('me')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fa-solid fa-user-tie text-[10px]"></i></button>
-            <button id="admB" onclick="setTab('admin')" class="hidden w-10 h-10 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center"><i class="fa-solid fa-crown text-[10px]"></i></button>
+            <button onclick="setTab('home')" id="btn-home" class="nav-btn active"><i class="fa-solid fa-house-simple text-sm"></i></button>
+            <button onclick="setTab('me')" id="btn-me" class="nav-btn">
+                <i class="fa-solid fa-user-astronaut text-sm"></i>
+                <div id="msgDot" class="badge-dot hidden"></div>
+            </button>
+            <button id="admB" onclick="setTab('admin')" class="hidden nav-btn text-amber-500 bg-amber-500/10 border border-amber-500/20"><i class="fa-solid fa-crown text-sm"></i></button>
         </div>
     </header>
 
-    <main id="home" class="tab active px-6 space-y-6 pt-4">
-        <div id="bcBox" class="hidden glass overflow-hidden border-blue-500/20">
-            <img id="bcImg" class="w-full h-44 object-cover hidden">
-            <div class="p-5 font-bold italic text-[11px]" id="bcTxt"></div>
+    <main id="home" class="tab active px-6 space-y-6 pt-2">
+        <div id="bcBox" class="hidden glass overflow-hidden relative group">
+            <img id="bcImg" class="w-full h-48 object-cover opacity-60 group-hover:scale-110 transition duration-700">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0f141e] to-transparent"></div>
+            <div class="absolute bottom-5 left-5 right-5">
+                <span class="text-[8px] font-black bg-blue-600 px-2 py-0.5 rounded-md mb-2 inline-block">ОБЪЯВЛЕНИЕ</span>
+                <p id="bcTxt" class="text-xs font-bold leading-relaxed italic"></p>
+            </div>
         </div>
-        <div id="pGrid" class="space-y-4"></div>
+        
+        <div class="flex justify-between items-center px-1">
+            <h2 class="text-sm font-black uppercase tracking-widest opacity-30">Доступные тарифы</h2>
+            <i class="fa-solid fa-sliders text-xs opacity-20"></i>
+        </div>
+        <div id="pGrid" class="space-y-4 pb-10"></div>
     </main>
 
-    <section id="me" class="tab px-6 space-y-6 pt-4">
+    <section id="me" class="tab px-6 space-y-6 pt-2">
         <div class="glass p-8 text-center relative overflow-hidden">
-            <div id="uRank" class="absolute top-4 left-4 text-[8px] font-black px-3 py-1 bg-white/10 rounded-full">USER</div>
-            <h3 class="text-6xl font-black mb-6" id="uBal">0₽</h3>
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <button onclick="Swal.fire('ОПЛАТА','Пиши админу: @sswckk','info')" class="btn-blue py-4 rounded-2xl text-[10px] font-black uppercase italic shadow-lg">Пополнить</button>
-                <button onclick="openSet()" class="bg-white/5 border border-white/10 py-4 rounded-2xl text-[10px] font-black uppercase italic">Настройки</button>
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/10 blur-3xl rounded-full"></div>
+            <p id="uRank" class="text-[9px] font-black tracking-[4px] text-blue-500 mb-2 uppercase">Standart User</p>
+            <h3 class="text-6xl font-extrabold tracking-tighter mb-8" id="uBal">0₽</h3>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="showPay()" class="btn-main py-4 rounded-2xl text-[11px] font-black uppercase italic">Пополнить</button>
+                <button onclick="showSettings()" class="bg-white/5 border border-white/10 py-4 rounded-2xl text-[11px] font-black uppercase italic">Настройки</button>
             </div>
-            <button onclick="openChat()" class="w-full py-4 bg-blue-500/5 rounded-2xl text-[9px] font-black uppercase border border-blue-500/10 text-blue-400">Техподдержка</button>
+            <button onclick="openChat()" class="w-full py-4 bg-indigo-500/10 rounded-2xl text-[10px] font-black uppercase border border-indigo-500/20 text-indigo-400 flex items-center justify-center gap-3">
+                <i class="fa-solid fa-comment-dots animate-bounce"></i> Центр поддержки
+            </button>
         </div>
 
-        <div class="space-y-3">
-            <p class="text-[10px] font-black opacity-30 uppercase ml-2 tracking-widest">Вход в аккаунт</p>
-            <div class="flex gap-2">
-                <input type="text" id="loginInp" placeholder="Secret Key или Номер" class="flex-1 inp text-center font-bold">
-                <button onclick="doLogin()" class="btn-blue px-8 rounded-2xl text-[10px] font-black uppercase shadow-lg">Войти</button>
-            </div>
+        <div class="space-y-4">
+            <p class="text-[10px] font-black opacity-30 uppercase ml-2 tracking-widest">Ваши подписки</p>
+            <div id="keyList" class="space-y-3 pb-10"></div>
         </div>
-        <div id="keyList" class="space-y-3 pb-10"></div>
     </section>
 
-    <section id="admin" class="tab px-6 space-y-6 pt-4 pb-24">
-        <div class="glass p-6 space-y-8 border-red-500/20">
-            <h2 class="text-red-500 font-black text-center text-xs tracking-[5px] uppercase">v51 Control</h2>
-
-            <div class="p-5 bg-purple-500/5 rounded-3xl border border-purple-500/10 space-y-3">
-                <p class="text-[10px] font-black text-purple-400 uppercase italic">🎵 Глобальная Музыка</p>
-                <input type="file" id="musicFile" class="hidden" accept="audio/*" onchange="uploadMusic(this)">
-                <button onclick="document.getElementById('musicFile').click()" class="w-full py-3 bg-white/5 rounded-xl text-[9px] font-bold uppercase">Загрузить трек из файлов</button>
-                <button onclick="window.db_data.music='';window.saveSys();" class="w-full py-2 text-[8px] text-red-400 font-bold">Выключить у всех</button>
+    <section id="admin" class="tab px-6 space-y-6 pt-2 pb-32">
+        <div class="glass p-7 space-y-8">
+            <div class="text-center">
+                <h2 class="text-xs font-black tracking-[8px] text-indigo-500 uppercase">EuphorX Admin</h2>
+                <p class="text-[8px] opacity-20 mt-1 uppercase font-bold tracking-widest">Ultra Management v52</p>
             </div>
 
-            <div class="space-y-3">
-                <div id="admUsers" class="max-h-48 overflow-y-auto space-y-2 pr-2"></div>
-                <div class="p-4 bg-red-500/5 rounded-3xl border border-red-500/10 space-y-3">
-                    <input id="admTId" class="inp" placeholder="Введите ID">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input id="admTBal" type="number" class="inp" placeholder="Баланс ₽">
-                        <input id="admTNick" class="inp" placeholder="Ник">
-                    </div>
-                    <button onclick="admUpdate()" class="w-full py-3 bg-red-600 rounded-xl text-[10px] font-black uppercase italic">Обновить Юзера</button>
+            <div class="space-y-3 bg-white/5 p-5 rounded-3xl border border-white/5">
+                <div class="flex justify-between items-center mb-1">
+                    <p class="text-[10px] font-black text-purple-400 uppercase italic">🎵 Музыкальный поток</p>
                 </div>
+                <input type="file" id="musicFile" class="hidden" accept="audio/*" onchange="uploadMusic(this)">
+                <button onclick="document.getElementById('musicFile').click()" class="w-full py-3 bg-indigo-600 rounded-xl text-[10px] font-black uppercase">Выбрать аудиофайл</button>
+                <button onclick="window.db_data.music='';window.saveSys();" class="w-full text-[9px] text-red-500 font-bold opacity-40">Остановить трансляцию</button>
             </div>
 
-            <div class="p-5 bg-amber-500/5 rounded-3xl border border-amber-500/10 space-y-3">
-                <p class="text-[10px] font-black text-amber-500 uppercase italic">👑 Золотые Номера</p>
+            <div class="space-y-3 bg-amber-500/5 p-5 rounded-3xl border border-amber-500/10">
+                <p class="text-[10px] font-black text-amber-500 uppercase italic">👑 Привилегированные аккаунты</p>
                 <div class="grid grid-cols-2 gap-2">
                     <input id="goldN" class="inp" placeholder="Номер">
                     <input id="goldP" class="inp" placeholder="Пароль">
                 </div>
-                <button onclick="addGold()" class="w-full py-3 bg-amber-600 rounded-xl text-[10px] font-black uppercase">Создать</button>
-                <div id="goldList" class="space-y-1 mt-2"></div>
+                <button onclick="addGold()" class="w-full py-3 bg-amber-600 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-amber-600/20">Создать GOLD</button>
+                <div id="goldList" class="space-y-2 mt-3"></div>
             </div>
 
-            <div class="p-5 bg-blue-500/5 rounded-3xl space-y-3 border border-blue-500/10">
-                <p class="text-[10px] font-black text-blue-400 uppercase italic">🖼️ Баннер</p>
+            <div class="space-y-3 bg-blue-500/5 p-5 rounded-3xl border border-blue-500/10">
+                <p class="text-[10px] font-black text-blue-400 uppercase italic">🖼️ Рекламная кампания</p>
                 <input type="file" id="bcFile" class="hidden" onchange="uploadBC(this)">
-                <button onclick="document.getElementById('bcFile').click()" class="w-full py-2 bg-white/5 rounded-xl text-[9px] font-bold uppercase">Сменить фото</button>
-                <textarea id="bcT" class="inp h-16" placeholder="Текст рекламы..."></textarea>
-                <button onclick="admBC()" id="bcBtn" class="w-full py-3 rounded-xl text-[10px] font-black uppercase"></button>
+                <button onclick="document.getElementById('bcFile').click()" class="w-full py-2 bg-white/5 rounded-xl text-[9px] font-bold">ЗАГРУЗИТЬ ФОТО</button>
+                <textarea id="bcT" class="inp h-20" placeholder="Текст для баннера..."></textarea>
+                <button onclick="admBC()" id="bcBtn" class="w-full py-3 rounded-xl text-[10px] font-black uppercase transition-all"></button>
             </div>
 
-            <div id="admSupport" class="space-y-3"></div>
-            <div id="admProds" class="space-y-3"></div>
-            <button onclick="admAddP()" class="w-full py-3 border border-dashed border-white/20 rounded-xl text-[9px] font-bold">+ Сервер</button>
-            <button onclick="admSave()" class="w-full py-6 bg-green-600 rounded-[30px] text-xs font-black uppercase italic shadow-xl shadow-green-600/30">Сохранить всё</button>
+            <div class="space-y-4">
+                <p class="text-[10px] font-black opacity-30 uppercase italic">👤 База данных</p>
+                <div id="admUsers" class="max-h-56 overflow-y-auto space-y-2 pr-2 custom-scroll"></div>
+                <div class="p-5 bg-red-500/5 rounded-3xl border border-red-500/10 space-y-3">
+                    <input id="admTId" class="inp" placeholder="Введите ID пользователя">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="admTBal" type="number" class="inp" placeholder="Новый баланс">
+                        <input id="admTNick" class="inp" placeholder="Сменить ник">
+                    </div>
+                    <button onclick="admUpdate()" class="w-full py-3 bg-red-600 rounded-xl text-[10px] font-black uppercase">Применить изменения</button>
+                </div>
+            </div>
+
+            <div id="admSupport" class="space-y-4"></div>
+
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <p class="text-[10px] font-black opacity-30 uppercase italic">🏷️ Управление тарифами</p>
+                    <button onclick="admAddP()" class="text-[10px] text-blue-500 font-black">+ ДОБАВИТЬ</button>
+                </div>
+                <div id="admProds" class="space-y-3"></div>
+            </div>
+            
+            <button onclick="admSave()" class="w-full py-6 bg-gradient-to-r from-green-600 to-emerald-600 rounded-[30px] text-xs font-black uppercase italic shadow-2xl shadow-green-600/30">Зафиксировать v52</button>
         </div>
     </section>
 
-    <div id="chatBox" class="fixed inset-0 bg-black/98 z-[100] hidden flex-col">
+    <div id="chatBox" class="fixed inset-0 bg-[#020408] z-[100] hidden flex-col">
         <header class="p-6 border-b border-white/5 flex justify-between items-center">
-            <h3 class="text-xs font-black uppercase text-blue-500 tracking-tighter">Support Dog X</h3>
-            <button onclick="closeChat()" class="text-xl opacity-20"><i class="fa-solid fa-xmark"></i></button>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-headset text-xs"></i></div>
+                <div>
+                    <h3 class="text-xs font-black uppercase">Служба заботы</h3>
+                    <p class="text-[8px] opacity-40 uppercase font-bold tracking-widest">Отвечаем быстро</p>
+                </div>
+            </div>
+            <button onclick="closeChat()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fa-solid fa-xmark opacity-40"></i></button>
         </header>
         <div id="chatMsgs" class="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col"></div>
-        <div class="p-6 flex gap-2">
-            <input type="text" id="chatInp" placeholder="Напишите нам..." class="flex-1 inp">
-            <button onclick="sendMsg()" class="w-14 h-14 btn-blue rounded-2xl flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+        <div class="p-6 pb-10 flex gap-2 bg-[#020408]">
+            <input type="text" id="chatInp" placeholder="Ваше сообщение..." class="flex-1 inp">
+            <button onclick="sendMsg()" class="w-14 h-14 btn-main rounded-2xl flex items-center justify-center"><i class="fa-solid fa-paper-plane-top text-xs"></i></button>
         </div>
     </div>
 
     <script>
         window.isAdminOpen = false;
-        const aPlayer = document.getElementById('globalAudio');
+        const audio = document.getElementById('globalAudio');
 
         function setTab(t) { 
             document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); 
+            document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active')); 
             document.getElementById(t).classList.add('active'); 
+            document.getElementById('btn-' + t)?.classList.add('active');
             window.isAdminOpen = (t === 'admin');
             if(t==='admin') renderAdm(); 
+            if(t==='me') document.getElementById('msgDot').classList.add('hidden');
         }
 
         function updateUI() {
             if(!window.user) return;
-            document.getElementById('topId').innerText = `${window.user.nick} • ID: ${window.user.id}`;
+            document.getElementById('topId').innerText = `ID: ${window.user.id} • ${window.user.nick}`;
             document.getElementById('uBal').innerText = (window.user.bal || 0).toLocaleString() + '₽';
-            document.getElementById('uRank').innerText = window.user.rank || 'USER';
+            document.getElementById('uRank').innerText = window.user.rank || 'Standard User';
             
             const kL = document.getElementById('keyList');
-            kL.innerHTML = (window.user.keys || []).map(k => `
-                <div class="glass p-5 border-l-4 border-blue-600 flex justify-between items-center">
-                    <div><p class="text-[9px] opacity-30 font-black uppercase">${k.name}</p><p class="text-xs font-mono text-blue-400 font-bold select-all">${k.key}</p></div>
-                </div>`).join('');
+            if(!window.user.keys || window.user.keys.length === 0) {
+                kL.innerHTML = '<div class="glass p-10 text-center opacity-20 text-[10px] font-black uppercase">Нет активных подписок</div>';
+            } else {
+                kL.innerHTML = window.user.keys.map(k => `
+                    <div class="glass p-6 border-l-4 border-indigo-500 flex justify-between items-center group">
+                        <div>
+                            <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">${k.name}</p>
+                            <p class="text-xs font-mono font-bold select-all">${k.key}</p>
+                        </div>
+                        <button onclick="copy('${k.key}')" class="w-10 h-10 rounded-xl bg-white/5 opacity-0 group-hover:opacity-100 transition flex items-center justify-center"><i class="fa-solid fa-copy text-[10px]"></i></button>
+                    </div>`).join('');
+            }
         }
 
-        async function init() {
+        async function register() {
             if(window.mySecret) return;
             const { value: v } = await Swal.fire({
-                title: 'DOG X | WELCOME',
-                html: '<input id="n" class="swal2-input" placeholder="Ник"><input id="p" type="password" class="swal2-input" placeholder="Пароль">',
-                background: '#05070a', color: '#fff', preConfirm: () => [document.getElementById('n').value, document.getElementById('p').value]
+                title: 'ДОБРО ПОЖАЛОВАТЬ',
+                html: '<input id="n" class="swal2-input" style="font-size:14px" placeholder="Ник"><input id="p" type="password" class="swal2-input" style="font-size:14px" placeholder="Пароль">',
+                background: '#020408', color: '#fff', confirmButtonText: 'СОЗДАТЬ АККАУНТ',
+                preConfirm: () => [document.getElementById('n').value, document.getElementById('p').value]
             });
             if(!v || !v[0]) return;
-            const sec = 'SEC-' + Math.random().toString(36).substr(2,10).toUpperCase();
-            const u = { id: Math.floor(Math.random()*900000+100000), nick: v[0], pass: v[1], bal: 0, keys: [], rank: 'USER', secret: sec, music: true };
-            window.mySecret = sec; localStorage.setItem('dog_v51_sec', sec);
+            const s = 'SEC-' + Math.random().toString(36).substr(2,12).toUpperCase();
+            const u = { id: Math.floor(Math.random()*800000+100000), nick: v[0], pass: v[1], bal: 0, keys: [], rank: 'Standard User', secret: s, music: true };
+            window.mySecret = s; localStorage.setItem('dog_v52_sec', s);
             await window.saveUsr(u); location.reload();
         }
-        setTimeout(init, 1000);
+        setTimeout(register, 800);
 
         function doLogin() {
-            const val = document.getElementById('loginInp').value.trim();
-            if(val === 'KALUBXQ') { document.getElementById('admB').classList.remove('hidden'); return; }
+            const v = document.getElementById('loginInp').value.trim();
+            if(v === 'KALUBXQ') { document.getElementById('admB').classList.remove('hidden'); return; }
             
-            const g = (window.db_data.gold_numbers || []).find(x => x.num === val);
-            if(g) {
-                Swal.fire({ title: 'Вход по Номеру', input: 'password', background: '#05070a', color: '#fff' }).then(r => {
-                    if(r.value === g.pass) {
-                        const s = 'GOLD-' + g.num;
-                        if(!window.allUsers[s]) { window.allUsers[s] = {id:g.num, nick:'Gold', bal:5000, keys:[], rank:'ELITE', secret:s, music:true}; window.saveUsr(window.allUsers[s], s); }
-                        window.mySecret = s; localStorage.setItem('dog_v51_sec', s); location.reload();
+            const gold = (window.db_data.gold_numbers || []).find(x => x.num === v);
+            if(gold) {
+                Swal.fire({ title: 'Вход GOLD', input: 'password', background: '#020408', color: '#fff' }).then(r => {
+                    if(r.value === gold.pass) {
+                        const s = 'GOLD-' + gold.num;
+                        if(!window.allUsers[s]) { window.allUsers[s] = {id:gold.num, nick:'Gold Explorer', bal:10000, keys:[], rank:'VIP GOLD', secret:s, music:true}; window.saveUsr(window.allUsers[s], s); }
+                        window.mySecret = s; localStorage.setItem('dog_v52_sec', s); location.reload();
                     }
                 });
                 return;
             }
-
-            if(window.allUsers[val]) { window.mySecret = val; localStorage.setItem('dog_v51_sec', val); location.reload(); }
-            else { Swal.fire('Ошибка','Неверный ключ','error'); }
+            if(window.allUsers[v]) { window.mySecret = v; localStorage.setItem('dog_v52_sec', v); location.reload(); }
+            else { Swal.fire('Ошибка','Ключ не найден','error'); }
         }
 
-        // --- MUSIC LOGIC ---
+        // --- VPN LOGIC ---
+        function renderProducts() {
+            const g = document.getElementById('pGrid');
+            g.innerHTML = (window.db_data.products || []).map(p => `
+                <div class="glass p-6 flex justify-between items-center group active:scale-95 transition-all">
+                    <div class="flex items-center gap-5">
+                        <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500"><i class="fa-solid fa-globe text-xl"></i></div>
+                        <div><h4 class="text-sm font-black uppercase italic tracking-tight">${p.name}</h4><p class="text-[9px] font-black text-blue-500 uppercase tracking-widest">${p.h} ЧАСОВ ДОСТУПА</p></div>
+                    </div>
+                    <button onclick="buyP(${p.id})" class="btn-main px-8 py-4 rounded-2xl text-[12px] font-black italic">${p.pr}₽</button>
+                </div>`).join('');
+        }
+
+        function buyP(id) {
+            const p = window.db_data.products.find(x => x.id === id);
+            if(window.user.bal < p.pr) return Swal.fire('Мало средств','','error');
+            
+            window.user.bal -= p.pr;
+            // Берем ключ из заготовок админа или генерим если пусто
+            const baseKey = (window.db_data.vpn_keys && window.db_data.vpn_keys[p.id]) || "V-KEY-";
+            const k = `${baseKey}${Math.random().toString(36).substr(2,8).toUpperCase()}`;
+            
+            if(!window.user.keys) window.user.keys = [];
+            window.user.keys.unshift({name: p.name, key: k, date: Date.now()});
+            window.saveUsr(window.user);
+            Swal.fire({ title: 'ОТЛИЧНО!', text: 'Ключ добавлен в ваш профиль', icon: 'success', background: '#020408', color: '#fff' });
+        }
+
+        // --- MUSIC ---
         function uploadMusic(i) {
-            const r = new FileReader();
-            r.onloadend = () => { 
-                window.db_data.music = r.result; 
-                window.saveSys(); 
-                Swal.fire('Музыка загружена!','','success');
-            };
-            r.readAsDataURL(i.files[0]);
+            const f = i.files[0]; if(f.size > 15 * 1024 * 1024) return Swal.fire('Файл слишком большой','Макс 15МБ','error');
+            const r = new FileReader(); r.onloadend = () => { window.db_data.music = r.result; window.saveSys(); Swal.fire('Музыка в эфире!','','success'); };
+            r.readAsDataURL(f);
+        }
+        function handleMusic() {
+            if(!window.db_data.music || (window.user && window.user.music === false)) { audio.pause(); return; }
+            if(audio.src !== window.db_data.music) { audio.src = window.db_data.music; audio.play().catch(()=>{}); }
         }
 
-        function handleGlobalMusic() {
-            if(!window.db_data.music || (window.user && window.user.music === false)) {
-                aPlayer.pause(); return;
-            }
-            if(aPlayer.src !== window.db_data.music) {
-                aPlayer.src = window.db_data.music;
-                aPlayer.play().catch(() => {
-                    console.log('Ждем взаимодействия для автоплея...');
-                });
-            }
-        }
-
-        // --- ADMIN FUNCTIONS ---
+        // --- ADMIN ---
         function renderAdm() {
             document.getElementById('admUsers').innerHTML = Object.keys(window.allUsers).map(s => `
-                <div class="p-3 bg-white/5 rounded-xl flex justify-between items-center text-[10px] border border-white/5">
+                <div class="p-4 bg-white/5 rounded-2xl flex justify-between items-center text-[11px] border border-white/5">
                     <div onclick="document.getElementById('admTId').value='${window.allUsers[s].id}'">
-                        <b>${window.allUsers[s].nick}</b> <span class="text-blue-500 opacity-60">ID: ${window.allUsers[s].id}</span>
+                        <b class="text-blue-400">${window.allUsers[s].nick}</b> <span class="opacity-30 ml-2">ID: ${window.allUsers[s].id}</span>
                     </div>
-                    <button onclick="confirmDel('${s}')" class="text-red-500 opacity-40"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="confirmDel('${s}')" class="text-red-500 opacity-30 hover:opacity-100 transition"><i class="fa-solid fa-trash-can"></i></button>
                 </div>`).join('');
             
             document.getElementById('goldList').innerHTML = (window.db_data.gold_numbers || []).map((x, i) => `
-                <div class="p-2 bg-amber-500/10 rounded flex justify-between items-center text-[9px] border border-amber-500/10">
+                <div class="p-3 bg-white/5 rounded-xl flex justify-between items-center text-[10px]">
                     <span>👑 <b>${x.num}</b></span>
-                    <button onclick="window.db_data.gold_numbers.splice(${i},1);window.saveSys();renderAdm()" class="text-red-500">X</button>
+                    <button onclick="window.db_data.gold_numbers.splice(${i},1);window.saveSys();renderAdm()" class="text-red-500 opacity-40">Удалить</button>
                 </div>`).join('');
 
             const b = document.getElementById('bcBtn');
             b.innerText = window.db_data.broadcast.active ? "ВЫКЛЮЧИТЬ БАННЕР" : "ВКЛЮЧИТЬ БАННЕР";
-            b.className = window.db_data.broadcast.active ? "w-full py-3 rounded-xl text-[10px] font-black uppercase bg-red-600 shadow-lg" : "w-full py-3 rounded-xl text-[10px] font-black uppercase bg-green-600 shadow-lg";
+            b.className = window.db_data.broadcast.active ? "w-full py-4 rounded-xl text-[10px] font-black uppercase bg-red-600 shadow-lg" : "w-full py-4 rounded-xl text-[10px] font-black uppercase bg-indigo-600 shadow-lg";
             
             document.getElementById('admProds').innerHTML = (window.db_data.products || []).map(p => `
-                <div class="p-4 bg-white/5 rounded-2xl space-y-2 border border-white/5">
-                    <input id="pn_${p.id}" value="${p.name}" class="inp">
-                    <div class="grid grid-cols-2 gap-2"><input id="pp_${p.id}" value="${p.pr}" class="inp"><input id="pk_${p.id}" value="${p.pref}" class="inp"></div>
+                <div class="p-5 bg-white/5 rounded-3xl space-y-3 border border-white/5">
+                    <input id="pn_${p.id}" value="${p.name}" class="inp" placeholder="Название тарифа">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="pp_${p.id}" value="${p.pr}" class="inp" placeholder="Цена">
+                        <input id="ph_${p.id}" value="${p.h}" class="inp" placeholder="Часы">
+                    </div>
+                    <input id="pk_${p.id}" value="${(window.db_data.vpn_keys && window.db_data.vpn_keys[p.id]) || ''}" class="inp" placeholder="Заготовка VPN-ключа (напр. PRO-...)">
+                    <button onclick="removeP(${p.id})" class="w-full py-2 text-[9px] text-red-500 font-bold uppercase opacity-40">Удалить тариф</button>
                 </div>`).join('');
             renderAdmSupport();
         }
 
         function admUpdate() {
             const id = document.getElementById('admTId').value;
-            const sec = Object.keys(window.allUsers).find(s => String(window.allUsers[s].id) === String(id));
-            if(!sec) return Swal.fire('Ошибка','ID не найден','error');
-            const u = window.allUsers[sec];
+            const s = Object.keys(window.allUsers).find(k => String(window.allUsers[k].id) === String(id));
+            if(!s) return Swal.fire('Ошибка','ID не найден','error');
+            const u = window.allUsers[s];
             u.bal = parseFloat(document.getElementById('admTBal').value) || u.bal;
             u.nick = document.getElementById('admTNick').value || u.nick;
-            window.saveUsr(u, sec); Swal.fire('Обновлено','','success'); renderAdm();
+            window.saveUsr(u, s); Swal.fire('Готово','','success'); renderAdm();
         }
 
-        function confirmDel(sec) {
-            Swal.fire({ title: 'Удалить?', text: "Безвозвратно!", icon: 'warning', showCancelButton: true }).then(r => { if(r.isConfirmed) { window.delUsr(sec); renderAdm(); } });
+        function admAddP() { if(!window.db_data.products) window.db_data.products=[]; window.db_data.products.push({id:Date.now(), name:"Новый VPN", pr:500, h:720}); renderAdm(); }
+        function removeP(id) { window.db_data.products = window.db_data.products.filter(x => x.id !== id); renderAdm(); }
+        function admSave() { 
+            if(!window.db_data.vpn_keys) window.db_data.vpn_keys = {};
+            (window.db_data.products || []).forEach(p => { 
+                p.name = document.getElementById(`pn_${p.id}`).value; 
+                p.pr = parseInt(document.getElementById(`pp_${p.id}`).value); 
+                p.h = parseInt(document.getElementById(`ph_${p.id}`).value); 
+                window.db_data.vpn_keys[p.id] = document.getElementById(`pk_${p.id}`).value;
+            }); 
+            window.saveSys(); Swal.fire('Конфигурация сохранена','','success'); 
         }
-
-        function addGold() {
-            const n = document.getElementById('goldN').value; const p = document.getElementById('goldP').value;
-            if(!n || !p) return;
-            if(!window.db_data.gold_numbers) window.db_data.gold_numbers = [];
-            window.db_data.gold_numbers.push({num: n, pass: p});
-            window.saveSys(); renderAdm();
-        }
-
-        function uploadBC(i) { const r = new FileReader(); r.onloadend = () => { window.db_data.broadcast.img = r.result; Swal.fire('Фото готово','','success'); }; r.readAsDataURL(i.files[0]); }
-        function admBC() { window.db_data.broadcast.active = !window.db_data.broadcast.active; window.db_data.broadcast.text = document.getElementById('bcT').value; window.saveSys(); renderAdm(); }
 
         // --- SUPPORT ---
+        function checkSupportNotif() {
+            if(!window.mySecret || !window.allTickets[window.mySecret]) return;
+            const msgs = window.allTickets[window.mySecret].msgs;
+            if(msgs[msgs.length-1].s === 'a') {
+                if(!document.getElementById('chatBox').classList.contains('hidden')) return;
+                document.getElementById('msgDot').classList.remove('hidden');
+            }
+        }
         function openChat() { document.getElementById('chatBox').style.display = 'flex'; renderUserChat(); }
-        function closeChat() { document.getElementById('chatBox').style.display = 'none'; }
+        function closeChat() { document.getElementById('chatBox').style.display = 'none'; document.getElementById('msgDot').classList.add('hidden'); }
         async function sendMsg() {
             const inp = document.getElementById('chatInp'); if(!inp.value.trim()) return;
             const tId = window.mySecret; if(!window.allTickets[tId]) window.allTickets[tId] = {nick: window.user.nick, msgs: []};
-            window.allTickets[tId].msgs.push({t: inp.value, s: 'u'});
+            window.allTickets[tId].msgs.push({t: inp.value, s: 'u', time: Date.now()});
             await window.saveTicket(tId, window.allTickets[tId]); inp.value = '';
         }
         function renderUserChat() {
             const b = document.getElementById('chatMsgs'); if(!b || !window.mySecret) return;
             const t = window.allTickets[window.mySecret];
-            if(!t) return b.innerHTML = '<p class="text-center py-20 opacity-10 uppercase font-black text-[10px]">Тикет пуст</p>';
-            b.innerHTML = t.msgs.map(m => `<div class="p-4 rounded-3xl max-w-[85%] ${m.s==='u'?'bg-blue-600 ml-auto rounded-br-none':'bg-white/10 mr-auto rounded-bl-none'} text-[11px] font-bold">${m.t}</div>`).join('');
+            if(!t) return b.innerHTML = '<div class="h-full flex flex-col items-center justify-center opacity-10"><i class="fa-solid fa-messages text-6xl mb-4"></i><p class="font-black uppercase tracking-widest text-xs">История пуста</p></div>';
+            b.innerHTML = t.msgs.map(m => `
+                <div class="flex ${m.s==='u'?'justify-end':'justify-start'}">
+                    <div class="p-5 rounded-[24px] max-w-[85%] ${m.s==='u'?'bg-indigo-600 rounded-br-none':'bg-white/10 rounded-bl-none'}">
+                        <p class="text-[12px] leading-relaxed font-semibold">${m.t}</p>
+                    </div>
+                </div>`).join('');
             b.scrollTop = b.scrollHeight;
         }
         function renderAdmSupport() {
             const l = document.getElementById('admSupport'); if(!l) return;
             l.innerHTML = Object.keys(window.allTickets).map(id => `
-                <div class="p-4 bg-white/5 rounded-3xl space-y-3 border border-white/5">
-                    <p class="text-[9px] font-black text-blue-500 uppercase">${window.allTickets[id].nick}</p>
-                    <div class="max-h-32 overflow-y-auto space-y-1 text-[10px] opacity-60">${window.allTickets[id].msgs.map(m=>`<div><b>${m.s}:</b> ${m.t}</div>`).join('')}</div>
-                    <div class="flex gap-2"><input id="rep_${id}" class="inp" placeholder="Ответ..."><button onclick="admReply('${id}')" class="btn-blue px-4 rounded-xl text-[10px]">OK</button></div>
+                <div class="p-5 bg-indigo-500/5 rounded-3xl space-y-4 border border-indigo-500/10">
+                    <div class="flex justify-between items-center"><p class="text-[10px] font-black text-indigo-400 uppercase">${window.allTickets[id].nick}</p><button onclick="delTicket('${id}')" class="text-red-500 opacity-20"><i class="fa-solid fa-trash"></i></button></div>
+                    <div class="max-h-40 overflow-y-auto space-y-2 text-[11px] font-bold opacity-60">${window.allTickets[id].msgs.map(m=>`<div class="${m.s==='a'?'text-blue-400':''}"><b>${m.s.toUpperCase()}:</b> ${m.t}</div>`).join('')}</div>
+                    <div class="flex gap-2"><input id="rep_${id}" class="inp" placeholder="Ваш ответ..."><button onclick="admReply('${id}')" class="btn-main px-6 rounded-2xl text-[10px]">ОТВЕТ</button></div>
                 </div>`).join('');
         }
         function admReply(id) {
             const m = document.getElementById('rep_'+id).value; if(!m) return;
-            window.allTickets[id].msgs.push({t: m, s: 'a'});
+            window.allTickets[id].msgs.push({t: m, s: 'a', time: Date.now()});
             window.saveTicket(id, window.allTickets[id]); renderAdmSupport();
         }
+        function delTicket(id) { remove(ref(db, 'support_v52/' + id)); }
 
-        // --- MARKET ---
-        function renderProducts() {
-            const g = document.getElementById('pGrid');
-            g.innerHTML = (window.db_data.products || []).map(p => `
-                <div class="glass p-5 flex justify-between items-center">
-                    <div class="flex items-center gap-4">
-                        <div class="w-11 h-11 bg-white/5 rounded-2xl flex items-center justify-center text-blue-500"><i class="fa-solid fa-server"></i></div>
-                        <div><h4 class="text-xs font-black uppercase italic">${p.name}</h4><p class="text-[8px] font-black text-blue-500">${p.h} ЧАСОВ</p></div>
-                    </div>
-                    <button onclick="buyP(${p.id})" class="btn-blue px-8 py-4 rounded-2xl text-[10px] font-black italic shadow-lg shadow-blue-500/20">${p.pr}₽</button>
-                </div>`).join('');
-        }
-        function buyP(id) {
-            const p = window.db_data.products.find(x => x.id === id);
-            if(window.user.bal < p.pr) return Swal.fire('Мало денег','','error');
-            window.user.bal -= p.pr;
-            const k = `${p.pref}-${Math.random().toString(36).substr(2,6).toUpperCase()}`;
-            if(!window.user.keys) window.user.keys = [];
-            window.user.keys.unshift({name: p.name, key: k});
-            window.saveUsr(window.user); Swal.fire('Куплено!','','success');
-        }
-
-        // --- CORE UTILS ---
+        // --- UTILS ---
         function renderBC() {
             const bc = window.db_data.broadcast; const el = document.getElementById('bcBox'); if(!bc.active) return el.classList.add('hidden');
             el.classList.remove('hidden'); document.getElementById('bcTxt').innerText = bc.text;
             const im = document.getElementById('bcImg'); if(bc.img) { im.src = bc.img; im.classList.remove('hidden'); } else im.classList.add('hidden');
         }
-        function openSet() {
-            Swal.fire({
-                title: 'ОПЦИИ',
-                html: `<div class="space-y-4">
-                    <button onclick="tglM()" class="w-full py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase">Звук: ${window.user.music ? 'ВКЛ' : 'ВЫКЛ'}</button>
-                    <button onclick="Swal.fire('KEY',window.mySecret,'info')" class="w-full py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase">Secret Key</button>
-                </div>`,
-                showConfirmButton: false, background: '#0f121a', color: '#fff'
-            });
-        }
-        window.tglM = () => { window.user.music = !window.user.music; window.saveUsr(window.user); location.reload(); };
-        function admAddP() { if(!window.db_data.products) window.db_data.products=[]; window.db_data.products.push({id:Date.now(), name:"New", pr:100, h:24, pref:"DOG"}); renderAdm(); }
-        function admSave() { 
-            (window.db_data.products || []).forEach(p => { p.name=document.getElementById(`pn_${p.id}`).value; p.pr=parseInt(document.getElementById(`pp_${p.id}`).value); p.pref=document.getElementById(`pk_${p.id}`).value; }); 
-            window.saveSys(); Swal.fire('Данные сохранены','','success'); 
-        }
-        function checkPush() { 
-            const lp = localStorage.getItem('lp_51'); if(window.db_data.push?.time > (lp || 0)) { Swal.fire({ title: 'NEWS', text: window.db_data.push.text, background: '#0f121a', color: '#fff' }); localStorage.setItem('lp_51', window.db_data.push.time); } 
-        }
-        document.body.addEventListener('click', () => { if(window.db_data.music && window.user.music !== false) aPlayer.play(); }, {once: true});
+        function uploadBC(i) { const r = new FileReader(); r.onloadend = () => { window.db_data.broadcast.img = r.result; Swal.fire('Готово','','success'); }; r.readAsDataURL(i.files[0]); }
+        function admBC() { window.db_data.broadcast.active = !window.db_data.broadcast.active; window.db_data.broadcast.text = document.getElementById('bcT').value; window.saveSys(); renderAdm(); }
+        function addGold() { const n=document.getElementById('goldN').value; const p=document.getElementById('goldP').value; if(!n||!p) return; if(!window.db_data.gold_numbers) window.db_data.gold_numbers=[]; window.db_data.gold_numbers.push({num:n, pass:p}); window.saveSys(); renderAdm(); }
+        function showSettings() { Swal.fire({ title: 'ОПЦИИ', html: `<button onclick="window.user.music=!window.user.music;window.saveUsr(window.user);location.reload();" class="w-full py-4 glass text-[10px] font-black uppercase mb-3">Музыка: ${window.user.music?'ВКЛ':'ВЫКЛ'}</button><button onclick="Swal.fire('KEY',window.mySecret,'info')" class="w-full py-4 glass text-[10px] font-black uppercase">Ваш Secret Key</button>`, showConfirmButton:false, background:'#020408', color:'#fff' }); }
+        function showPay() { Swal.fire({ title: 'ПОПОЛНЕНИЕ', text: 'Для оплаты обратитесь к @sswckk. Укажите ваш ID: ' + window.user.id, icon: 'info', background: '#020408', color: '#fff' }); }
+        function confirmDel(s) { Swal.fire({ title:'Удалить?', icon:'warning', showCancelButton:true }).then(r=>{if(r.isConfirmed) remove(ref(db, 'users_v52/'+s)); }); }
+        function copy(t) { navigator.clipboard.writeText(t); Swal.fire({title:'Скопировано', toast:true, position:'top', timer:1500, showConfirmButton:false, icon:'success'}); }
+        
+        document.body.addEventListener('click', () => { if(window.db_data.music && window.user.music !== false) audio.play(); }, {once: true});
     </script>
 </body>
 </html>
