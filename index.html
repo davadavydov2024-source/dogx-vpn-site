@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | Ultimate Admin & Cloud</title>
+    <title>DOG X | Premium Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -77,7 +77,7 @@
 
     <div id="globalBC" class="max-w-xl mx-auto m-4 hidden">
         <div class="player-card border border-amber-500/30 p-4 flex items-center gap-4">
-            <img id="bcImgDisplay" src="" class="w-12 h-12 rounded-lg object-cover hidden">
+            <img id="bcImgDisplay" src="" class="w-14 h-14 rounded-xl object-cover hidden">
             <div class="flex-1">
                 <p id="bcTextDisplay" class="text-[11px] font-bold"></p>
                 <div id="bcBtnBox" class="mt-2"></div>
@@ -115,21 +115,23 @@
             <h2 class="text-red-500 font-black uppercase text-center text-sm">Панель Управления</h2>
             
             <div class="p-4 bg-green-500/5 rounded-2xl space-y-3">
-                <p class="text-[10px] font-bold text-green-500 uppercase">📊 Аналитика</p>
+                <p class="text-[10px] font-bold text-green-500 uppercase">📊 Аналитика (Баланс юзеров)</p>
                 <div id="adm_users_list" class="space-y-2 max-h-60 overflow-y-auto pr-2"></div>
             </div>
 
             <div class="grid grid-cols-1 gap-4">
                 <div class="p-4 bg-amber-500/5 rounded-2xl space-y-2">
-                    <p class="text-[10px] font-bold text-amber-500 uppercase">Рассылка (Верх)</p>
+                    <p class="text-[10px] font-bold text-amber-500 uppercase">Рассылка</p>
                     <textarea id="adm_bc_text" class="w-full p-2 bg-black/20 rounded text-xs" placeholder="Текст"></textarea>
-                    <input id="adm_bc_url" class="w-full p-2 bg-black/20 rounded text-[10px]" placeholder="URL кнопки">
+                    <input id="adm_bc_img" class="w-full p-2 bg-black/20 rounded text-[9px]" placeholder="URL Фото (если нужно)">
+                    <input id="adm_bc_url" class="w-full p-2 bg-black/20 rounded text-[9px]" placeholder="URL Кнопки">
                     <button onclick="toggleStatus('bc')" id="bc_status_btn" class="w-full py-2 bg-amber-600/20 text-amber-500 text-[9px] font-bold rounded uppercase">ВКЛ / ВЫКЛ</button>
                 </div>
                 <div class="p-4 bg-blue-500/5 rounded-2xl space-y-2">
-                    <p class="text-[10px] font-bold text-blue-400 uppercase">Реклама (Низ)</p>
+                    <p class="text-[10px] font-bold text-blue-400 uppercase">Реклама</p>
                     <textarea id="adm_ad_text" class="w-full p-2 bg-black/20 rounded text-xs" placeholder="Текст"></textarea>
-                    <input id="adm_ad_url" class="w-full p-2 bg-black/20 rounded text-[10px]" placeholder="URL кнопки">
+                    <input id="adm_ad_img" class="w-full p-2 bg-black/20 rounded text-[9px]" placeholder="URL Фото (если нужно)">
+                    <input id="adm_ad_url" class="w-full p-2 bg-black/20 rounded text-[9px]" placeholder="URL Кнопки">
                     <button onclick="toggleStatus('ad')" id="ad_status_btn" class="w-full py-2 bg-blue-600/20 text-blue-400 text-[9px] font-bold rounded uppercase">ВКЛ / ВЫКЛ</button>
                 </div>
             </div>
@@ -152,7 +154,7 @@
                     <button onclick="adminChangeBalance()" class="bg-blue-600 rounded-xl text-[9px] font-bold uppercase">Обновить ₽</button>
                 </div>
                 <div class="pt-2 border-t border-white/5 space-y-2">
-                    <input id="adm_new_id_val" class="w-full p-3 bg-black/20 rounded-xl text-xs" placeholder="Новый ID (напр. 1000000)">
+                    <input id="adm_new_id_val" class="w-full p-3 bg-black/20 rounded-xl text-xs" placeholder="Новый ID">
                     <button onclick="adminForceChangeID()" class="w-full py-3 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase">Сменить ID</button>
                 </div>
                 <button onclick="adminDeleteAccount()" class="w-full py-3 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase italic">УДАЛИТЬ (БАН)</button>
@@ -166,13 +168,13 @@
 
     <div id="footerAd" class="footer-ad">
         <div class="max-w-xl mx-auto flex items-center gap-4">
+            <img id="adImgDisplay" src="" class="w-12 h-12 rounded-xl object-cover hidden">
             <p id="adTextDisplay" class="text-[11px] font-bold flex-1"></p>
             <div id="adBtnBox"></div>
         </div>
     </div>
 
     <script>
-        // --- РЕНДЕР И ЛОГИКА ---
         function updateUI() {
             if(!window.user) return;
             document.getElementById('userDisplay').innerText = `${window.user.nick} | #${window.user.id}`;
@@ -182,22 +184,25 @@
 
         async function initUser() {
             if(window.user) return;
-            const { value: nick } = await Swal.fire({ title: 'РЕГИСТРАЦИЯ', input: 'text', background: '#191c24', color: '#fff' });
+            const { value: nick } = await Swal.fire({ title: 'ДОБРО ПОЖАЛОВАТЬ', input: 'text', background: '#191c24', color: '#fff', inputPlaceholder: 'Твой ник' });
             if(!nick) return initUser();
             const id = (Object.keys(window.allUsers).length + 1).toString();
             window.user = { id, nick, bal: 0, keys: [], username: "@" + nick };
             localStorage.setItem('dog_v29_me', JSON.stringify(window.user));
             window.saveUser(window.user);
         }
-        setTimeout(() => { if(!window.user) initUser(); }, 1000);
+        setTimeout(() => { if(!window.user) initUser(); }, 1200);
 
+        // --- ОБНОВЛЕННАЯ АНАЛИТИКА ---
         function renderAnalytics() {
             const list = document.getElementById('adm_users_list');
             const users = Object.values(window.allUsers);
             list.innerHTML = users.map(u => `
                 <div onclick="inspectUser('${u.id}')" class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 mb-1 active:scale-95 transition">
-                    <span class="text-[10px] font-bold text-blue-400">#${u.id} ${u.nick}</span>
-                    <span class="text-[11px] font-black">${u.bal.toFixed(0)}₽</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-blue-400">#${u.id} ${u.nick}</span>
+                    </div>
+                    <span class="text-[11px] font-black text-green-400">${u.bal.toFixed(0)}₽</span>
                 </div>
             `).join('');
         }
@@ -206,33 +211,18 @@
             const u = window.allUsers[uid];
             if(!u) return;
             Swal.fire({
-                title: `ИНФО #${u.id}`,
-                html: `<div class="text-left text-[11px]"><b>НИК:</b> ${u.nick}<br><b>TG:</b> ${u.username || 'Нет'}<br><b>КЛЮЧЕЙ:</b> ${(u.keys || []).length}</div>`,
+                title: `ПРОФИЛЬ #${u.id}`,
+                html: `<div class="text-left text-[11px] space-y-1"><b>НИК:</b> ${u.nick}<br><b>БАЛАНС:</b> ${u.bal}₽<br><b>КЛЮЧЕЙ:</b> ${(u.keys || []).length}</div>`,
                 showCancelButton: true,
                 confirmButtonText: 'Выбрать'
             }).then((res) => { if(res.isConfirmed) document.getElementById('adm_uid').value = u.id; });
         }
 
-        // Исправленное удаление аккаунта
         function adminDeleteAccount() {
             const uid = document.getElementById('adm_uid').value;
-            if(!uid || !window.allUsers[uid]) return Swal.fire('Ошибка', 'ID не выбран или не найден', 'error');
-            
-            Swal.fire({
-                title: 'Удалить аккаунт?',
-                text: "Это действие нельзя отменить!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'Да, УДАЛИТЬ'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.firebase_db_mod.remove(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users/' + uid))
-                    .then(() => {
-                        Swal.fire('Удалено!', 'Аккаунт полностью стерт из базы.', 'success');
-                        document.getElementById('adm_uid').value = "";
-                    });
-                }
+            if(!uid) return Swal.fire('ID?', '', 'error');
+            Swal.fire({ title: 'УДАЛИТЬ?', text: 'Бан навсегда!', icon: 'warning', showCancelButton: true }).then(r => {
+                if(r.isConfirmed) window.firebase_db_mod.remove(window.firebase_db_mod.ref(window.firebase_db_mod.getDatabase(), 'dog_users/' + uid)).then(() => Swal.fire('Стерто', '', 'success'));
             });
         }
 
@@ -254,14 +244,16 @@
             if(!window.allUsers[uid] || isNaN(sum)) return;
             window.allUsers[uid].bal += sum;
             window.saveUser(window.allUsers[uid]);
-            Swal.fire('Баланс обновлен', '', 'success');
+            Swal.fire('Обновлено', '', 'success');
         }
 
         function loadAdmin() {
             renderAnalytics();
             document.getElementById('adm_bc_text').value = window.db.broadcast?.text || '';
+            document.getElementById('adm_bc_img').value = window.db.broadcast?.img || '';
             document.getElementById('adm_bc_url').value = window.db.broadcast?.url || '';
             document.getElementById('adm_ad_text').value = window.db.footerAd?.text || '';
+            document.getElementById('adm_ad_img').value = window.db.footerAd?.img || '';
             document.getElementById('adm_ad_url').value = window.db.footerAd?.url || '';
             document.getElementById('adm_promos_list').innerHTML = (window.db.promos || []).map((p, i) => `<div class="flex justify-between items-center bg-black/40 p-2 rounded text-[10px] mb-1"><span>${p.code} (+${p.sum}₽)</span><button onclick="deletePromo(${i})" class="text-red-500">❌</button></div>`).join('');
             document.getElementById('admin_stocks').innerHTML = (window.db.products || []).map(p => `<div class="p-4 bg-white/5 rounded-2xl space-y-2 border-l-2 border-blue-500 mb-2"><div class="flex gap-2"><input id="p_i_${p.id}" value="${p.icon || '🛡️'}" class="bg-black/40 rounded p-1 w-10 text-center"><input id="p_n_${p.id}" value="${p.name}" class="bg-black/40 rounded p-1 text-[10px] font-bold flex-1 uppercase"></div><div class="grid grid-cols-3 gap-2"><input id="p_p_${p.id}" value="${p.pr}" class="bg-black/40 rounded p-1 text-[10px]"><input id="p_h_${p.id}" value="${p.h}" class="bg-black/40 rounded p-1 text-[10px]"><input id="p_d_${p.id}" value="${p.discount || 0}" class="bg-black/40 rounded p-1 text-[10px] text-red-400"></div><button onclick="deleteProduct(${p.id})" class="w-full text-[8px] text-red-500 opacity-50 uppercase">Удалить</button></div>`).join('');
@@ -271,8 +263,10 @@
             if(!window.db.broadcast) window.db.broadcast = {};
             if(!window.db.footerAd) window.db.footerAd = {};
             window.db.broadcast.text = document.getElementById('adm_bc_text').value;
+            window.db.broadcast.img = document.getElementById('adm_bc_img').value;
             window.db.broadcast.url = document.getElementById('adm_bc_url').value;
             window.db.footerAd.text = document.getElementById('adm_ad_text').value;
+            window.db.footerAd.img = document.getElementById('adm_ad_img').value;
             window.db.footerAd.url = document.getElementById('adm_ad_url').value;
             window.db.products.forEach(p => {
                 p.icon = document.getElementById(`p_i_${p.id}`).value;
@@ -346,21 +340,27 @@
             if(id === 'admin') loadAdmin();
         }
 
+        // Рендер рассылки с ФОТО
         function renderGlobalBC() {
             const bc = window.db.broadcast;
             const el = document.getElementById('globalBC');
             if(!bc || !bc.active) return el.classList.add('hidden');
             el.classList.remove('hidden');
             document.getElementById('bcTextDisplay').innerText = bc.text;
+            const imgEl = document.getElementById('bcImgDisplay');
+            if(bc.img) { imgEl.src = bc.img; imgEl.classList.remove('hidden'); } else { imgEl.classList.add('hidden'); }
             document.getElementById('bcBtnBox').innerHTML = bc.url ? `<a href="${bc.url}" class="px-4 py-1 bg-amber-500 text-black text-[10px] font-bold rounded-lg uppercase">ОТКРЫТЬ</a>` : '';
         }
 
+        // Рендер рекламы с ФОТО
         function renderFooterAd() {
             const ad = window.db.footerAd;
             const el = document.getElementById('footerAd');
             if(!ad || !ad.active) return el.style.display = 'none';
             el.style.display = 'block';
             document.getElementById('adTextDisplay').innerText = ad.text;
+            const imgEl = document.getElementById('adImgDisplay');
+            if(ad.img) { imgEl.src = ad.img; imgEl.classList.remove('hidden'); } else { imgEl.classList.add('hidden'); }
             document.getElementById('adBtnBox').innerHTML = ad.url ? `<a href="${ad.url}" class="px-4 py-2 bg-blue-500 text-white text-[10px] font-bold rounded-lg uppercase">ПЕРЕЙТИ</a>` : '';
         }
 
