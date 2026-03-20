@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | Support Update v34</title>
+    <title>DOG X | Clean Support v35</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update, remove, get, push } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI",
@@ -27,6 +27,7 @@
 
         window.db = {};
         window.allUsers = {};
+        window.allTickets = {};
         window.mySecret = localStorage.getItem('dog_v31_secret');
         window.user = null;
 
@@ -36,13 +37,7 @@
 
         onValue(dbRef, (snapshot) => {
             const data = snapshot.val();
-            if (data) {
-                window.db = data;
-                renderProducts();
-                renderGlobalBC();
-                renderFooterAd();
-                if(document.getElementById('admin').classList.contains('active')) loadAdmin();
-            }
+            if (data) { window.db = data; renderProducts(); renderGlobalBC(); renderFooterAd(); }
         });
 
         onValue(usersRef, (snapshot) => {
@@ -51,20 +46,12 @@
                 window.user = window.allUsers[window.mySecret];
                 updateUI();
             } else if (window.mySecret && !window.allUsers[window.mySecret]) {
-                localStorage.removeItem('dog_v31_secret');
-                window.mySecret = null;
-                location.reload();
+                localStorage.removeItem('dog_v31_secret'); window.mySecret = null; location.reload();
             }
         });
 
-        // Слушатель тикетов для админа и юзера
-        onValue(supportRef, (snapshot) => {
-            window.allTickets = snapshot.val() || {};
-            renderSupportChat();
-            if(document.getElementById('admin').classList.contains('active')) renderAdminSupport();
-        });
+        onValue(supportRef, (snapshot) => { window.allTickets = snapshot.val() || {}; });
 
-        window.saveSystem = () => set(dbRef, window.db);
         window.saveUser = (u) => set(ref(db_firebase, 'dog_users/' + window.mySecret), u);
         window.sendTicket = (msg) => {
             const tId = window.mySecret;
@@ -78,7 +65,6 @@
             window.allTickets[tId].msgs.push(reply);
             set(ref(db_firebase, 'dog_support/' + tId), window.allTickets[tId]);
         };
-        window.firebase_db_mod = { getDatabase, ref, set, remove, get };
     </script>
 
     <style>
@@ -89,16 +75,14 @@
         .btn-primary { background: var(--accent); color: #fff; border-radius: 12px; font-weight: 700; transition: 0.2s; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .guide-box { background: rgba(88, 101, 242, 0.1); border: 1px dashed var(--accent); border-radius: 15px; padding: 12px; margin-bottom: 15px; }
-        .chat-msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 11px; margin-bottom: 8px; }
-        .msg-user { background: var(--accent); margin-left: auto; border-bottom-right-radius: 2px; }
-        .msg-admin { background: #34d399; color: #000; margin-right: auto; border-bottom-left-radius: 2px; font-weight: bold; }
+        .chat-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .chat-modal.active { display: flex; }
     </style>
 </head>
 <body class="pb-40">
 
     <header class="p-6 flex justify-between items-center">
-        <div><div class="text-2xl font-extrabold text-blue-500 italic uppercase">Dog X</div><div id="userDisplay" class="text-[9px] opacity-40 italic">Live Support v34</div></div>
+        <div><div class="text-2xl font-extrabold text-blue-500 italic uppercase">Dog X</div><div id="userDisplay" class="text-[9px] opacity-40 italic italic">session v35</div></div>
         <div class="flex gap-4">
             <button onclick="showTab('home')" class="text-xs font-bold opacity-60">Маркет</button>
             <button onclick="showTab('me')" class="text-xs font-bold opacity-60">Профиль</button>
@@ -117,37 +101,34 @@
             <h3 class="text-5xl font-extrabold text-blue-500" id="userBal">0.00₽</h3>
             <div class="mt-6 flex gap-2">
                 <button onclick="topUp()" class="flex-1 py-4 btn-primary text-xs uppercase italic">Пополнить</button>
+                <button onclick="openSupport()" class="px-4 bg-blue-600/20 border border-blue-500/30 rounded-xl text-blue-400 text-[9px] font-bold uppercase">Support</button>
                 <button onclick="showTransferCode()" class="px-4 bg-white/5 rounded-xl border border-white/10"><i class="fa-solid fa-key text-blue-400"></i></button>
             </div>
         </div>
-
-        <div class="player-card p-4 space-y-4">
-            <h3 class="text-xs font-black uppercase text-blue-400"><i class="fa-solid fa-headset mr-2"></i>Поддержка онлайн</h3>
-            <div id="supportChatBox" class="h-48 overflow-y-auto pr-2 space-y-2 flex flex-col">
-                <p class="text-[9px] opacity-30 text-center py-10 uppercase italic">История сообщений пуста</p>
-            </div>
-            <div class="flex gap-2">
-                <input type="text" id="supportInp" placeholder="Ваш вопрос..." class="flex-1 bg-black/40 p-3 rounded-xl text-xs outline-none">
-                <button onclick="sendUserMsg()" class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
-        </div>
-
         <div id="keysList" class="space-y-3"></div>
+        <input type="text" id="promoInp" placeholder="Промокод / Код" class="w-full p-4 player-card bg-transparent text-center text-sm outline-none">
+        <button onclick="checkInput()" class="w-full py-4 btn-primary bg-white/5 text-[10px] uppercase">Активировать</button>
     </section>
 
     <section id="admin" class="tab-content px-6 pb-20 space-y-6">
         <div class="player-card p-6 space-y-6 border border-red-500/20">
-            <h2 class="text-red-500 font-black uppercase text-center text-sm">Управление Тикетами</h2>
-            
-            <div id="adminSupportList" class="space-y-4">
-                <p class="text-center opacity-30 text-[10px]">НОВЫХ ТИКЕТОВ НЕТ</p>
-            </div>
-
-            <hr class="opacity-10">
-            <div id="admin_stocks" class="space-y-4"></div>
-            <button onclick="saveAdmin()" class="w-full py-6 btn-primary bg-red-600 text-sm font-black italic uppercase">Сохранить всё</button>
+            <h2 class="text-red-500 font-black uppercase text-center text-sm italic">Admin Control</h2>
+            <div id="adminSupportList" class="space-y-4"></div>
+            <button onclick="saveAdmin()" class="w-full py-6 btn-primary bg-red-600 text-sm font-black italic uppercase">Save v35</button>
         </div>
     </section>
+
+    <div id="chatModal" class="chat-modal">
+        <div class="player-card w-full max-w-sm p-6 space-y-4 relative">
+            <button onclick="closeSupport()" class="absolute top-4 right-4 opacity-40"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xs font-black uppercase text-blue-400 italic">Поддержка v35</h3>
+            <div id="supportChatBox" class="h-60 overflow-y-auto space-y-2 flex flex-col pr-2 text-[10px]"></div>
+            <div class="flex gap-2">
+                <input type="text" id="supportInp" placeholder="..." class="flex-1 bg-black/40 p-3 rounded-xl text-xs outline-none">
+                <button onclick="sendUserMsg()" class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+            </div>
+        </div>
+    </div>
 
     <script>
         function updateUI() {
@@ -162,67 +143,34 @@
             const { value: nick } = await Swal.fire({ title: 'DOG X', input: 'text', background: '#191c24', color: '#fff', allowOutsideClick: false });
             if(!nick) return initUser();
             const secret = 'SEC-' + Math.random().toString(36).substr(2, 15).toUpperCase();
-            window.mySecret = secret;
-            localStorage.setItem('dog_v31_secret', secret);
+            window.mySecret = secret; localStorage.setItem('dog_v31_secret', secret);
             window.user = { id: Math.floor(Math.random()*900000+100000), nick, bal: 0, keys: [], secret };
             window.saveUser(window.user);
         }
         setTimeout(() => { if(!window.mySecret) initUser(); }, 1000);
 
-        // ЛОГИКА ЧАТА ДЛЯ ЮЗЕРА
+        function openSupport() { document.getElementById('chatModal').classList.add('active'); renderSupportChat(); }
+        function closeSupport() { document.getElementById('chatModal').classList.remove('active'); }
+
         function sendUserMsg() {
             const inp = document.getElementById('supportInp');
             if(!inp.value.trim()) return;
             window.sendTicket(inp.value.trim());
             inp.value = '';
+            setTimeout(renderSupportChat, 200);
         }
 
         function renderSupportChat() {
             const box = document.getElementById('supportChatBox');
-            if(!window.mySecret || !window.allTickets[window.mySecret]) return;
-            const msgs = window.allTickets[window.mySecret].msgs;
-            box.innerHTML = msgs.map(m => `
-                <div class="chat-msg ${m.sender === 'user' ? 'msg-user' : 'msg-admin'}">
+            if(!window.mySecret || !window.allTickets[window.mySecret]) return box.innerHTML = '<p class="text-center opacity-20 py-10">Нет сообщений</p>';
+            box.innerHTML = window.allTickets[window.mySecret].msgs.map(m => `
+                <div class="p-2 rounded-lg max-w-[85%] ${m.sender === 'user' ? 'bg-blue-600 ml-auto' : 'bg-green-500 text-black font-bold mr-auto'}">
                     ${m.text}
                 </div>
             `).join('');
             box.scrollTop = box.scrollHeight;
         }
 
-        // ЛОГИКА АДМИНКИ ДЛЯ ТИКЕТОВ
-        function renderAdminSupport() {
-            const list = document.getElementById('adminSupportList');
-            const tickets = Object.keys(window.allTickets);
-            if(tickets.length === 0) return;
-            
-            list.innerHTML = tickets.map(tId => {
-                const t = window.allTickets[tId];
-                const lastMsg = t.msgs[t.msgs.length - 1];
-                return `
-                    <div class="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-black text-blue-400 uppercase">${t.userNick} (#${t.userId})</span>
-                            <span class="text-[8px] opacity-30">${new Date(lastMsg.time).toLocaleTimeString()}</span>
-                        </div>
-                        <div class="max-h-32 overflow-y-auto bg-black/20 p-2 rounded text-[10px] italic opacity-70">
-                            ${t.msgs.map(m => `<div><b>${m.sender}:</b> ${m.text}</div>`).join('')}
-                        </div>
-                        <div class="flex gap-2">
-                            <input id="reply_${tId}" class="flex-1 bg-black/40 p-2 rounded-lg text-[10px]" placeholder="Ответ...">
-                            <button onclick="window.adminReply('${tId}', document.getElementById('reply_${tId}').value); document.getElementById('reply_${tId}').value=''" class="px-4 bg-green-600 rounded-lg text-[10px]">ОТВЕТИТЬ</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(id === 'admin') loadAdmin();
-        }
-
-        // Базовые функции без изменений
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = (window.db.products || []).map(p => {
@@ -238,11 +186,12 @@
             window.user.bal -= price;
             window.user.keys.unshift({ name: p.name, key: "DOG-" + Math.random().toString(36).substr(2,9).toUpperCase() });
             window.saveUser(window.user);
+            Swal.fire('Успех', 'Ключ в профиле', 'success');
         }
 
         function renderKeys() {
             const list = document.getElementById('keysList');
-            if(!window.user.keys || window.user.keys.length === 0) { list.innerHTML = `<p class="text-center opacity-20 text-[10px]">КЛЮЧЕЙ НЕТ</p>`; return; }
+            if(!window.user.keys || window.user.keys.length === 0) { list.innerHTML = `<p class="text-center opacity-20 text-[10px]">ПУСТО</p>`; return; }
             list.innerHTML = window.user.keys.map(k => `<div class="player-card p-4 border-l-2 border-blue-500 mb-2"><p class="text-[9px] opacity-40 uppercase">${k.name}</p><div class="bg-black/20 p-2 text-[11px] font-mono select-all">${k.key}</div></div>`).join('');
         }
 
@@ -250,13 +199,31 @@
             if(document.getElementById('promoInp').value === 'KALUBXQ') { document.getElementById('adminBtn').classList.remove('hidden'); Swal.fire('Admin', '', 'success'); }
         }
 
-        function loadAdmin() { renderAdminSupport(); }
-        function saveAdmin() { window.saveSystem(); Swal.fire('Ок', '', 'success'); }
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'admin') renderAdminSupport();
+        }
+
+        function renderAdminSupport() {
+            const list = document.getElementById('adminSupportList');
+            const tickets = Object.keys(window.allTickets);
+            if(tickets.length === 0) return list.innerHTML = '<p class="opacity-30 text-center">Тикетов нет</p>';
+            list.innerHTML = tickets.map(tId => {
+                const t = window.allTickets[tId];
+                return `<div class="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-2">
+                    <p class="text-[9px] font-black text-blue-400">${t.userNick} (#${t.userId})</p>
+                    <div class="text-[9px] opacity-60">${t.msgs.map(m => `<div><b>${m.sender}:</b> ${m.text}</div>`).join('')}</div>
+                    <div class="flex gap-2"><input id="rep_${tId}" class="flex-1 bg-black/40 p-2 rounded text-[10px]" placeholder="Ответ..."><button onclick="window.adminReply('${tId}', document.getElementById('rep_${tId}').value); document.getElementById('rep_${tId}').value=''" class="bg-green-600 px-3 rounded text-[9px]">ОК</button></div>
+                </div>`;
+            }).join('');
+        }
+
+        function saveAdmin() { Swal.fire('OK', '', 'success'); }
         function renderGlobalBC() { /* ... */ }
         function renderFooterAd() { /* ... */ }
-        function topUp() { Swal.fire('Оплата', 'Пишите @sswckk', 'info'); }
+        function topUp() { Swal.fire('Инфо', 'Contact @sswckk', 'info'); }
         function showTransferCode() { Swal.fire('Code', window.mySecret, 'info'); }
-        function addTariff() { if(!window.db.products) window.db.products = []; window.db.products.push({ id: Date.now(), name: "NEW", pr: 100, h: 24, icon: "⚡", discount: 0 }); window.saveSystem(); loadAdmin(); }
     </script>
 </body>
 </html>
