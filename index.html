@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Твои стили проекта */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0e14; color: #ffffff; margin: 0; padding: 0; overflow-x: hidden; }
         .container { padding: 20px; padding-bottom: 80px; }
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
@@ -17,13 +16,16 @@
         .balance-card { background: linear-gradient(135deg, #1d222d 0%, #161a23 100%); padding: 25px; border-radius: 20px; text-align: center; border: 1px solid #2a3142; margin-bottom: 25px; }
         .balance-amount { font-size: 32px; font-weight: 800; color: #5865f2; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .menu-item { background: #191c24; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #2a3142; transition: transform 0.2s; }
+        .menu-item { background: #191c24; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #2a3142; transition: transform 0.2s; cursor: pointer; }
         .menu-item:active { transform: scale(0.95); }
         .menu-item i { font-size: 24px; color: #5865f2; margin-bottom: 10px; display: block; }
         .navbar { position: fixed; bottom: 0; left: 0; right: 0; background: #161a23; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #2a3142; }
         .nav-link { color: #8a8f9d; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .nav-link.active { color: #5865f2; }
         .hidden { display: none; }
+        h2 { margin-top: 0; }
+        .btn-main { width: 100%; padding: 15px; border-radius: 12px; background: #5865f2; border: none; color: #fff; font-weight: bold; cursor: pointer; }
+        .btn-secondary { width: 100%; padding: 10px; background: none; border: 1px solid #2a3142; color: #8a8f9d; border-radius: 10px; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -44,7 +46,7 @@
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item" onclick="showPage('vpn-page')">
+            <div class="menu-item" onclick="Swal.fire({title:'DOG X VPN', text:'Подключение выполняется через бота...', icon:'info', background:'#191c24', color:'#fff'})">
                 <i class="fas fa-shield-halved"></i>
                 <span>VPN Подключить</span>
             </div>
@@ -56,7 +58,7 @@
                 <i class="fas fa-headset"></i>
                 <span>Поддержка</span>
             </div>
-            <div class="menu-item" onclick="Swal.fire({title:'Скоро!', text:'Реферальная система в разработке', icon:'info', background:'#191c24', color:'#fff'})">
+            <div class="menu-item" onclick="Swal.fire({title:'Друзья', text:'Система в разработке', icon:'info', background:'#191c24', color:'#fff'})">
                 <i class="fas fa-users"></i>
                 <span>Друзья</span>
             </div>
@@ -65,18 +67,18 @@
 
     <div id="profile-page" class="hidden">
         <h2>Мой профиль</h2>
-        <div class="menu-item" style="text-align: left; display: flex; justify-content: space-between; align-items: center;">
+        <div class="menu-item" style="text-align: left; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <span>ID Пользователя:</span>
             <span id="user-id-val" style="color: #5865f2;">0000</span>
         </div>
-        <button onclick="showPage('home-page')" style="width: 100%; margin-top: 20px; padding: 15px; border-radius: 10px; background: #5865f2; border: none; color: #fff; font-weight: bold;">Назад</button>
+        <button onclick="showPage('home-page')" class="btn-main">Назад</button>
     </div>
 
     <div id="help-page" class="hidden">
         <h2>Поддержка</h2>
         <div id="tickets-list" style="margin-bottom: 20px;"></div>
-        <button onclick="createNewTicket()" style="width: 100%; padding: 15px; border-radius: 10px; background: #5865f2; border: none; color: #fff; font-weight: bold;">Создать обращение</button>
-        <button onclick="showPage('home-page')" style="width: 100%; margin-top: 10px; padding: 10px; background: none; border: 1px solid #2a3142; color: #8a8f9d;">Назад</button>
+        <button onclick="createNewTicket()" class="btn-main">Создать обращение</button>
+        <button onclick="showPage('home-page')" class="btn-secondary">Назад</button>
     </div>
 </div>
 
@@ -93,13 +95,13 @@
     // Инициализация пользователя
     window.user = {
         id: tg.initDataUnsafe.user?.id || 12345,
-        name: tg.initDataUnsafe.user?.first_name || "Артём",
+        name: tg.initDataUnsafe.user?.first_name || "Пользователь",
         bal: 0,
         isAdmin: false
     };
 
-    // Заглушка админа для теста (замени на свой ID)
-    if(window.user.id === 12345678 || window.user.id === 5158671607) {
+    // Админка (твой ID)
+    if(window.user.id === 5158671607) {
         window.user.isAdmin = true;
         document.getElementById('admin-icon').style.display = 'block';
     }
@@ -117,27 +119,25 @@
         document.getElementById('profile-page').classList.add('hidden');
         document.getElementById('help-page').classList.add('hidden');
         document.getElementById(pageId).classList.remove('hidden');
+
+        // Подсветка в навигации
+        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
     }
 
     async function createNewTicket() {
         const { value: text } = await Swal.fire({
             title: 'Ваш вопрос',
             input: 'textarea',
+            placeholder: 'Опишите проблему...',
             background: '#191c24',
             color: '#fff',
-            confirmButtonColor: '#5865f2'
+            confirmButtonColor: '#5865f2',
+            confirmButtonText: 'Отправить'
         });
         if(text) {
             Swal.fire('Отправлено!', 'Админ ответит вам в ближайшее время.', 'success');
-            // Здесь должна быть твоя функция отправки сообщения в ТГ
         }
     }
-
-    // Сохранение (заглушка)
-    window.saveUser = function(userData) {
-        console.log("Saving user...", userData);
-        document.getElementById('balance-val').innerText = userData.bal;
-    };
 
     initApp();
 </script>
