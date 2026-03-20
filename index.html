@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | v42 Ultimate</title>
+    <title>DOG X | v43 ELITE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -26,128 +26,165 @@
         const db_firebase = getDatabase(app);
 
         window.db = {}; window.allUsers = {}; window.allTickets = {};
-        window.mySecret = localStorage.getItem('dog_v42_secret');
+        window.mySecret = localStorage.getItem('dog_v43_secret');
         window.user = null;
 
-        const dbRef = ref(db_firebase, 'dog_system_v42');
-        const usersRef = ref(db_firebase, 'dog_users_v42');
-        const supportRef = ref(db_firebase, 'dog_support_v42');
+        const dbRef = ref(db_firebase, 'dog_system_v43');
+        const usersRef = ref(db_firebase, 'dog_users_v43');
+        const supportRef = ref(db_firebase, 'dog_support_v43');
 
-        onValue(dbRef, (s) => { window.db = s.val() || { products: [], broadcast: {}, gold_numbers: {}, logs: [] }; renderProducts(); renderGlobalBC(); if(window.isAdminOpen) loadAdmin(); });
+        onValue(dbRef, (s) => { window.db = s.val() || { products: [], broadcast: {active:false, text:'', img:''}, gold_numbers: {}, logs: [] }; renderProducts(); renderGlobalBC(); if(window.isAdminOpen) loadAdmin(); });
         onValue(usersRef, (s) => { window.allUsers = s.val() || {}; if (window.mySecret && window.allUsers[window.mySecret]) { window.user = window.allUsers[window.mySecret]; updateUI(); } });
         onValue(supportRef, (s) => { window.allTickets = s.val() || {}; if(window.isAdminOpen) renderAdminSupport(); });
 
         window.saveSystem = () => set(dbRef, window.db);
-        window.saveUser = async (u) => { await set(ref(db_firebase, 'dog_users_v42/' + window.mySecret), u); };
+        window.saveUser = async (u) => { await set(ref(db_firebase, 'dog_users_v43/' + window.mySecret), u); };
         window.addLog = (txt) => { if(!window.db.logs) window.db.logs = []; window.db.logs.unshift({t: Date.now(), txt}); window.saveSystem(); };
-        window.adminReply = (tId, m) => { if(!m.trim()) return; window.allTickets[tId].msgs.push({text:m, sender:'admin'}); set(ref(db_firebase, 'dog_support_v42/'+tId), window.allTickets[tId]); };
-        window.sendTicket = (m) => { const tId = window.mySecret; if(!window.allTickets[tId]) window.allTickets[tId]={userNick:window.user.nick, userId: window.user.id, msgs:[]}; window.allTickets[tId].msgs.push({text:m, sender:'user'}); set(ref(db_firebase, 'dog_support_v42/'+tId), window.allTickets[tId]); };
     </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
-        :root { --bg: #090b10; --card: #12161f; }
+        :root { --bg: #05070a; --card: #0f121a; --blue: #3b82f6; --gold: #fbbf24; }
         body { background: var(--bg); color: #fff; font-family: 'Manrope', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .player-card { background: var(--card); border-radius: 20px; border: 1px solid rgba(255,255,255,0.03); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .vip-border { border: 1px solid #fbbf24 !important; box-shadow: 0 0 15px rgba(251,191,36,0.1); }
-        .chat-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-        .chat-modal.active { display: flex; }
+        .glass-card { background: var(--card); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .tab-content { display: none; transition: 0.3s; }
+        .tab-content.active { display: block; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 15px rgba(37,99,235,0.3); }
+        .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight: 800; }
+        .admin-input { background: #000; border: 1px solid #333; border-radius: 12px; padding: 10px; font-size: 11px; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-28">
 
-    <header class="p-6 flex justify-between items-center sticky top-0 bg-[#090b10]/80 backdrop-blur-md z-50">
-        <div><div class="text-2xl font-black text-blue-500 italic uppercase">DOG X</div><div id="userDisplay" class="text-[8px] opacity-40 uppercase tracking-widest">v42 OMNI PLATFORM</div></div>
-        <div class="flex gap-4 text-[10px] font-black uppercase">
-            <button onclick="showTab('home')">Маркет</button>
-            <button onclick="showTab('me')">Профиль</button>
-            <button id="adminBtn" onclick="showTab('admin')" class="hidden text-red-500">Admin</button>
+    <header class="p-6 flex justify-between items-center sticky top-0 bg-[#05070a]/90 backdrop-blur-xl z-50 border-b border-white/5">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-dog text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-black italic tracking-tighter uppercase">DOG <span class="text-blue-500">X</span></h1>
+                <p id="userDisplay" class="text-[7px] opacity-30 font-bold uppercase tracking-[2px]">Loading System...</p>
+            </div>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="showTab('home')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fa-solid fa-shop text-xs"></i></button>
+            <button onclick="showTab('me')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fa-solid fa-user text-xs"></i></button>
+            <button id="adminBtn" onclick="showTab('admin')" class="hidden w-10 h-10 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-crown text-xs"></i></button>
         </div>
     </header>
 
-    <main id="home" class="tab-content active px-6 space-y-4">
-        <div id="globalBC" class="hidden player-card p-4 mb-4 border-amber-500/30 overflow-hidden">
-            <img id="bcImgDisplay" src="" class="w-full h-32 object-cover rounded-xl mb-3 hidden">
-            <p id="bcTextDisplay" class="text-xs font-bold mb-2"></p>
+    <main id="home" class="tab-content active px-6 space-y-6 pt-4">
+        <div id="globalBC" class="hidden glass-card overflow-hidden border-blue-500/20">
+            <img id="bcImgDisplay" src="" class="w-full h-40 object-cover hidden">
+            <div class="p-4">
+                <p id="bcTextDisplay" class="text-xs font-bold leading-relaxed"></p>
+            </div>
         </div>
-        <h2 class="text-lg font-black italic uppercase italic">Актуальные Сервера</h2>
-        <div id="productsGrid" class="grid grid-cols-1 gap-3"></div>
+        
+        <div class="flex justify-between items-end">
+            <h2 class="text-2xl font-black uppercase italic">Сервера <br><span class="text-blue-500 text-sm not-italic font-bold">Premium VPN</span></h2>
+            <div class="text-[9px] opacity-30 font-bold mb-1">ONLINE: 24/7</div>
+        </div>
+        
+        <div id="productsGrid" class="grid grid-cols-1 gap-4"></div>
     </main>
 
-    <section id="me" class="tab-content px-6 space-y-6">
-        <div class="player-card p-8 text-center" id="profileCard">
-            <p id="userRank" class="text-[9px] text-blue-400 font-black uppercase mb-1">Обычный аккаунт</p>
-            <h3 class="text-5xl font-black text-white mb-6" id="userBal">0₽</h3>
-            <div class="grid grid-cols-2 gap-2 mb-2">
-                <button onclick="topUp()" class="py-4 bg-blue-600 rounded-2xl text-[10px] font-black uppercase shadow-lg shadow-blue-500/20">Пополнить</button>
-                <button onclick="openSwitchAcc()" class="py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase border border-white/10">Аккаунты</button>
+    <section id="me" class="tab-content px-6 space-y-6 pt-4">
+        <div class="glass-card p-8 text-center relative overflow-hidden" id="profileCard">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl"></div>
+            <p id="userRank" class="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-2">Standard User</p>
+            <h3 class="text-6xl font-black mb-6 tracking-tighter" id="userBal">0₽</h3>
+            
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <button onclick="topUp()" class="btn-primary py-4 rounded-2xl text-[11px] font-black uppercase italic">Пополнить</button>
+                <button onclick="openSwitchAcc()" class="bg-white/5 border border-white/10 py-4 rounded-2xl text-[11px] font-black uppercase italic">Аккаунты</button>
             </div>
-            <button onclick="openSupport()" class="w-full py-3 bg-white/5 text-white/40 rounded-xl text-[9px] font-bold uppercase border border-white/5">Тех.Поддержка</button>
-            <button onclick="createNewAccount()" class="w-full mt-3 py-3 text-[9px] font-bold uppercase opacity-20 italic">Регистрация через номер</button>
+            <button onclick="openSupport()" class="w-full py-3 bg-white/5 rounded-xl text-[9px] font-bold uppercase border border-white/5 opacity-60 italic">Служба поддержки</button>
         </div>
 
         <div class="space-y-3">
-            <button onclick="showTransferCode()" class="w-full p-4 player-card flex justify-between items-center">
-                <span class="text-xs font-bold uppercase">Ваш ключ доступа</span>
-                <i class="fa-solid fa-id-card opacity-30 text-blue-400"></i>
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-shield-halved text-blue-500 text-xs"></i>
+                <span class="text-[10px] font-black uppercase opacity-40">Управление доступом</span>
+            </div>
+            <button onclick="showTransferCode()" class="w-full p-5 glass-card flex justify-between items-center group">
+                <span class="text-xs font-black uppercase">Секретный ключ (ID)</span>
+                <i class="fa-solid fa-chevron-right text-[10px] opacity-20 group-hover:translate-x-1 transition"></i>
             </button>
             <div class="flex gap-2">
-                <input type="text" id="promoInp" placeholder="Код / Номер" class="flex-1 p-4 player-card bg-transparent text-center text-xs outline-none border-blue-500/10">
-                <button onclick="checkInput()" class="px-6 bg-blue-600 rounded-2xl text-[10px] font-black uppercase shadow-md">OK</button>
+                <input type="text" id="promoInp" placeholder="Код или Номер" class="flex-1 p-5 glass-card bg-transparent text-xs font-bold outline-none text-center">
+                <button onclick="checkInput()" class="btn-primary px-8 rounded-2xl text-[11px] font-black uppercase">OK</button>
             </div>
         </div>
-        <div id="keysList" class="space-y-3"></div>
+
+        <div id="keysList" class="space-y-3 pb-10"></div>
     </section>
 
-    <section id="admin" class="tab-content px-6 pb-20 space-y-6">
-        <div class="player-card p-6 space-y-6 border-red-500/20">
-            <h2 class="text-red-500 font-black text-xs uppercase italic text-center">Full Control Panel v42</h2>
-            
-            <div class="space-y-2">
-                <p class="text-[9px] font-black opacity-40 uppercase tracking-tighter">Золотые Номера (С паролем)</p>
-                <div class="flex gap-2">
-                    <input id="adm_gold_num" class="flex-1 p-3 bg-black/40 rounded-xl text-[10px]" placeholder="777-000">
-                    <select id="adm_gold_rank" class="bg-black/40 rounded-xl text-[10px] px-2 text-amber-500 font-bold"><option value="VIP">VIP</option><option value="ELITE">ELITE</option></select>
-                    <button onclick="addGoldNumber()" class="bg-amber-600 px-4 rounded-xl text-[10px] font-bold">ADD</button>
+    <section id="admin" class="tab-content px-6 pb-28 space-y-6 pt-4">
+        <div class="glass-card p-6 space-y-8 border-red-500/20">
+            <div class="text-center">
+                <h2 class="text-red-500 font-black text-sm uppercase tracking-[4px]">Elite Admin</h2>
+                <div class="h-1 w-12 bg-red-600 mx-auto mt-2 rounded-full"></div>
+            </div>
+
+            <div class="space-y-3">
+                <p class="text-[10px] font-black opacity-40 uppercase">💎 Создать Уникальный Номер</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="adm_gold_num" class="admin-input" placeholder="Номер (777)">
+                    <input id="adm_gold_pass" class="admin-input" placeholder="Пароль">
                 </div>
-                <div id="gold_nums_list" class="max-h-24 overflow-y-auto space-y-1"></div>
+                <div class="flex gap-2">
+                    <select id="adm_gold_rank" class="admin-input flex-1 font-bold text-amber-500"><option value="VIP">VIP РАНГ</option><option value="ELITE">ELITE РАНГ</option></select>
+                    <button onclick="addGoldNumber()" class="btn-gold px-6 rounded-xl text-[10px]">СОЗДАТЬ</button>
+                </div>
+                <div id="gold_nums_list" class="space-y-1"></div>
             </div>
 
-            <div class="space-y-2">
-                <p class="text-[9px] font-black opacity-40 uppercase">Юзеры (Ник | Pass | Bal)</p>
-                <div id="adm_users_list" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div>
+            <div class="p-5 bg-blue-500/5 rounded-3xl space-y-4 border border-blue-500/10">
+                <p class="text-[10px] font-black text-blue-400 uppercase italic">📢 Объявление / Рассылка</p>
+                <input type="file" id="adFile" class="hidden" onchange="uploadAdPhoto(this)">
                 <div class="flex gap-2">
-                    <input id="adm_uid" class="flex-1 p-3 bg-black/40 rounded-xl text-[10px]" placeholder="SEC Ключ">
-                    <input id="adm_sum" type="number" class="w-20 p-3 bg-black/40 rounded-xl text-[10px]" placeholder="₽">
-                    <button onclick="adminChangeBalance()" class="bg-blue-600 px-4 rounded-xl text-[10px] font-bold">OK</button>
+                    <button onclick="document.getElementById('adFile').click()" class="flex-1 py-3 bg-white/5 border border-dashed border-white/20 rounded-xl text-[9px] font-bold uppercase">Загрузить фото</button>
+                    <button onclick="window.db.broadcast.img=''; window.saveSystem();" class="px-4 bg-red-500/20 text-red-500 rounded-xl"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <textarea id="adm_bc_text" class="w-full admin-input h-20" placeholder="Текст вашего объявления..."></textarea>
+                <button onclick="toggleBC()" id="bcStatusBtn" class="w-full py-4 rounded-2xl text-[10px] font-black uppercase transition"></button>
+            </div>
+
+            <div class="space-y-4">
+                <p class="text-[10px] font-black opacity-40 uppercase italic">📦 Настройка Тарифов</p>
+                <div id="admin_stocks" class="space-y-4"></div>
+                <button onclick="addTariff()" class="w-full py-5 border-2 border-dashed border-white/5 rounded-3xl text-[10px] font-black uppercase tracking-widest">+ Новый Тариф</button>
+            </div>
+
+            <div class="space-y-3">
+                <p class="text-[10px] font-black opacity-40 uppercase">👤 Управление Юзерами</p>
+                <div id="adm_users_list" class="max-h-60 overflow-y-auto space-y-2"></div>
+                <div class="flex gap-2">
+                    <input id="adm_uid" class="admin-input flex-1" placeholder="SEC-KEY">
+                    <input id="adm_sum" type="number" class="admin-input w-24" placeholder="₽">
+                    <button onclick="adminChangeBalance()" class="btn-primary px-4 rounded-xl text-[10px]">OK</button>
                 </div>
             </div>
 
-            <div id="admin_stocks" class="space-y-4"></div>
-            <button onclick="addTariff()" class="w-full py-4 border border-dashed border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest">+ Добавить тариф</button>
-            
-            <div class="p-4 bg-white/5 rounded-2xl space-y-3">
-                <p class="text-[9px] font-black text-blue-400 uppercase">Рассылка</p>
-                <textarea id="adm_bc_text" class="w-full p-2 bg-black/40 rounded text-[10px]" placeholder="Текст рекламы..."></textarea>
-                <button onclick="toggleStatus('bc')" class="w-full py-3 bg-amber-600 text-black text-[10px] font-black rounded uppercase">Вкл/Выкл баннер</button>
+            <div class="space-y-3">
+                <p class="text-[10px] font-black opacity-40 uppercase">📩 Поддержка (Админ-панель)</p>
+                <div id="adminSupportList" class="space-y-3"></div>
             </div>
 
-            <div id="adminSupportList" class="space-y-3"></div>
-            <div id="adm_logs" class="max-h-32 overflow-y-auto text-[7px] bg-black/40 p-2 rounded-xl text-white/40"></div>
-            <button onclick="saveAdmin()" class="w-full py-6 bg-red-600 rounded-3xl text-sm font-black uppercase italic shadow-xl shadow-red-600/30">Сохранить v42</button>
+            <button onclick="saveAdmin()" class="w-full py-6 bg-red-600 rounded-[30px] text-sm font-black uppercase italic shadow-2xl shadow-red-600/40">Применить v43</button>
         </div>
     </section>
 
     <div id="chatModal" class="chat-modal">
-        <div class="player-card w-full max-w-sm p-6 space-y-4 relative">
-            <button onclick="closeSupport()" class="absolute top-4 right-4 opacity-40"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-xs font-black uppercase text-blue-400">DOG X Support</h3>
-            <div id="supportChatBox" class="h-64 overflow-y-auto space-y-2 flex flex-col pr-2 text-[10px]"></div>
+        <div class="glass-card w-full max-w-sm p-6 space-y-4 relative">
+            <button onclick="closeSupport()" class="absolute top-5 right-5 opacity-40"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-[11px] font-black uppercase text-blue-500">Live Support</h3>
+            <div id="supportChatBox" class="h-80 overflow-y-auto space-y-2 flex flex-col pr-2 text-[11px]"></div>
             <div class="flex gap-2">
-                <input type="text" id="supportInp" placeholder="Напишите..." class="flex-1 bg-black/40 p-3 rounded-xl text-xs outline-none">
-                <button onclick="sendUserMsg()" class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+                <input type="text" id="supportInp" placeholder="Ваш вопрос..." class="flex-1 bg-black/60 p-4 rounded-2xl text-xs outline-none border border-white/5">
+                <button onclick="sendUserMsg()" class="w-14 h-14 btn-primary rounded-2xl flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
             </div>
         </div>
     </div>
@@ -157,9 +194,9 @@
 
         function updateUI() {
             if(!window.user) return;
-            document.getElementById('userDisplay').innerText = `${window.user.nick} | ID: ${window.user.id}`;
+            document.getElementById('userDisplay').innerText = `${window.user.nick} • ID: ${window.user.id}`;
             document.getElementById('userBal').innerText = window.user.bal.toFixed(0) + '₽';
-            document.getElementById('userRank').innerText = window.user.rank || "Стандартный аккаунт";
+            document.getElementById('userRank').innerText = window.user.rank === 'VIP' ? '💎 VIP MEMBER' : (window.user.rank === 'ELITE' ? '⚡ ELITE MEMBER' : 'STANDARD USER');
             const pc = document.getElementById('profileCard');
             if(window.user.rank === 'VIP' || window.user.rank === 'ELITE') pc.classList.add('vip-border');
             else pc.classList.remove('vip-border');
@@ -168,158 +205,181 @@
 
         async function initUser() {
             if(window.mySecret) return;
-            let accs = JSON.parse(localStorage.getItem('dog_v42_accs') || '[]');
             const { value: v } = await Swal.fire({
-                title: 'Регистрация',
-                html: '<input id="s-n" class="swal2-input" placeholder="Ник"><input id="s-p" type="password" class="swal2-input" placeholder="Пароль">',
-                background: '#090b10', color: '#fff', confirmButtonText: 'Создать', allowOutsideClick: false,
-                preConfirm: () => [document.getElementById('s-n').value, document.getElementById('s-p').value]
+                title: 'РЕГИСТРАЦИЯ',
+                html: '<input id="s-n" class="swal2-input" placeholder="Ваш Ник"><input id="s-p" type="password" class="swal2-input" placeholder="Пароль">',
+                background: '#05070a', color: '#fff', confirmButtonText: 'НАЧАТЬ', allowOutsideClick: false,
+                preConfirm: () => {
+                    const n = document.getElementById('s-n').value;
+                    const p = document.getElementById('s-p').value;
+                    if(!n || !p) return Swal.showValidationMessage('Заполни все поля!');
+                    return [n, p];
+                }
             });
-            if(!v[0] || !v[1]) return initUser();
             const sec = 'SEC-' + Math.random().toString(36).substr(2,12).toUpperCase();
-            window.mySecret = sec; localStorage.setItem('dog_v42_secret', sec);
-            accs.push({nick: v[0], secret: sec}); localStorage.setItem('dog_v42_accs', JSON.stringify(accs));
-            window.user = { id: Math.floor(Math.random()*900000+100000), nick: v[0], pass: v[1], bal: 0, keys: [], rank: 'Стандарт', secret: sec };
+            window.mySecret = sec; localStorage.setItem('dog_v43_secret', sec);
+            let accs = JSON.parse(localStorage.getItem('dog_v43_accs') || '[]');
+            accs.push({nick: v[0], secret: sec}); localStorage.setItem('dog_v43_accs', JSON.stringify(accs));
+            window.user = { id: Math.floor(Math.random()*900000+100000), nick: v[0], pass: v[1], bal: 0, keys: [], rank: 'Standard', secret: sec };
             await window.saveUser(window.user); location.reload(); 
         }
-        setTimeout(() => { if(!window.mySecret) initUser(); }, 1200);
-
-        function openSwitchAcc() {
-            let accs = JSON.parse(localStorage.getItem('dog_v42_accs') || '[]');
-            let html = accs.map(a => `<button onclick="switchAcc('${a.secret}')" class="w-full p-4 mb-2 player-card text-left flex justify-between items-center ${a.secret===window.mySecret?'border-blue-500':''}">
-                <span>${a.nick}</span> ${a.secret===window.mySecret?'<i class="fa-solid fa-check text-blue-500"></i>':''}
-            </button>`).join('');
-            Swal.fire({ title: 'Ваши аккаунты', html: `<div class="mt-4">${html}</div>`, showConfirmButton: false, background: '#12161f', color: '#fff' });
-        }
-        window.switchAcc = (sec) => { localStorage.setItem('dog_v42_secret', sec); location.reload(); };
-
-        async function createNewAccount() {
-            let accs = JSON.parse(localStorage.getItem('dog_v42_accs') || '[]');
-            const { value: goldNum } = await Swal.fire({ title: 'Золотой Номер', input: 'text', background: '#12161f', color: '#fff' });
-            if(window.db.gold_numbers && window.db.gold_numbers[goldNum]) {
-                const rank = window.db.gold_numbers[goldNum];
-                const { value: v } = await Swal.fire({ 
-                    title: `Регистрация (${rank})`, 
-                    html: '<input id="n-n" class="swal2-input" placeholder="Ник"><input id="n-p" type="password" class="swal2-input" placeholder="Пароль">', 
-                    preConfirm: () => [document.getElementById('n-n').value, document.getElementById('n-p').value]
-                });
-                if(!v[0] || !v[1]) return;
-                const sec = 'SEC-' + Math.random().toString(36).substr(2,12).toUpperCase();
-                window.mySecret = sec; localStorage.setItem('dog_v42_secret', sec);
-                accs.push({nick: v[0], secret: sec}); localStorage.setItem('dog_v42_accs', JSON.stringify(accs));
-                window.user = { id: Math.floor(Math.random()*900000+100000), nick: v[0], pass: v[1], bal: 0, keys: [], rank: rank, secret: sec };
-                window.addLog(`Активирован элитный номер ${goldNum} юзером ${v[0]}`);
-                await window.saveUser(window.user); location.reload();
-            } else { Swal.fire('Ошибка','Номер недействителен','error'); }
-        }
-
-        function loadAdmin() {
-            window.isAdminOpen = true;
-            const uL = document.getElementById('adm_users_list');
-            uL.innerHTML = Object.keys(window.allUsers).map(s => `<div onclick="document.getElementById('adm_uid').value='${s}'" class="p-3 bg-white/5 rounded-2xl flex justify-between text-[9px] mb-1">
-                <span><b>${window.allUsers[s].nick}</b> <i class="text-blue-500">(${window.allUsers[s].pass})</i></span>
-                <span class="text-green-500 font-bold">${window.allUsers[s].bal}₽</span>
-            </div>`).join('');
-            const gL = document.getElementById('gold_nums_list');
-            gL.innerHTML = Object.keys(window.db.gold_numbers || {}).map(n => `<div class="flex justify-between text-[9px] bg-white/5 p-2 rounded-xl"><span>${n} - ${window.db.gold_numbers[n]}</span><i class="fa-solid fa-trash text-red-500" onclick="delete window.db.gold_numbers['${n}']; window.saveSystem(); loadAdmin();"></i></div>`).join('');
-            document.getElementById('adm_logs').innerHTML = (window.db.logs || []).map(l => `<div>${l.txt}</div>`).join('');
-            
-            // Новая настройка тарифов с выбором типа ключа
-            document.getElementById('admin_stocks').innerHTML = (window.db.products || []).map(p => `
-                <div class="p-4 bg-white/5 rounded-2xl space-y-2 border border-white/5">
-                    <div class="flex gap-2">
-                        <input id="p_n_${p.id}" value="${p.name}" class="bg-black/40 p-2 text-[10px] flex-1 rounded-lg">
-                        <select id="p_t_${p.id}" class="bg-black/40 text-[9px] rounded-lg px-2">
-                            <option value="Universal" ${p.type==='Universal'?'selected':''}>Universal</option>
-                            <option value="iOS" ${p.type==='iOS'?'selected':''}>iOS</option>
-                            <option value="Android" ${p.type==='Android'?'selected':''}>Android</option>
-                        </select>
-                    </div>
-                    <div class="flex gap-1 items-center">
-                        <input id="p_p_${p.id}" value="${p.pr}" class="bg-black/40 p-1 w-1/4 text-[9px] rounded" placeholder="₽">
-                        <input id="p_h_${p.id}" value="${p.h}" class="bg-black/40 p-1 w-1/4 text-[9px] rounded" placeholder="Часы">
-                        <label class="text-[8px] flex items-center gap-1 opacity-60"><input id="p_v_${p.id}" type="checkbox" ${p.vip?'checked':''}> VIP</label>
-                    </div>
-                </div>`).join('');
-            renderAdminSupport();
-        }
-
-        function saveAdmin() {
-            window.db.broadcast = { text: document.getElementById('adm_bc_text').value, img: window.db.broadcast?.img || '', active: window.db.broadcast?.active || false };
-            window.db.products.forEach(p => {
-                p.name = document.getElementById(`p_n_${p.id}`).value;
-                p.pr = parseInt(document.getElementById(`p_p_${p.id}`).value);
-                p.h = parseInt(document.getElementById(`p_h_${p.id}`).value);
-                p.vip = document.getElementById(`p_v_${p.id}`).checked;
-                p.type = document.getElementById(`p_t_${p.id}`).value; // Сохраняем тип ключа
-            });
-            window.saveSystem(); Swal.fire('База v42 обновлена','','success');
-        }
+        setTimeout(() => { if(!window.mySecret) initUser(); }, 1000);
 
         function renderProducts() {
             const g = document.getElementById('productsGrid');
             g.innerHTML = (window.db.products || []).map(p => {
                 if(p.vip && (!window.user || (window.user.rank !== 'VIP' && window.user.rank !== 'ELITE'))) return '';
-                return `<div class="player-card p-5 flex justify-between items-center ${p.vip?'border-amber-500/40':''}">
-                    <div>
-                        <h4 class="font-black text-[13px] uppercase ${p.vip?'text-amber-500':''}">${p.name}</h4>
-                        <div class="flex gap-2 items-center mt-1">
-                            <span class="text-[8px] opacity-40 uppercase font-black tracking-widest">${p.h} ЧАСОВ</span>
-                            <span class="text-[7px] bg-white/10 px-1.5 py-0.5 rounded text-blue-400 uppercase">${p.type || 'Universal'}</span>
+                return `
+                <div class="glass-card p-5 flex justify-between items-center group active:scale-95 transition ${p.vip?'border-amber-500/30':''}">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-xl">
+                            ${p.type==='iOS'?'📱':(p.type==='Android'?'🤖':'🌐')}
+                        </div>
+                        <div>
+                            <h4 class="font-black text-sm uppercase italic">${p.name}</h4>
+                            <div class="flex gap-2 items-center">
+                                <span class="text-[9px] font-black text-blue-500">⏱ ${p.h} ЧАСОВ</span>
+                                ${p.vip?'<span class="text-[8px] bg-amber-500/20 text-amber-500 px-1 rounded">VIP</span>':''}
+                            </div>
                         </div>
                     </div>
-                    <button onclick="buyKey(${p.id})" class="px-6 py-3 bg-blue-600 rounded-2xl text-[11px] font-black italic shadow-lg shadow-blue-500/10">${p.pr}₽</button>
+                    <button onclick="buyKey(${p.id})" class="px-6 py-3 btn-primary rounded-xl text-[11px] font-black">${p.pr}₽</button>
                 </div>`;
             }).join('');
         }
 
         function buyKey(id) {
             const p = window.db.products.find(x=>x.id===id);
-            if(window.user.bal < p.pr) return Swal.fire('Недостаточно средств','','error');
+            if(window.user.bal < p.pr) return Swal.fire('Мало денег!','Пополни баланс в профиле.','error');
             window.user.bal -= p.pr;
-            const prefix = p.type === 'iOS' ? 'IPHONE' : (p.type === 'Android' ? 'DROID' : 'DOG');
-            const keyVal = `${prefix}-${Math.random().toString(36).substr(2,8).toUpperCase()}`;
-            window.user.keys.unshift({name: p.name, key: keyVal, type: p.type || 'Universal'});
-            window.saveUser(window.user); 
-            Swal.fire('Покупка успешна','Ключ добавлен в профиль','success');
+            const finalKey = `${p.keyPrefix || 'KEY'}-${Math.random().toString(36).substr(2,6).toUpperCase()}`;
+            window.user.keys.unshift({name: p.name, key: finalKey, date: new Date().toLocaleDateString()});
+            window.saveUser(window.user);
+            Swal.fire({title:'Успешно!', text:'Ключ появился в твоем профиле', icon:'success', background:'#0f121a', color:'#fff'});
         }
 
-        function renderKeys() {
-            const l = document.getElementById('keysList');
-            if(!window.user.keys?.length) return l.innerHTML='<p class="text-center py-6 opacity-10 text-[8px] uppercase tracking-widest">Список ключей пуст</p>';
-            l.innerHTML = window.user.keys.map(k => `
-                <div class="player-card p-4 border-l-4 border-blue-600 mb-2">
-                    <div class="flex justify-between items-center mb-1">
-                        <p class="text-[9px] opacity-40 font-black uppercase">${k.name}</p>
-                        <span class="text-[7px] text-blue-400 font-bold uppercase tracking-tighter">${k.type || 'Universal'}</span>
-                    </div>
-                    <div class="text-[11px] font-mono text-blue-300 select-all tracking-wider">${k.key}</div>
+        function loadAdmin() {
+            window.isAdminOpen = true;
+            document.getElementById('adm_users_list').innerHTML = Object.keys(window.allUsers).map(s => `
+                <div onclick="document.getElementById('adm_uid').value='${s}'" class="p-4 bg-white/5 rounded-2xl flex justify-between items-center text-[10px] active:bg-white/10">
+                    <div><b>${window.allUsers[s].nick}</b> <span class="opacity-30">| ${window.allUsers[s].pass}</span></div>
+                    <div class="text-green-500 font-black">${window.allUsers[s].bal}₽</div>
                 </div>`).join('');
+
+            document.getElementById('gold_nums_list').innerHTML = Object.keys(window.db.gold_numbers || {}).map(n => `
+                <div class="flex justify-between text-[10px] bg-black p-3 rounded-xl border border-white/5">
+                    <span>${n} → <b class="text-amber-500">${window.db.gold_numbers[n].rank}</b> (Pass: ${window.db.gold_numbers[n].pass})</span>
+                    <i class="fa-solid fa-trash text-red-500" onclick="delete window.db.gold_numbers['${n}']; window.saveSystem(); loadAdmin();"></i>
+                </div>`).join('');
+
+            document.getElementById('admin_stocks').innerHTML = (window.db.products || []).map(p => `
+                <div class="p-4 bg-white/5 rounded-2xl space-y-3">
+                    <div class="flex gap-2">
+                        <input id="p_n_${p.id}" value="${p.name}" class="admin-input flex-1" placeholder="Название (iOS 24H 💎)">
+                        <select id="p_t_${p.id}" class="admin-input"><option value="Universal" ${p.type==='Universal'?'selected':''}>Universal</option><option value="iOS" ${p.type==='iOS'?'selected':''}>iOS</option><option value="Android" ${p.type==='Android'?'selected':''}>Android</option></select>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input id="p_p_${p.id}" value="${p.pr}" class="admin-input" placeholder="Цена ₽">
+                        <input id="p_h_${p.id}" value="${p.h}" class="admin-input" placeholder="Часы">
+                        <input id="p_k_${p.id}" value="${p.keyPrefix || ''}" class="admin-input" placeholder="Ключ (iOS-24H)">
+                    </div>
+                    <label class="flex items-center gap-2 text-[10px] font-bold opacity-60"><input id="p_v_${p.id}" type="checkbox" ${p.vip?'checked':''}> Сделать VIP тарифом</label>
+                </div>`).join('');
+            
+            document.getElementById('adm_bc_text').value = window.db.broadcast.text;
+            const btn = document.getElementById('bcStatusBtn');
+            btn.innerText = window.db.broadcast.active ? "ВЫКЛЮЧИТЬ БАННЕР" : "ВКЛЮЧИТЬ БАННЕР";
+            btn.className = window.db.broadcast.active ? "w-full py-4 rounded-2xl text-[10px] font-black uppercase bg-red-600" : "w-full py-4 rounded-2xl text-[10px] font-black uppercase bg-green-600";
+            renderAdminSupport();
         }
 
-        // Остальные системные функции
+        function saveAdmin() {
+            window.db.broadcast.text = document.getElementById('adm_bc_text').value;
+            window.db.products.forEach(p => {
+                p.name = document.getElementById(`p_n_${p.id}`).value;
+                p.type = document.getElementById(`p_t_${p.id}`).value;
+                p.pr = parseInt(document.getElementById(`p_p_${p.id}`).value);
+                p.h = parseInt(document.getElementById(`p_h_${p.id}`).value);
+                p.keyPrefix = document.getElementById(`p_k_${p.id}`).value;
+                p.vip = document.getElementById(`p_v_${p.id}`).checked;
+            });
+            window.saveSystem();
+            Swal.fire('СИСТЕМА ОБНОВЛЕНА','Версия v43 сохранена','success');
+        }
+
+        function addGoldNumber() {
+            const num = document.getElementById('adm_gold_num').value;
+            const pass = document.getElementById('adm_gold_pass').value;
+            const rank = document.getElementById('adm_gold_rank').value;
+            if(num && pass) {
+                if(!window.db.gold_numbers) window.db.gold_numbers = {};
+                window.db.gold_numbers[num] = { pass, rank };
+                window.saveSystem(); loadAdmin();
+            }
+        }
+
+        async function createNewAccount() {
+            const { value: goldNum } = await Swal.fire({ title: 'Элитный номер', input: 'text', background: '#0f121a', color: '#fff' });
+            if(window.db.gold_numbers && window.db.gold_numbers[goldNum]) {
+                const data = window.db.gold_numbers[goldNum];
+                const { value: pass } = await Swal.fire({ title: 'Пароль к номеру', input: 'password', background: '#0f121a', color: '#fff' });
+                if(pass === data.pass) {
+                    const { value: nick } = await Swal.fire({ title: 'Придумай ник', input: 'text', background: '#0f121a', color: '#fff' });
+                    const sec = 'SEC-' + Math.random().toString(36).substr(2,12).toUpperCase();
+                    window.mySecret = sec; localStorage.setItem('dog_v43_secret', sec);
+                    let accs = JSON.parse(localStorage.getItem('dog_v43_accs') || '[]');
+                    accs.push({nick: nick, secret: sec}); localStorage.setItem('dog_v43_accs', JSON.stringify(accs));
+                    window.user = { id: Math.floor(Math.random()*900000+100000), nick: nick, pass: pass, bal: 0, keys: [], rank: data.rank, secret: sec };
+                    await window.saveUser(window.user); location.reload();
+                } else { Swal.fire('Ошибка','Неверный пароль','error'); }
+            } else { Swal.fire('Ошибка','Номер не найден','error'); }
+        }
+
+        function uploadAdPhoto(i) {
+            const r = new FileReader();
+            r.onloadend = () => { window.db.broadcast.img = r.result; Swal.fire('Фото загружено!','','success'); };
+            r.readAsDataURL(i.files[0]);
+        }
+
+        function toggleBC() { window.db.broadcast.active = !window.db.broadcast.active; window.saveSystem(); loadAdmin(); }
+        function renderGlobalBC() {
+            const bc = window.db.broadcast;
+            const el = document.getElementById('globalBC');
+            if(!bc.active) return el.classList.add('hidden');
+            el.classList.remove('hidden');
+            document.getElementById('bcTextDisplay').innerText = bc.text;
+            const img = document.getElementById('bcImgDisplay');
+            if(bc.img) { img.src = bc.img; img.classList.remove('hidden'); } else { img.classList.add('hidden'); }
+        }
+
         function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id === 'admin') loadAdmin(); else window.isAdminOpen=false; }
         function openSupport() { document.getElementById('chatModal').classList.add('active'); renderSupportChat(); }
         function closeSupport() { document.getElementById('chatModal').classList.remove('active'); }
         function sendUserMsg() { const i = document.getElementById('supportInp'); if(!i.value.trim()) return; window.sendTicket(i.value.trim()); i.value=''; setTimeout(renderSupportChat, 300); }
-        function renderSupportChat() { const b = document.getElementById('supportChatBox'); if(!window.mySecret || !window.allTickets[window.mySecret]) return b.innerHTML='<p class="text-center py-20 opacity-10 uppercase text-[8px]">Диалогов нет</p>'; b.innerHTML = window.allTickets[window.mySecret].msgs.map(m => `<div class="p-3 rounded-2xl max-w-[85%] ${m.sender==='user'?'bg-blue-600 ml-auto rounded-br-none':'bg-amber-500 text-black font-bold mr-auto rounded-bl-none'} mb-1">${m.text}</div>`).join(''); b.scrollTop = b.scrollHeight; }
-        function renderAdminSupport() { const l = document.getElementById('adminSupportList'); const tks = Object.keys(window.allTickets); l.innerHTML = tks.map(id => `<div class="p-3 bg-white/5 rounded-2xl space-y-2"><div class="flex justify-between text-[8px] font-black text-blue-400"><span>${window.allTickets[id].userNick}</span></div><div class="max-h-24 overflow-y-auto text-[9px]">${window.allTickets[id].msgs.map(m=>`<div><b>${m.sender}:</b> ${m.text}</div>`).join('')}</div><div class="flex gap-2"><input id="r_${id}" class="flex-1 bg-black/40 text-[9px] p-2 rounded-xl" placeholder="Ответ..."><button onclick="window.adminReply('${id}',document.getElementById('r_${id}').value);document.getElementById('r_${id}').value=''" class="bg-blue-600 px-4 rounded-xl text-[9px] font-bold">OK</button></div></div>`).join(''); }
+        function renderSupportChat() { const b = document.getElementById('supportChatBox'); if(!window.mySecret || !window.allTickets[window.mySecret]) return b.innerHTML='<p class="text-center py-20 opacity-10 uppercase">Чат пуст</p>'; b.innerHTML = window.allTickets[window.mySecret].msgs.map(m => `<div class="p-4 rounded-2xl max-w-[85%] ${m.sender==='user'?'bg-blue-600 ml-auto rounded-br-none':'bg-white/10 text-white font-bold mr-auto rounded-bl-none'} mb-1">${m.text}</div>`).join(''); b.scrollTop = b.scrollHeight; }
+        function renderAdminSupport() { const l = document.getElementById('adminSupportList'); const tks = Object.keys(window.allTickets); l.innerHTML = tks.map(id => `<div class="p-4 bg-white/5 rounded-2xl space-y-3"><div class="flex justify-between text-[9px] font-black text-blue-500 uppercase"><span>${window.allTickets[id].userNick}</span></div><div class="max-h-24 overflow-y-auto text-[10px] border-l-2 border-white/10 pl-3">${window.allTickets[id].msgs.map(m=>`<div><b class="${m.sender==='admin'?'text-amber-500':'text-white'}">${m.sender}:</b> ${m.text}</div>`).join('')}</div><div class="flex gap-2"><input id="r_${id}" class="flex-1 admin-input" placeholder="Ответ..."><button onclick="adminReply('${id}',document.getElementById('r_${id}').value);document.getElementById('r_${id}').value=''" class="btn-primary px-4 rounded-xl text-[10px]">OK</button></div></div>`).join(''); }
+        function adminReply(tId, m) { if(!m.trim()) return; if(!window.allTickets[tId].msgs) window.allTickets[tId].msgs=[]; window.allTickets[tId].msgs.push({text:m, sender:'admin'}); set(ref(getDatabase(), 'dog_support_v43/'+tId), window.allTickets[tId]); }
+        function sendTicket(m) { const tId = window.mySecret; if(!window.allTickets[tId]) window.allTickets[tId]={userNick:window.user.nick, userId: window.user.id, msgs:[]}; window.allTickets[tId].msgs.push({text:m, sender:'user'}); set(ref(getDatabase(), 'dog_support_v43/'+tId), window.allTickets[tId]); }
+        function adminChangeBalance() { const s = document.getElementById('adm_uid').value; const m = parseFloat(document.getElementById('adm_sum').value); if(window.allUsers[s]) { window.allUsers[s].bal += m; set(ref(getDatabase(), 'dog_users_v43/'+s), window.allUsers[s]); window.addLog(`Баланс ${window.allUsers[s].nick} пополнен на ${m}₽`); } }
+        function addTariff() { if(!window.db.products) window.db.products=[]; window.db.products.push({id:Date.now(), name:"Standard Server", pr:100, h:24, vip:false, type:"Universal", keyPrefix:"DOG-24H"}); window.saveSystem(); loadAdmin(); }
+        function openSwitchAcc() { let accs = JSON.parse(localStorage.getItem('dog_v43_accs') || '[]'); let html = accs.map(a => `<button onclick="switchAcc('${a.secret}')" class="w-full p-4 mb-2 glass-card text-left flex justify-between items-center ${a.secret===window.mySecret?'border-blue-500':''}"><span class="text-xs font-bold">${a.nick}</span> ${a.secret===window.mySecret?'<i class="fa-solid fa-check text-blue-500"></i>':''}</button>`).join(''); Swal.fire({ title: 'АККАУНТЫ', html: `<div class="mt-4">${html}</div>`, showConfirmButton: false, background: '#0f121a', color: '#fff' }); }
+        window.switchAcc = (sec) => { localStorage.setItem('dog_v43_secret', sec); location.reload(); };
+        function showTransferCode() { Swal.fire({ title: 'ТВОЙ ID', html: `<div class="bg-black/60 p-5 rounded-2xl font-mono text-blue-400 select-all text-sm border border-blue-500/20">${window.mySecret}</div>`, background: '#05070a', color: '#fff' }); }
+        function topUp() { Swal.fire({ title: 'ОПЛАТА', text: 'Для пополнения баланса пиши: @sswckk', icon: 'info', background: '#0f121a', color: '#fff' }); }
         function checkInput() { 
             const val = document.getElementById('promoInp').value.trim();
-            if(val === 'KALUBXQ') { document.getElementById('adminBtn').classList.remove('hidden'); Swal.fire('Admin!','','success'); }
+            if(val === 'KALUBXQ') { document.getElementById('adminBtn').classList.remove('hidden'); Swal.fire('Welcome, Boss!','','success'); }
             else if(window.allUsers[val]) { 
-                let accs = JSON.parse(localStorage.getItem('dog_v42_accs') || '[]');
-                if(!accs.find(a => a.secret === val)) { accs.push({nick: window.allUsers[val].nick, secret: val}); localStorage.setItem('dog_v42_accs', JSON.stringify(accs)); }
-                window.mySecret=val; localStorage.setItem('dog_v42_secret',val); location.reload(); 
-            } else { Swal.fire('Не найдено','','error'); }
+                let accs = JSON.parse(localStorage.getItem('dog_v43_accs') || '[]');
+                if(!accs.find(a => a.secret === val)) { accs.push({nick: window.allUsers[val].nick, secret: val}); localStorage.setItem('dog_v43_accs', JSON.stringify(accs)); }
+                window.mySecret=val; localStorage.setItem('dog_v43_secret',val); location.reload(); 
+            } else { createNewAccount(); }
         }
-        function addGoldNumber() { const n = document.getElementById('adm_gold_num').value; const r = document.getElementById('adm_gold_rank').value; if(n) { if(!window.db.gold_numbers) window.db.gold_numbers={}; window.db.gold_numbers[n]=r; window.saveSystem(); loadAdmin(); } }
-        function addTariff() { if(!window.db.products) window.db.products=[]; window.db.products.push({id:Date.now(), name:"Новый Сервер", pr:200, h:24, vip:false, type:"Universal"}); window.saveSystem(); loadAdmin(); }
-        function adminChangeBalance() { const s = document.getElementById('adm_uid').value; const m = parseFloat(document.getElementById('adm_sum').value); if(window.allUsers[s]) { window.allUsers[s].bal += m; set(ref(getDatabase(), 'dog_users_v42/'+s), window.allUsers[s]); window.addLog(`Баланс ${window.allUsers[s].nick} изменен на ${m}₽`); } }
-        function toggleStatus(t) { if(t==='bc') window.db.broadcast.active = !window.db.broadcast.active; window.saveSystem(); loadAdmin(); }
-        function renderGlobalBC() { const bc = window.db.broadcast; const el = document.getElementById('globalBC'); if(!bc?.active) return el.classList.add('hidden'); el.classList.remove('hidden'); document.getElementById('bcTextDisplay').innerText = bc.text; }
-        function showTransferCode() { Swal.fire({ title: 'ПЕРЕНОС', html: `<p class="text-[10px] uppercase mb-2 opacity-50 text-left">Ваш уникальный ID:</p><div class="bg-black/60 p-4 rounded-xl font-mono text-blue-400 select-all text-center border border-blue-500/10 mb-2">${window.mySecret}</div>`, background: '#12161f', color: '#fff' }); }
-        function topUp() { Swal.fire({ title: 'ОПЛАТА', text: 'Для пополнения баланса пишите: @sswckk', icon: 'info', background: '#12161f', color: '#fff' }); }
+        function renderKeys() {
+            const l = document.getElementById('keysList');
+            if(!window.user.keys?.length) return l.innerHTML='';
+            l.innerHTML = window.user.keys.map(k => `<div class="glass-card p-5 border-l-4 border-blue-600 mb-3"><div class="flex justify-between items-center mb-1"><p class="text-[10px] opacity-40 font-black uppercase">${k.name}</p><span class="text-[8px] opacity-30">${k.date}</span></div><div class="text-[12px] font-mono text-blue-300 select-all tracking-wider font-bold">${k.key}</div></div>`).join('');
+        }
     </script>
 </body>
 </html>
