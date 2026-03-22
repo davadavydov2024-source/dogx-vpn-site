@@ -3,328 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOG X | v101.4 CLOUD SYNC</title>
+    <title>dog X vpn</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=Plus+Jakarta+Sans:wght@300;800&display=swap');
         body { background: #010204; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; }
-        .tab { display: none; }
-        .tab.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .btn-main { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); font-weight: 800; text-transform: uppercase; }
+        .glass-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 44px; }
         .unbound { font-family: 'Unbounded', sans-serif; }
-        input, textarea { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; border-radius: 12px !important; outline: none; padding: 10px; }
-        .btn-banner { background: linear-gradient(135deg, rgba(99, 102, 241, 0.5) 0%, rgba(168, 85, 247, 0.5) 100%); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .cloud-indicator { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+        .btn-purple { background: linear-gradient(135deg, #7c3aed, #a855f7); border-radius: 28px; font-weight: 800; box-shadow: 0 10px 40px -15px #7c3aed; }
+        .btn-dark { background: #16171a; border-radius: 28px; font-weight: 800; border: 1px solid #222; }
+        .tab { display: none; } .tab.active { display: block; }
     </style>
 </head>
-<body class="pb-36">
+<body class="pb-32">
 
-    <header class="p-6 flex justify-between items-center sticky top-0 z-50 bg-[#010204]/90 backdrop-blur-xl border-b border-white/5">
+    <header class="p-6 flex justify-between items-center">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <i class="fa-solid fa-cloud-arrow-up text-white text-lg"></i>
+            <div class="w-14 h-14 bg-indigo-600/20 rounded-2xl flex items-center justify-center border border-indigo-500/30">
+                <i class="fa-solid fa-shield-halved text-indigo-500 text-2xl"></i>
             </div>
             <div>
-                <div class="flex items-center gap-2">
-                    <h1 id="u-header-title" class="text-xs font-black italic unbound uppercase tracking-tight">DOG // X</h1>
-                    <div class="cloud-indicator"></div>
-                </div>
-                <p class="text-[7px] font-black opacity-30 tracking-[3px]">v101.4 CLOUD SYNC</p>
+                <h1 class="text-2xl font-black italic unbound uppercase tracking-tighter">DOG<span class="text-indigo-500">X</span></h1>
+                <p class="text-[7px] font-bold opacity-20 tracking-[4px]">CLOUD v104</p>
             </div>
         </div>
-        <button onclick="setTab('admin_login')" class="w-10 h-10 glass flex items-center justify-center opacity-30">
-            <i class="fa-solid fa-gear"></i>
-        </button>
+        <div class="bg-white/5 px-4 py-2 rounded-2xl border border-white/10">
+            <p id="u-nick-display" class="text-[10px] font-black opacity-60 uppercase tracking-widest">USER</p>
+        </div>
     </header>
 
-    <main id="home" class="tab active px-6 space-y-6">
-        <div id="ad-banner" class="hidden glass overflow-hidden relative min-h-[160px] border border-white/5">
-            <img id="ad-banner-img" class="w-full h-full object-cover opacity-50 absolute inset-0">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#010204] via-transparent"></div>
-            <div class="absolute bottom-5 left-5 right-5 flex justify-between items-end gap-3 z-10">
-                <p id="ad-banner-text" class="text-xs font-bold italic text-white leading-snug"></p>
-                <a id="ad-banner-link" target="_blank" class="hidden btn-banner">Перейти</a>
+    <section id="me" class="tab active px-6">
+        <div class="glass-card p-12 text-center relative mt-4 overflow-hidden">
+            <p class="text-[10px] font-black text-indigo-500 tracking-[10px] uppercase mb-6 opacity-40">БАЛАНС</p>
+            <h3 class="text-9xl font-black italic tracking-tighter mb-14" id="u-bal">0₽</h3>
+            <div class="grid grid-cols-2 gap-5">
+                <button onclick="showPay()" class="btn-purple py-7 text-[13px] uppercase tracking-widest">ПОПОЛНИТЬ</button>
+                <button onclick="setTab('admin_login')" class="btn-dark py-7 text-[13px] uppercase tracking-widest text-white/90">АДМИН</button>
             </div>
         </div>
+        <div id="my-keys" class="mt-8 space-y-4"></div>
+    </section>
+
+    <section id="home" class="tab px-6 pt-4">
         <div id="product-list" class="space-y-4"></div>
-    </main>
+    </section>
+    
+    <section id="admin_login" class="tab px-6 pt-20">
+        <div class="glass-card p-8">
+            <input type="password" id="adm-pass-input" oninput="checkAdm(this.value)" class="w-full bg-white/5 p-6 rounded-3xl text-center text-2xl tracking-[10px] border border-white/10 outline-none" placeholder="••••">
+            <p class="text-[10px] text-center mt-6 opacity-30 font-bold uppercase tracking-widest">Вход для @sswckk</p>
+        </div>
+    </section>
 
-    <section id="me" class="tab px-6 space-y-6">
-        <div class="glass p-8 text-center border-indigo-500/10">
-            <p id="u-profile-title" class="text-[9px] font-black text-white/40 tracking-widest uppercase mb-2">ЗАГРУЗКА...</p>
-            <h3 class="text-7xl font-black italic mb-10 tracking-tighter" id="u-bal">0₽</h3>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="showPay()" class="btn-main py-5 rounded-3xl text-[12px] italic">ПОПОЛНИТЬ</button>
-                <button onclick="showKey()" class="bg-white/5 border border-white/10 py-5 rounded-3xl text-[12px] font-bold">КЛЮЧ</button>
+    <section id="admin" class="tab px-6 pt-6 pb-40 space-y-6">
+        <div class="glass-card p-6 space-y-4">
+            <p class="text-[10px] font-black text-indigo-400 uppercase">Пользователи</p>
+            <input id="ad-search" class="w-full bg-white/5 p-4 rounded-2xl outline-none" placeholder="ID (например: 1)">
+            <button onclick="adSearch()" class="w-full bg-indigo-600 py-4 rounded-2xl font-black uppercase text-xs">Найти в базе</button>
+            <div id="ad-controls" class="hidden space-y-4 p-5 bg-black/40 rounded-[35px] border border-white/5">
+                <div id="ad-res" class="text-xs font-mono opacity-60"></div>
+                <input id="ad-n-bal" class="w-full bg-white/5 p-4 rounded-2xl outline-none" placeholder="Новый баланс">
+                <button onclick="adUpdateU()" class="w-full bg-white/10 py-4 rounded-2xl font-black text-[10px]">ИЗМЕНИТЬ БАЛАНС</button>
             </div>
         </div>
-        <div id="my-keys" class="space-y-3 pb-10"></div>
+        <button onclick="globalSync()" class="w-full py-7 btn-purple uppercase font-black text-xs tracking-widest">Обновить данные в Облаке</button>
     </section>
 
-    <section id="admin_login" class="tab px-6 pt-10">
-        <div class="glass p-6 space-y-4">
-            <p class="text-[10px] font-black text-center opacity-40 tracking-[5px]">ВХОД В АДМИНКУ</p>
-            <input type="password" id="adm-pass-input" oninput="checkAdm(this.value)" class="w-full p-5 text-center tracking-[15px] text-xl" placeholder="••••••">
-        </div>
-    </section>
-
-    <section id="admin" class="tab px-6 space-y-6 pb-40">
-        <div class="text-center py-4"><h2 class="unbound text-[10px] font-black text-indigo-500 tracking-[8px]">ОБЛАЧНОЕ УПРАВЛЕНИЕ</h2></div>
-
-        <div class="glass p-5 space-y-4">
-            <p class="text-[10px] font-black text-indigo-400 uppercase">📊 База Пользователей</p>
-            <input id="ad-search" class="w-full p-3 text-xs" placeholder="Введите ID (цифры: 1, 2, 3...)">
-            <button onclick="adSearch()" class="w-full bg-indigo-600 py-2 rounded-xl text-[10px] font-bold">НАЙТИ АККАУНТ</button>
-            <div id="ad-res" class="hidden bg-black/40 p-3 rounded-xl text-[10px] font-mono border border-white/5"></div>
-            <div id="ad-controls" class="hidden space-y-3">
-                <input id="ad-n-bal" class="w-full p-2 text-[10px]" placeholder="Установить баланс">
-                <button onclick="adUpdateU()" class="w-full py-2 bg-white/10 rounded font-bold text-[9px]">ОБНОВИТЬ БАЛАНС</button>
-                <button onclick="adDeleteU()" class="w-full py-2 bg-red-600/20 text-red-500 border border-red-500/20 rounded font-black text-[9px]">УДАЛИТЬ АККАУНТ</button>
-            </div>
-        </div>
-
-        <div class="glass p-5 space-y-4">
-            <p class="text-[10px] font-black text-amber-500 uppercase">📢 Рекламный баннер</p>
-            <input id="ad-bc-img" class="w-full p-2 text-[10px]" placeholder="URL Картинки">
-            <input id="ad-bc-btn-url" class="w-full p-2 text-[10px]" placeholder="URL Кнопки">
-            <textarea id="ad-bc-text" class="w-full p-2 h-16 text-[10px]" placeholder="Текст баннера..."></textarea>
-            <button onclick="adTogBC()" id="bc-btn" class="w-full py-2 bg-white/5 rounded text-[9px] font-bold">ВКЛ/ВЫКЛ БАННЕР</button>
-        </div>
-
-        <div class="glass p-5 space-y-4">
-            <p class="text-[10px] font-black text-indigo-400 uppercase">📦 Глобальные Товары</p>
-            <div id="ad-plist" class="space-y-4"></div>
-            <button onclick="adAddP()" class="w-full py-3 bg-indigo-600/20 border border-indigo-500/30 rounded-xl text-[10px] font-black">+ ДОБАВИТЬ ТОВАР</button>
-        </div>
-
-        <button onclick="globalSave()" class="w-full py-6 btn-main rounded-[35px] text-[11px] italic uppercase">Синхронизировать для ВСЕХ</button>
-    </section>
-
-    <nav class="fixed bottom-0 left-0 right-0 h-24 flex justify-around items-center px-10 z-[60] border-t border-white/5 bg-[#010204]">
-        <button onclick="setTab('home')" id="btn-home" class="nav-item active opacity-40 flex flex-col items-center gap-1">
-            <i class="fa-solid fa-store text-xl"></i>
-            <span class="text-[8px] font-black uppercase">Магазин</span>
+    <nav class="fixed bottom-0 left-0 right-0 h-28 bg-[#010204]/90 backdrop-blur-3xl border-t border-white/5 flex justify-around items-center px-10 z-[100]">
+        <button onclick="setTab('home')" id="btn-home" class="flex flex-col items-center gap-2 opacity-30">
+            <i class="fa-solid fa-shop text-2xl"></i>
+            <span class="text-[9px] font-black uppercase">Магазин</span>
         </button>
-        <button onclick="setTab('me')" id="btn-me" class="nav-item opacity-40 flex flex-col items-center gap-1">
-            <i class="fa-solid fa-user-circle text-xl"></i>
-            <span class="text-[8px] font-black uppercase">Профиль</span>
+        <button onclick="setTab('me')" id="btn-me" class="flex flex-col items-center gap-2">
+            <i class="fa-solid fa-user-astronaut text-2xl"></i>
+            <span class="text-[9px] font-black uppercase tracking-widest">Профиль</span>
         </button>
     </nav>
 
     <script>
-        // ИМИТАЦИЯ ОБЛАКА: Синхронизация между вкладками через storage event
-        const DB_KEY = 'dogx_v101_cloud_prod';
-        
-        let db = JSON.parse(localStorage.getItem(DB_KEY)) || {
-            users: {},
-            prods: [{id: 1, name: "🚀 ПРЕМИУМ", pr: 500, stock: ["KEY-123"]}],
-            sys: { bc: {active: true, text: "DOG X CLOUD SYNC ON", img: "https://i.imgur.com/8QzQ5XG.png", btn_url: ""}}
+        // ТВОИ КЛЮЧИ ИЗ СКРИНШОТА
+        const firebaseConfig = {
+            apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI",
+            authDomain: "dogx-base.firebaseapp.com",
+            databaseURL: "https://dogx-base-default-rtdb.firebaseio.com",
+            projectId: "dogx-base",
+            storageBucket: "dogx-base.firebasestorage.app",
+            messagingSenderId: "81713249793",
+            appId: "1:81713249793:web:540bb07ec6bf97b9a78a00"
         };
 
+        firebase.initializeApp(firebaseConfig);
+        const rdb = firebase.database();
+        let db = { users: {}, prods: [] };
         let me = null;
 
+        // Инициализация системы из облака
         function init() {
-            const uid = localStorage.getItem('dogx_uid');
-            if(!uid) return showAuth();
-            me = db.users[uid];
-            if(!me) { localStorage.clear(); location.reload(); }
-            render();
-            
-            // СЛУШАТЕЛЬ ОБЛАКА: Если ты изменил настройки в одной вкладке, они меняются во всех
-            window.addEventListener('storage', (e) => {
-                if(e.key === DB_KEY) {
-                    db = JSON.parse(e.newValue);
-                    if(me) me = db.users[me.id];
-                    render();
+            rdb.ref('dogx_v100_final').on('value', (s) => {
+                const data = s.val();
+                if(data) {
+                    db = data;
+                    const uid = localStorage.getItem('dogx_uid');
+                    if(uid && db.users && db.users[uid]) {
+                        me = db.users[uid];
+                        render();
+                    } else { showAuth(); }
+                } else { 
+                    // Первичная настройка базы, если она пустая
+                    rdb.ref('dogx_v100_final').set({
+                        prods: [{id: 1, name: "PREMIUM VPN", pr: 499, stock: ["KEY-DOGX-1234"]}]
+                    });
                 }
             });
-
-            // Авто-обновление каждые 3 сек (для имитации реального времени)
-            setInterval(() => {
-                const updated = JSON.parse(localStorage.getItem(DB_KEY));
-                if(JSON.stringify(updated) !== JSON.stringify(db)) {
-                    db = updated;
-                    if(me) me = db.users[me.id];
-                    render();
-                }
-            }, 3000);
-        }
-
-        async function showAuth() {
-            const { value: mode } = await Swal.fire({
-                title: 'DOG X CLOUD', text: 'Вход или Регистрация', background: '#010204', color: '#fff',
-                showCancelButton: true, confirmButtonText: 'РЕГИСТРАЦИЯ', cancelButtonText: 'ВХОД',
-                confirmButtonColor: '#6366f1', cancelButtonColor: '#1f2937', allowOutsideClick: false
-            });
-
-            if(mode) {
-                const { value: res } = await Swal.fire({
-                    title: 'РЕГИСТРАЦИЯ',
-                    html: '<input id="r-n" class="swal2-input" placeholder="Ник"><input id="r-p" type="password" class="swal2-input" placeholder="Пароль">',
-                    background: '#010204', color: '#fff', preConfirm: () => [document.getElementById('r-n').value, document.getElementById('r-p').value]
-                });
-                if(res && res[0]) {
-                    const nextId = (Object.keys(db.users).length + 1).toString();
-                    db.users[nextId] = { id: nextId, nick: res[0], pass: res[1], bal: 0, items: [], date: new Date().toLocaleDateString() };
-                    saveAndExit(nextId);
-                }
-            } else {
-                const { value: res } = await Swal.fire({
-                    title: 'ВХОД',
-                    html: '<input id="l-n" class="swal2-input" placeholder="Ник"><input id="l-p" type="password" class="swal2-input" placeholder="Пароль">',
-                    background: '#010204', color: '#fff', preConfirm: () => [document.getElementById('l-n').value, document.getElementById('l-p').value]
-                });
-                if(res) {
-                    const user = Object.values(db.users).find(u => u.nick === res[0] && u.pass === res[1]);
-                    if(user) saveAndExit(user.id); else Swal.fire('Ошибка', 'Нет такого аккаунта', 'error').then(showAuth);
-                }
-            }
-        }
-
-        function saveAndExit(id) {
-            localStorage.setItem('dogx_uid', id);
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-            location.reload();
         }
 
         function render() {
             if(!me) return;
             document.getElementById('u-bal').innerText = me.bal.toLocaleString() + '₽';
-            const hText = `${me.nick.toUpperCase()} // ID:${me.id}`;
-            document.getElementById('u-header-title').innerText = hText;
-            document.getElementById('u-profile-title').innerText = hText;
+            document.getElementById('u-nick-display').innerText = me.nick.toUpperCase();
 
-            const bc = db.sys.bc;
-            const b = document.getElementById('ad-banner');
-            b.classList.toggle('hidden', !bc.active);
-            if(bc.active) {
-                document.getElementById('ad-banner-img').src = bc.img;
-                document.getElementById('ad-banner-text').innerText = bc.text;
-                const link = document.getElementById('ad-banner-link');
-                if(bc.btn_url) { link.href = bc.btn_url; link.classList.remove('hidden'); } else { link.classList.add('hidden'); }
-            }
-
-            document.getElementById('product-list').innerHTML = db.prods.map(p => `
-                <div class="glass p-6 flex justify-between items-center transition hover:scale-[1.02]">
-                    <div><h4 class="text-sm font-black uppercase italic unbound">${p.name}</h4><p class="text-indigo-500 font-black">${p.pr}₽</p></div>
-                    <button onclick="buyP(${p.id})" class="btn-main px-8 py-4 rounded-2xl text-[10px] italic">КУПИТЬ</button>
+            document.getElementById('product-list').innerHTML = (db.prods || []).map(p => `
+                <div class="glass-card p-8 flex justify-between items-center transition active:scale-95">
+                    <div><h4 class="unbound text-sm font-black italic uppercase">${p.name}</h4><p class="text-indigo-400 font-black mt-1">${p.pr}₽</p></div>
+                    <button onclick="buyP(${p.id})" class="btn-purple px-10 py-5 text-[11px] uppercase tracking-widest">Купить</button>
                 </div>`).join('');
 
-            document.getElementById('my-keys').innerHTML = me.items.map(i => `
-                <div class="glass p-4 border-l-2 border-indigo-500 flex justify-between">
-                    <div><p class="text-[8px] opacity-40 uppercase">${i.name}</p><p class="text-xs font-mono font-bold">${i.key}</p></div>
+            document.getElementById('my-keys').innerHTML = (me.items || []).map(i => `
+                <div class="glass-card p-6 border-l-4 border-indigo-600 flex justify-between items-center bg-white/[0.01]">
+                    <div><p class="text-[8px] opacity-30 uppercase font-black tracking-widest">${i.name}</p><p class="text-xs font-mono font-bold mt-1 text-indigo-200 tracking-widest">${i.key}</p></div>
+                    <i class="fa-solid fa-key opacity-10 text-xl"></i>
                 </div>`).join('');
         }
 
-        function buyP(id) {
-            const p = db.prods.find(x => x.id == id);
-            if(me.bal < p.pr) return Swal.fire('Ошибка', 'Пополните баланс у @sswckk', 'error');
-            if(!p.stock.length) return Swal.fire('Пусто', 'Товара нет в наличии', 'warning');
+        async function showAuth() {
+            const { value: r } = await Swal.fire({
+                title: 'DOG X NETWORK',
+                input: 'text',
+                inputPlaceholder: 'Введите ваш ник...',
+                background: '#010204', color: '#fff',
+                confirmButtonText: 'ВОЙТИ',
+                confirmButtonColor: '#7c3aed'
+            });
+            if(!r) return showAuth();
+            
+            let user = Object.values(db.users || {}).find(u => u.nick.toLowerCase() === r.toLowerCase());
+            if(!user) {
+                const id = (Object.keys(db.users || {}).length + 1).toString();
+                user = { id, nick: r, bal: 0, items: [] };
+                rdb.ref('dogx_v100_final/users/' + id).set(user);
+            }
+            localStorage.setItem('dogx_uid', user.id);
+            location.reload();
+        }
+
+        function buyP(pid) {
+            const p = db.prods.find(x => x.id == pid);
+            if(me.bal < p.pr) return Swal.fire('Оплата', 'Напишите @sswckk для пополнения', 'error');
+            if(!p.stock?.length) return Swal.fire('Склад', 'Тариф временно закончился', 'warning');
+            
             const key = p.stock.shift();
             me.bal -= p.pr;
-            me.items.unshift({name: p.name, key});
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-            render();
-            Swal.fire('УСПЕХ', 'Ключ добавлен в профиль', 'success');
+            if(!me.items) me.items = [];
+            me.items.unshift({name: p.name, key, date: new Date().toLocaleDateString()});
+            
+            rdb.ref('dogx_v100_final/users/' + me.id).update({ bal: me.bal, items: me.items });
+            rdb.ref('dogx_v100_final/prods').set(db.prods);
         }
 
-        // АДМИНКА
         function checkAdm(v) { if(v.toUpperCase() === 'KALUBXQ') setTab('admin'); }
+        
         function setTab(t) {
             document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(x => x.style.opacity = '0.4');
             document.getElementById(t).classList.add('active');
-            if(document.getElementById('btn-' + t)) document.getElementById('btn-' + t).style.opacity = '1';
-            if(t === 'admin') renderAdmin();
-        }
-
-        function renderAdmin() {
-            document.getElementById('ad-bc-img').value = db.sys.bc.img;
-            document.getElementById('ad-bc-btn-url').value = db.sys.bc.btn_url;
-            document.getElementById('ad-bc-text').value = db.sys.bc.text;
-            const list = document.getElementById('ad-plist');
-            list.innerHTML = '';
-            db.prods.forEach(p => {
-                const div = document.createElement('div');
-                div.className = "bg-white/5 p-4 rounded-xl space-y-2 border border-white/5 prod-block";
-                div.dataset.id = p.id;
-                div.innerHTML = `
-                    <input class="w-full bg-transparent font-bold p-name" value="${p.name}">
-                    <input class="w-full p-2 p-price" type="number" value="${p.pr}">
-                    <textarea class="w-full h-10 text-[9px] p-stock" placeholder="Ключи через запятую">${p.stock.join(',')}</textarea>
-                    <button onclick="this.parentElement.remove()" class="text-[8px] text-red-500 font-black uppercase">Удалить</button>
-                `;
-                list.appendChild(div);
-            });
+            document.querySelectorAll('nav button').forEach(b => b.classList.add('opacity-30'));
+            const btn = document.getElementById('btn-' + (t === 'me' ? 'me' : 'home'));
+            if(btn) btn.classList.remove('opacity-30');
         }
 
         function adSearch() {
-            const sid = document.getElementById('ad-search').value.trim();
+            const sid = document.getElementById('ad-search').value;
             const u = db.users[sid];
-            const r = document.getElementById('ad-res');
-            const ctrl = document.getElementById('ad-controls');
-            if(!u) { r.classList.remove('hidden'); r.innerText = 'НЕТ ЮЗЕРА С ID ' + sid; ctrl.classList.add('hidden'); return; }
-            r.classList.remove('hidden'); ctrl.classList.remove('hidden');
-            r.innerHTML = `НИК: ${u.nick} | БАЛ: ${u.bal}₽ | ID: ${u.id}`;
-            document.getElementById('ad-n-bal').value = u.bal;
-            window.targetUid = sid;
+            if(!u) return Swal.fire('Упс', 'Пользователь не найден', 'error');
+            document.getElementById('ad-controls').classList.remove('hidden');
+            document.getElementById('ad-res').innerHTML = `ID: ${u.id} | NICK: ${u.nick}<br>ТЕКУЩИЙ БАЛАНС: ${u.bal}₽`;
+            window.targetUid = u.id;
         }
 
         function adUpdateU() {
-            db.users[window.targetUid].bal = parseInt(document.getElementById('ad-n-bal').value) || 0;
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-            Swal.fire('ОБЛАКО ОБНОВЛЕНО', 'Баланс изменен для юзера', 'success');
+            const nb = parseInt(document.getElementById('ad-n-bal').value);
+            rdb.ref('dogx_v100_final/users/' + window.targetUid).update({ bal: nb });
+            Swal.fire('ОК', 'Баланс успешно изменен!', 'success');
         }
 
-        function adDeleteU() {
-            Swal.fire({ title: 'УДАЛИТЬ?', text: 'ID:' + window.targetUid, icon: 'warning', showCancelButton: true, confirmButtonText: 'УДАЛИТЬ' }).then((result) => {
-                if (result.isConfirmed) {
-                    delete db.users[window.targetUid];
-                    localStorage.setItem(DB_KEY, JSON.stringify(db));
-                    render();
-                    document.getElementById('ad-res').classList.add('hidden');
-                    document.getElementById('ad-controls').classList.add('hidden');
-                }
+        function globalSync() {
+            rdb.ref('dogx_v100_final/prods').set(db.prods);
+            Swal.fire('CLOUD', 'Облако синхронизировано', 'success');
+        }
+
+        function showPay() { 
+            Swal.fire({
+                title: 'ID: ' + me.id,
+                text: 'Скопируйте ваш ID и отправьте @sswckk для оплаты',
+                icon: 'info',
+                background: '#16171a',
+                color: '#fff'
             });
         }
-
-        // ГЛОБАЛЬНАЯ СИНХРОНИЗАЦИЯ (СРАЗУ У ВСЕХ ЛЮДЕЙ)
-        function globalSave() {
-            db.sys.bc.img = document.getElementById('ad-bc-img').value;
-            db.sys.bc.btn_url = document.getElementById('ad-bc-btn-url').value;
-            db.sys.bc.text = document.getElementById('ad-bc-text').value;
-            const newProds = [];
-            document.querySelectorAll('.prod-block').forEach(el => {
-                newProds.push({
-                    id: el.dataset.id,
-                    name: el.querySelector('.p-name').value,
-                    pr: parseInt(el.querySelector('.p-price').value) || 0,
-                    stock: el.querySelector('.p-stock').value.split(',').filter(x => x.trim() !== '')
-                });
-            });
-            db.prods = newProds;
-            
-            // Записываем в хранилище — это событие увидят ВСЕ открытые вкладки
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-            Swal.fire('ГОТОВО', 'Настройки изменены у всех пользователей!', 'success').then(() => render());
-        }
-
-        function adAddP() {
-            const list = document.getElementById('ad-plist');
-            const div = document.createElement('div');
-            div.className = "bg-white/5 p-4 rounded-xl space-y-2 border border-white/5 prod-block";
-            div.dataset.id = Date.now();
-            div.innerHTML = `<input class="w-full bg-transparent font-bold p-name" value="Новый тариф"><input class="w-full p-2 p-price" type="number" value="100"><textarea class="w-full h-10 text-[9px] p-stock" placeholder="Ключи через запятую"></textarea><button onclick="this.parentElement.remove()" class="text-[8px] text-red-500 font-black uppercase">Удалить</button>`;
-            list.appendChild(div);
-        }
-
-        function adTogBC() { db.sys.bc.active = !db.sys.bc.active; Swal.fire('Баннер', db.sys.bc.active ? 'ВКЛ' : 'ВЫКЛ', 'info'); }
-        function showPay() { Swal.fire('ID: ' + me.id, 'Для оплаты пиши @sswckk', 'info'); }
-        function showKey() { Swal.fire('ТВОЙ ID', me.id, 'info'); }
 
         init();
     </script>
